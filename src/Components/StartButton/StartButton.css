@@ -1,0 +1,28 @@
+.start-button-div {
+    position: relative;
+    max-width: 80px;
+    max-height: 25px;
+    border: 2px solid;
+}
+
+.start-button {
+    display: flex;
+    width: 80px;
+    height: 28px;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    cursor:pointer;
+}
+
+.logo-text {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+#start-logo {
+    width: 28px;
+    height: 24px;
+    margin-bottom: 5px;
+}
