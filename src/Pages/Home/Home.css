@@ -1,7 +1,14 @@
 .home {
     height: 100%;
     width: 100%;
-    border: 2px solid white;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
+}
+
+
+.home .taskbar {
+  margin-top: auto;
 }
