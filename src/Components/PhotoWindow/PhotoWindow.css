@@ -1,0 +1,19 @@
+.window {
+    width: 300px;
+}
+
+.photo {
+    max-width: 300px;
+
+}
+
+
+button {
+    cursor: pointer;
+}
+
+.window-body {
+    display: flex;
+    max-width: 300px;
+    justify-content: center;
+}
