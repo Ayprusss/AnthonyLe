@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from "react";
 import "./Taskbar.css";
 import "98.css";
-import windowslogo from "./Windows_Logo_(1992-2001).svg.png";
+
+import StartButton from "../StartButton/StartButton.js";
 function Taskbar() {
     const [time, setTime] = useState('');
 
@@ -27,14 +28,9 @@ function Taskbar() {
 
     //TODO: either create new Start-button component in Components folder or find way to make this shit work lolol.
     return(
-        <div className="taskbar reverse-windows-box-shadow">
+        <div className="taskbar windows-box-shadow">
             <div className="left">
-                <div className="class-button-div">
-                    <label className="start-button windows-box-shadow" id="start-bar-button">
-                        <img src= {windowslogo} id="start-logo" alt="windows '91-01 logo"/>
-                        <p className="logo-text">Start</p>
-                    </label>
-                </div>
+                <StartButton />
             </div>  
             <div className="center">
                 <div className="mini-div"></div>
