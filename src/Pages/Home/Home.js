@@ -3,12 +3,16 @@ import './Home.css';
 import Taskbar from "../../Components/TaskBar/Taskbar.js";
 import PhotoWindow from "../../Components/PhotoWindow/PhotoWindow.js";
 import TextWindow from "../../Components/TextWindow/TextWindow.js";
+import StartDropdown from "../../Components/StartDropdown/StartDropdown.js";
+import ResumeWindow from "../../Components/ResumeWindow/ResumeWindow.js";
 function Home() {
     return(
         <div>
             <div className="home">
                 <PhotoWindow />
                 <TextWindow />
+                <StartDropdown />
+                <ResumeWindow />
                 <Taskbar />
             </div>
         </div>
