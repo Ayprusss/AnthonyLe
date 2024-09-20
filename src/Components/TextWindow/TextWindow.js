@@ -18,8 +18,14 @@ function TextWindow() {
                 </div>
             </div>
             <div className="window-body">
-                <p> <strong>Hi there!</strong> My name is Anthony Le, and I am currently a 
-                Third-year computer science student at the University of Ottawa! Check out what my website 
+                <p> <strong>Hi there!</strong> 
+                <br></br>
+                <br></br>
+                My name is Anthony Le, and I am currently a 
+                Third-year computer science student at the University of Ottawa! 
+                <br></br>
+                <br></br>
+                Check out what my website 
                 has to offer!</p>
                 <br></br>
                 <ul className="tree-view">
@@ -27,6 +33,7 @@ function TextWindow() {
                     <br></br>
                     <li>About me
                         <ul>
+                            <li>My Resume</li>
                             <li>my goals</li>
                             <li>my Interests</li>
                         </ul>
