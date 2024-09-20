@@ -24,7 +24,7 @@ function photoWindow() {
             </div>
             </div>
             <div className="window-body">
-                <img src={PortfolioPhoto1} className="photo"/>
+                <img src={PortfolioPhoto1} className="photo" alt="beautiful me :3"/>
             </div>
         </div>
         </Rnd>
