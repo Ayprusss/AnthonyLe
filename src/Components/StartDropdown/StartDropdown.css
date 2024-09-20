@@ -1,0 +1,5 @@
+start-dropdown-div {
+    width: 300px;
+    display: flex;
+    max-height: 600px;
+}
