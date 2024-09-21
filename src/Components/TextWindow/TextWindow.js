@@ -3,6 +3,7 @@ import "./TextWindow.css";
 import "98.css";
 import { Rnd } from "react-rnd";
 
+import Resume from "../ResumeWindow/resume.pdf";
 function TextWindow() {
 
 
@@ -33,7 +34,7 @@ function TextWindow() {
                     <br></br>
                     <li>About me
                         <ul>
-                            <li>My Resume</li>
+                            <li>My Resume <u><a href={Resume} target="_blank" rel="noreferrer noopener">(click here to download it!)</a></u> </li>
                             <li>my goals</li>
                             <li>my Interests</li>
                         </ul>

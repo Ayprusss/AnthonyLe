@@ -7,3 +7,7 @@
     max-width: 300px;
     flex-direction: column;
 }
+
+a {
+    color:blue;
+}
