@@ -9,6 +9,9 @@ function Home() {
     return(
         <div>
             <div className="home">
+                <div className="right"></div>
+                <div className="center"></div>
+                <div className="left"></div>
                 <PhotoWindow />
                 <TextWindow />
                 <StartDropdown />
