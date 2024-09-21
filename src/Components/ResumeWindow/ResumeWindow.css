@@ -35,3 +35,8 @@
     width: 800px;
     height:600px;
 }
+
+.resume-body {
+    display:flex;
+    flex-direction: column;
+}

@@ -29,7 +29,6 @@ function ResumeWindow() {
                     <button aria-label="Close"></button>
                 </div>
             </div>
-
             <div className="windows-body resume-body">
                 <Worker className="pdf-viewer"workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsVersion}/build/pdf.worker.min.js`}>
                     <Viewer fileUrl={Resume}
