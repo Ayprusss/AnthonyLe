@@ -29,13 +29,12 @@ function Taskbar() {
     //TODO: either create new Start-button component in Components folder or find way to make this shit work lolol.
     return(
         <div className="taskbar windows-box-shadow">
-            <div className="left">
+            <div className="taskbar-left">
                 <StartButton />
             </div>  
-            <div className="center">
-                <div className="mini-div"></div>
+            <div className="taskbar-center">
             </div>
-            <div className="right"> 
+            <div className="taskbar-right"> 
                 <div className="clock windows-box-shadow">
                     <div id="show-time" className="clock-text">
                         {time}

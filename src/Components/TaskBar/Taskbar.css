@@ -9,8 +9,9 @@
     margin: 0;
 }
 
-.left {
-    /*outline: 2px solid red; debugging attribute */
+.taskbar-left {
+    outline: 2px solid red;
+    width: 10%;
     height: 30px;
     align-items: center;
     display: flex;
@@ -18,7 +19,7 @@
 }
 
 
-.right {
+.taskbar-right {
     width: 10%;
     height: 30px;
     margin-top: 5px;
@@ -27,11 +28,11 @@
     justify-content: center;
 }
 
-.center {
+.taskbar-center {
     width: 80%;
     height: 30px;
     margin-top: 5px;
-    /*outline: 2px solid green; */
+    /* outline: 2px solid green; */
 }
 
 .windows-box-shadow {
