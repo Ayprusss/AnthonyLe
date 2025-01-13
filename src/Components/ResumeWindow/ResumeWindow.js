@@ -8,7 +8,7 @@ import {version as pdfjsVersion} from "pdfjs-dist"
 
 import Resume from "./resume.pdf";
 import { Rnd } from "react-rnd";
-function ResumeWindow() {
+function ResumeWindow( {onClose}) {
     return(
         <Rnd
         
@@ -26,7 +26,7 @@ function ResumeWindow() {
                 <div className="title-bar-controls">
                     <button aria-label="Minimize"></button>
                     <button aria-label="Maximize"></button>
-                    <button aria-label="Close"></button>
+                    <button aria-label="Close" onClick={onClose}></button>
                 </div>
             </div>
             <div className="windows-body resume-body">
