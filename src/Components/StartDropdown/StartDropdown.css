@@ -1,7 +1,7 @@
 .start-dropdown-div {
-    position: absolute;
-    bottom: 37px;  /* Adjust this value to match the height of your taskbar */
-    left: -2px; 
+    position: fixed;
+    bottom: 44px;  /* Adjust this value to match the height of your taskbar */
+    left: 0;
     z-index: 10;   /* Ensure it stays on top of other elements */
     /*outline: 2px solid blue; */
 }
