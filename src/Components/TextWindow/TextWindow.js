@@ -2,10 +2,9 @@ import React from "react";
 import "./TextWindow.css";
 import "98.css";
 import { Rnd } from "react-rnd";
-
+import useState from "react";
 import Resume from "../ResumeWindow/resume.pdf";
 function TextWindow() {
-
 
     return(
         <Rnd>
@@ -50,7 +49,6 @@ function TextWindow() {
                     <li>Contact Me!</li>
                 </ul>
             </div>
-            
         </div>
         </Rnd>
         
