@@ -2,8 +2,10 @@
     height: 100%;
     width: 100%;
     display: flex;
+    justify-content: center;
     flex-direction: column;
     min-height: 100vh;
+    margin: 0;
     -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -12,3 +14,28 @@
 .home .taskbar {
   margin-top: auto;
 }
+
+.home-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.home-right {
+   /* outline: 2px solid red; */
+   width: 50%;
+   height: 695px;
+   align-items: center;
+   display: flex;
+   margin-top: 0;
+}
+
+
+.home-left {
+   /*outline: 2px solid green;*/ 
+   width: 50%;
+   height: 695px;
+   display: flex;
+   margin-top: 0;
+}
+
