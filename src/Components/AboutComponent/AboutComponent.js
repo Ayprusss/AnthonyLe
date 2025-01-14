@@ -17,7 +17,7 @@ function AboutComponent( { onClose }) {
                     </div>
                 </div>
                 <div className="window-body">
-                    <p>Hi there! My name is Anthony. I am a passionate web developer with a keen interest in creating interactive and user-friendly web applications. 
+                    <p>Hi there! My name is XYZ. I am a passionate Software Engineer with a keen interest in creating . 
                         I have experience in various web technologies including React, JavaScript, HTML, and CSS.
                          In my free time, I enjoy learning new programming languages and exploring the latest trends in web development.</p>
                 </div>
