@@ -30,21 +30,21 @@
 
 .altered-window1 {
     position: fixed;
-    top: -5%;
+    top: 0%;
     left: 40%;
     z-index: 10; /* Ensure it stays on top */
 }
 
 .altered-window2 {
     position:fixed;
-    bottom: 80%;
+    bottom: 70%;
     left: 25%;
     z-index: 20;
 }
 
 .altered-window3 {
     position: fixed;
-    bottom: 80%;
+    bottom: 90%;
     left: 25%;
     z-index: 30;
 }
