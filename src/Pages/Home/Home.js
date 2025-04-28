@@ -6,8 +6,15 @@ import TextWindow from "../../Components/TextWindow/TextWindow.js";
 import ResumeWindow from "../../Components/ResumeWindow/ResumeWindow.js";
 import StartDropdown from "../../Components/StartDropdown/StartDropdown.js";
 import ClippyHelper from "../../Components/ClippyHelper/ClippyHelper.js";
-
+import {useState} from "react";
 function Home() {
+
+    const [isTextWindowVisible, setTextWindowVisible] = useState(true);
+
+    const closeTextWindow = () => {
+        setTextWindowVisible(false);
+    }
+
     return(
         <div>
             <div className="home">
@@ -19,7 +26,10 @@ function Home() {
                     <ClippyHelper />
                     </div>
                 </div>
-                <TextWindow />
+
+                {isTextWindowVisible && (
+                    <TextWindow onClick={closeTextWindow}/>
+                )}
                 <Taskbar />
             </div>
         </div>
