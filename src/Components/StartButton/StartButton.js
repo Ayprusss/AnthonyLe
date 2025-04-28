@@ -6,14 +6,16 @@ import StartDropdown from "../StartDropdown/StartDropdown";
 import AboutComponent from "../AboutComponent/AboutComponent";
 import PhotoWindow from "../PhotoWindow/PhotoWindow";
 import ResumeWindow from "../ResumeWindow/ResumeWindow";
+import ExperienceComponent from "../ExperienceComponent/ExperienceComponent";
+import ContactComponent from "../ContactComponent/ContactComponent";
 
 function StartButton() {
     const [isStartMenuVisible, setIsStartMenuVisible] = useState(false);
     const [isPhotoVisible, setPhotoVisible] = useState(false);
     const [isAboutVisible, setAboutVisible] = useState(false);
     const [isResumeVisible, setResumeVisible] = useState(false);
-    const [isExperienceVisible, setExperienceVisible] = useState(false);
     const [isContactVisible, setContactVisible] = useState(false);
+    const [isExperienceVisible, setExperienceVisible] = useState(false);
 
     const handleStartButtonClick = () => {
         setIsStartMenuVisible(!isStartMenuVisible);
@@ -37,6 +39,7 @@ function StartButton() {
     const handleExperienceVisibility = (value) => {
         console.log('Setting experience visibility to: ', value);
         setExperienceVisible(value);
+
     }
 
     const handleContactVisibility = (value) => {
@@ -78,6 +81,17 @@ function StartButton() {
             )}
             
 
+            {isExperienceVisible && (
+                <div className="altered-window1">
+                    <ExperienceComponent onClose={() => handleExperienceVisibility(false)}/>
+                </div>
+            )}
+
+            {isContactVisible && (
+                <div className="altered-window2">
+                    <ContactComponent onClose={() => handleContactVisibility(false)}/>
+                </div>
+            )}
             {/*Need to add the same behaviour; onClick behaviours for all  */}
             {/* {isExperienceVisible && <ExperienceComponent />} */}
             {/* {isContactVisible && <ContactComponent />} */}
