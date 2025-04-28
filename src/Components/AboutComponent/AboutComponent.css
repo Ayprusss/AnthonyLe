@@ -1,0 +1,9 @@
+.window {
+    width: 300px;
+}
+
+.window-body {
+    display: flex;
+    max-width: 300px;
+    flex-direction: column;
+}
