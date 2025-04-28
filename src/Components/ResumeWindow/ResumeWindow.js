@@ -8,7 +8,7 @@ import {version as pdfjsVersion} from "pdfjs-dist"
 
 import Resume from "./resume.pdf";
 import { Rnd } from "react-rnd";
-function ResumeWindow( {onClose}) {
+function ResumeWindow({onClose}) {
     return(
         <Rnd
         
