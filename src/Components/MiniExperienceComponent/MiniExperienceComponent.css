@@ -1,0 +1,30 @@
+.mini-experience-header {
+    font-size: 14px;
+    margin-bottom:0px;
+}
+
+
+.mini-experience-subheader {
+    margin-bottom: 0px;
+}
+
+.portal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999; /* High z-index */
+}
+
+
+.experience-window {
+    z-index: 100;
+}
+/* Make sure clickable items in ExperienceComponent work */
+.clickable-item {
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 1;
+}
