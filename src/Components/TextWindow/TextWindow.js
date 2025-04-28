@@ -4,25 +4,30 @@ import "98.css";
 import { Rnd } from "react-rnd";
 import useState from "react";
 import Resume from "../ResumeWindow/resume.pdf";
-function TextWindow() {
+function TextWindow({onClose}) {
 
     return(
-        <Rnd>
+        <Rnd
+        dragHandleClassName='title-bar'>
             <div className="window">
             <div className="title-bar">
                 <div className="title-bar-text">Hi there!</div>
                 <div className="title-bar-controls">
                     <button aria-label="Minimize"></button>
                     <button aria-label="Maximize"></button>
-                    <button aria-label="Close"></button>
+                    <button aria-label="Close" OnClick={onClose}></button>
                 </div>
             </div>
             <div className="window-body">
-                <p> <strong>Hi there!</strong> 
+                <p> <strong>My name is Anthony Le. Welcome to my website.</strong>
                 <br></br>
                 <br></br>
-                My name is Anthony Le, and I am currently a 
-                Third-year computer science student at the University of Ottawa! 
+                I am currently a Third-year computer science student at the University of Ottawa.
+                <br></br>
+                <br></br>
+                <li>Aspiring Softwware Engineer.</li>
+                <li>Previous Logistics Team Leader at uOttaHack.</li>
+                <li>Previous Sponsorship Member at SESA.</li>
                 <br></br>
                 <br></br>
                 Check out what my website 
