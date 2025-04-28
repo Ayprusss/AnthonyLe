@@ -1,0 +1,16 @@
+
+.experience-window {
+    display: flex;
+    max-width: 600px;
+    flex-direction: column;
+}
+
+.experience-window-header {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.experience-list {
+    display: flex;
+    justify-content: center;
+}
