@@ -39,13 +39,13 @@ function ClippyHelper() {
     const clippyResponses = {
         1:"Hi! I'm Clippy! Just to help you here, to take a look at this guy's info, try clicking the start button in the bottom left corner.",
         2: "What did you just say? Are you seriously punking me for trying to help you?",
-        3: "What are you calling me outdated for? No s**t I am!? I'm here for nostalgia!",
-        4 : "Hey man watch your mouth you're being so rude. I'm just trying to help you out here.",
-        5 : "I'm just trying to help you man, I could just let you figure out how to navigate this guy's trash-ass website.",
+        3: "What are you calling me outdated for? I'm here for nostalgia!",
+        4 : "Hey you're being so rude. I'm just trying to help you out here.",
+        5 : "I'm just trying to help you, I could just let you figure out how to navigate this guy's trash-ass website.",
 
     }
 
-    const clippyFinalNegativeResponse = "Wow okay man. Go f**k yourself."
+    const clippyFinalNegativeResponse = "Wow okay man. Whatever."
 
     const clippyGoodAnswers = {
         1: "Thanks!",
@@ -56,8 +56,8 @@ function ClippyHelper() {
     }
     
     const clippyBadAnswers = {
-        1 : "F**k you Clippy! You're terrible!",
-        2: "Yeah! You outdated B***h!",
+        1 : "Hey not today Clippy... You're terrible!",
+        2: "Yeah! You're outdated anyways!",
         3: "The person who created you wasn't even born when you were relevant.",
         4: "Why should I? All of your answers are pre-programmed! you're not even a GPT-Wrapped Clippy.",
         5 : "I don't care I don't need your help. Just go away."
