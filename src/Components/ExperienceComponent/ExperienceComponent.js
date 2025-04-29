@@ -64,7 +64,7 @@ function ExperienceComponent({ onClose }) {
         experienceList: {
             "languages": "HTML, CSS, JavaScript",
             "frameworks and libraries": "React.js, OpenAI API",
-            "Developer Tools": "Visual Studio Code, GitHub, HuggingFace Spaces",
+            "Developer Tools": "Visual Studio Code, GitHub, HuggingFace Spaces, Amazon EC2",
         },
     },
     "3": {
