@@ -1,32 +1,13 @@
 import React from 'react';
 import "98.css";
 import "./MiniExperienceComponent.css";
-import { Rnd } from "react-rnd";
-import ReactDOM from 'react-dom';
 
 
 function MiniExperienceComponent({ onClose, data }) {
 
-    const content = (
-            <Rnd
-                default={{
-                    x:150,
-                    y:150,
-                    width: 400,
-                    height: 400}}
-                style={{pointerEvents: "auto"
-                }}
-                bounds="window"
-                dragHandleClassName='title-bar'>
+    return(
+            
                 <div className="window mini-experience-window">
-                    <div className="title-bar">
-                        <div className="title-bar-text">My Experience</div>
-                        <div className="title-bar-controls">
-                            <button aria-label="Minimize"></button>
-                            <button aria-label="Maximize"></button>
-                            <button aria-label="Close" onClick={onClose}></button> 
-                        </div>
-                    </div>
                         <div className="window-body mini-experience-body">
                             <p className="mini-experience-header"><b>{data.title}</b></p>
                             <br></br>
@@ -73,15 +54,10 @@ function MiniExperienceComponent({ onClose, data }) {
                                     )}
                                 </ul>
                             )}
+                            <button className="mini-exp-button"aria-label="Close" onClick={onClose}>Close</button>
                         </div>
                     </div>
-                </Rnd>
         );
-
-    return ReactDOM.createPortal(
-        content,
-        document.body
-    );
 }
 
 export default MiniExperienceComponent;

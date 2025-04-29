@@ -28,3 +28,8 @@
     pointer-events: auto;
     z-index: 1;
 }
+
+.mini-exp-button {
+    max-width: 30px;
+    margin-top: 10px;
+}

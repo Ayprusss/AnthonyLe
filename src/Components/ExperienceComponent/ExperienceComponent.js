@@ -113,7 +113,6 @@ function ExperienceComponent({ onClose }) {
                 height: 500,
             }}
             style={{zIndex: 100}}
-            bounds="window"
             dragHandleClassName="title-bar"
             >
             <div className="window experience-window">
@@ -168,11 +167,11 @@ function ExperienceComponent({ onClose }) {
             </div>
 
             {isExpInfoComponentVisible && (
-                <div className="altered-window3">
+                <div>
                 <MiniExperienceComponent
                     onClose={closeExpInfoComponent}
                     data={selectedItemData} />
-                    </div>
+                </div>
             )}
         </Rnd>
     );
