@@ -11,7 +11,7 @@ import ContactComponent from "../ContactComponent/ContactComponent";
 
 function StartButton() {
     const [isStartMenuVisible, setIsStartMenuVisible] = useState(false);
-    const [isPhotoVisible, setPhotoVisible] = useState(false);
+    const [isPhotoVisible, setPhotoVisible] = useState(true);
     const [isAboutVisible, setAboutVisible] = useState(false);
     const [isResumeVisible, setResumeVisible] = useState(false);
     const [isContactVisible, setContactVisible] = useState(false);
