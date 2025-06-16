@@ -7,34 +7,31 @@ import audioUnmuted from "./audio-unmuted.png";
 
 
 function MusicPlayer() {
+  const audioRef = useRef(null);
+  const [isMuted, mute] = useState(true);
+  const playMusic = () => {
+    changeMute(!isMuted);
+    audioRef.current.volume = 0.3;
+    audioRef.current.play().catch(error => {
+      console.log("Play failed:", error);
+    });
+  };
 
-    const audioRef = useRef(null);
-    const [isMuted, setIsMuted] = useState(false);
+  const muteMusic = () => {
+    console.log("Muting music.")
+    changeMute(!isMuted);
+    audioRef.current.volume =0;
+  }
 
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = 0.3;
-            audioRef.current.play().catch(error => {
-                console.log("error playing audio:", error);
-            });
-        }
-    }, []);
-    
-    const handleMute = () => {
-        if (audioRef.current) {
-            audioRef.current.muted = !isMuted;
-            setIsMuted(!isMuted);
-        }
-    };
-
-    return(
-        <div className="music-player">
-            <audio ref={audioRef} src={music} loop />
-            <button className="music-player-button" onClick={handleMute}>
-                {isMuted ? <img alt="audioMuted"src={audioMuted} className="music-player-icon"/> : <img alt="audioUnmuted" className="music-player-icon" src={audioUnmuted}/>}
-            </button>
-        </div>
-    );
+  const changeMute = (value) => {
+    mute(value);
+  }
+  return (
+    <div className="music-player">
+      <audio ref={audioRef} src={music} />
+      {isMuted ? <img alt="audioMuted"src={audioMuted} onClick={playMusic} className="music-player-icon"/> : <img alt="audioUnmuted" onClick={muteMusic} className="music-player-icon" src={audioUnmuted}/>}
+    </div>
+  );
 }
 
 
