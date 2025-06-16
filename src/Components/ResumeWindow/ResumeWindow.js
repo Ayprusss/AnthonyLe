@@ -6,7 +6,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import {version as pdfjsVersion} from "pdfjs-dist"
 
-import Resume from "./resume.pdf";
+import Resume from "./Resume__using_overleaf_template_alternate.pdf";
 import { Rnd } from "react-rnd";
 function ResumeWindow({onClose}) {
     return(
