@@ -28,7 +28,7 @@ function MusicPlayer() {
   }
   return (
     <div className="music-player">
-      <audio ref={audioRef} src={music} />
+      <audio ref={audioRef} src={music} loop />
       {isMuted ? <img alt="audioMuted"src={audioMuted} onClick={playMusic} className="music-player-icon"/> : <img alt="audioUnmuted" onClick={muteMusic} className="music-player-icon" src={audioUnmuted}/>}
     </div>
   );
