@@ -2,8 +2,7 @@ import React from "react";
 import "./TextWindow.css";
 import "98.css";
 import { Rnd } from "react-rnd";
-import useState from "react";
-import Resume from "../ResumeWindow/resume.pdf";
+import Resume from "../ResumeWindow/Resume__using_overleaf_template_alternate.pdf";
 function TextWindow({onClose}) {
 
     return(

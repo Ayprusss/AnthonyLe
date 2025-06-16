@@ -2,7 +2,7 @@ import React from "react";
 import "98.css";
 import "./AboutComponent.css";
 import { Rnd } from "react-rnd";
-import resume from "../ResumeWindow/resume.pdf";
+import resume from "../ResumeWindow/Resume__using_overleaf_template_alternate.pdf";
 function AboutComponent( { onClose }) {
 
 
