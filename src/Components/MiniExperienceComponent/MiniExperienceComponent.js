@@ -31,26 +31,30 @@ function MiniExperienceComponent({ onClose, data }) {
                                     <>
                                             {Object.entries(data.experienceList).map(([key, value]) => (
                                                 <React.Fragment key={key}>
-                                                    <li><strong>{key}</strong></li>
-                                                    <ul>
-                                                        <li>{value}</li>
-                                                    </ul>
+                                                    <details>
+                                                        <summary><strong>{key}</strong></summary>
+                                                        <ul>
+                                                            <li>{value}</li>
+                                                        </ul>
+                                                    </details>
                                                 </React.Fragment>
                                             ))}
                                     </>
                                 )}
 
                                     {data.pointsList && (
-                                        <>
-                                        <li className="mini-experience-subheader"><strong>Achievements</strong></li>
-                                                {Object.entries(data.pointsList).map(([key, value]) => (
-                                                    <React.Fragment key={key}>
-                                                        <ul>
-                                                            <li>{value}</li>
-                                                        </ul>
-                                                    </React.Fragment>
-                                                ))}
-                                        </>
+                                        
+                                        <details>
+                                            <summary className="mini-experience-subheader"><strong>Achievements</strong></summary>
+                                                    {Object.entries(data.pointsList).map(([key, value]) => (
+                                                        <React.Fragment key={key}>
+                                                            <ul>
+                                                                <li>{value}</li>
+                                                            </ul>
+                                                        </React.Fragment>
+                                                    ))}
+                                        </details>
+                                        
                                     )}
                                 </ul>
                             )}

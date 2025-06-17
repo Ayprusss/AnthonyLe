@@ -126,7 +126,7 @@ function ExperienceComponent({ onClose }) {
                     </div>
                 <div className="window-body experience-body">
                     <p className="experience-window-header"><strong>Experience</strong></p>
-                    <p>list of experience, projects and extracurriculars done throughout my time at University.</p>
+                    {/*  <p>list of experience, projects and extracurriculars done throughout my time at University.</p>*/}
                     <p>Please feel free to click on any of the items. Each item will bring you to a new window with <b>more details.</b></p>
                     <ul className="tree-view experience-list">
                         <li><strong>Internships</strong></li>
