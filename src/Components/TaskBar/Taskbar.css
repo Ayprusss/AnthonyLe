@@ -1,11 +1,15 @@
 .taskbar {
-    width: 100%;
+     width: 100%;
     height: 40px;
     background-color:#c0c0c0;
     gap: 5px;
     display: inline-flex;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 9999;
     justify-content: center;
-    position: relative;
+    position: fixed;
     margin: 0;
 }
 
