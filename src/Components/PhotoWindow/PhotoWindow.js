@@ -4,7 +4,7 @@ import "./PhotoWindow.css";
 import {useState} from "react";
 import { Rnd } from "react-rnd";
 
-import photo1 from "./portfolioPhoto.jpg";
+import photo1 from "./pfp.jpg";
 
 
 function PhotoWindow( { onClose }) {
