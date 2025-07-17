@@ -24,7 +24,7 @@ function TextWindow({onClose}) {
                 I am currently a Third-year computer science student at the University of Ottawa.
                 <br></br>
                 <br></br>
-                <li>Aspiring Softwware Engineer.</li>
+                <li>Aspiring Software Engineer.</li>
                 <li>Previous Logistics Team Leader at uOttaHack.</li>
                 <li>Previous Sponsorship Member at SESA.</li>
                 <br></br>
