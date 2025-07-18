@@ -115,65 +115,68 @@ function ExperienceComponent({ onClose }) {
             style={{zIndex: 100}}
             dragHandleClassName="title-bar"
             >
-            <div className="window experience-window">
-                <div className="title-bar">
-                    <div className="title-bar-text">My Experience</div>
-                        <div className="title-bar-controls">
-                            <button aria-label="Minimize"></button>
-                            <button aria-label="Maximize"></button>
-                            <button aria-label="Close" onClick={onClose}></button>
+            <div className="window-div">
+                <div className="window experience-window">
+                    <div className="title-bar">
+                        <div className="title-bar-text">My Experience</div>
+                            <div className="title-bar-controls">
+                                <button aria-label="Minimize"></button>
+                                <button aria-label="Maximize"></button>
+                                <button aria-label="Close" onClick={onClose}></button>
+                            </div>
                         </div>
+                    <div className="window-body experience-body">
+                        <p className="experience-window-header"><strong>Experience</strong></p>
+                        {/*  <p>list of experience, projects and extracurriculars done throughout my time at University.</p>*/}
+                        <p>Please feel free to click on any of the items. Each item will bring you to a new window with <b>more details.</b></p>
+                        <ul className="tree-view experience-list">
+                            <li><strong>Internships</strong></li>
+                            <ul>
+                                {Object.values(internshipsList).map((internship, index) => (
+                                    <li 
+                                        key={index} 
+                                        className="clickable-item"
+                                        onClick={() => openExpInfoComponent(internship)}>
+                                        {internship.title}
+                                    </li>
+                                ))}
+                            </ul>
+                            <br></br>
+                            <li><strong>Projects</strong></li>
+                            <ul>
+                                {Object.values(projectsList).map((project, index) => (
+                                    <li key={index}
+                                        className="clickable-item"
+                                        onClick={() => openExpInfoComponent(project)}>
+                                        {project.title}
+                                    </li>
+                                ))}
+                            </ul>
+                            <br></br>
+                            <li><strong>Extracurriculars</strong></li>
+                            <ul>
+                                {Object.values(extracurricularsList).map((extracurricular, index) => (
+                                    <li key={index}
+                                    className="clickable-item"
+                                    onClick={() => openExpInfoComponent(extracurricular)}>
+                                        {extracurricular.title}
+                                    </li>
+                                ))}
+                            </ul>
+                        </ul>   
                     </div>
-                <div className="window-body experience-body">
-                    <p className="experience-window-header"><strong>Experience</strong></p>
-                    {/*  <p>list of experience, projects and extracurriculars done throughout my time at University.</p>*/}
-                    <p>Please feel free to click on any of the items. Each item will bring you to a new window with <b>more details.</b></p>
-                    <ul className="tree-view experience-list">
-                        <li><strong>Internships</strong></li>
-                        <ul>
-                            {Object.values(internshipsList).map((internship, index) => (
-                                <li 
-                                    key={index} 
-                                    className="clickable-item"
-                                    onClick={() => openExpInfoComponent(internship)}>
-                                    {internship.title}
-                                </li>
-                            ))}
-                        </ul>
-                        <br></br>
-                        <li><strong>Projects</strong></li>
-                        <ul>
-                            {Object.values(projectsList).map((project, index) => (
-                                <li key={index}
-                                    className="clickable-item"
-                                    onClick={() => openExpInfoComponent(project)}>
-                                    {project.title}
-                                </li>
-                            ))}
-                        </ul>
-                        <br></br>
-                        <li><strong>Extracurriculars</strong></li>
-                        <ul>
-                            {Object.values(extracurricularsList).map((extracurricular, index) => (
-                                <li key={index}
-                                className="clickable-item"
-                                onClick={() => openExpInfoComponent(extracurricular)}>
-                                    {extracurricular.title}
-                                </li>
-                            ))}
-                        </ul>
-                    </ul>   
                 </div>
-            </div>
 
-            {isExpInfoComponentVisible && (
-                <div>
-                <MiniExperienceComponent
-                    onClose={closeExpInfoComponent}
-                    data={selectedItemData} />
-                </div>
-            )}
+                {isExpInfoComponentVisible && (
+                    <div>
+                    <MiniExperienceComponent
+                        onClose={closeExpInfoComponent}
+                        data={selectedItemData} />
+                    </div>
+                )}
+            </div>
         </Rnd>
+        
     );
 }
 
