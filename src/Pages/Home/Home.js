@@ -24,13 +24,12 @@ function Home() {
                     </div>
                     <div className="home-right">
                     <MusicPlayer />
-                    <ClippyHelper />
                     </div>
                 </div>
 
-                {isTextWindowVisible && (
+                {/*isTextWindowVisible && (
                     <TextWindow onClick={closeTextWindow}/>
-                )}
+                )*/}
                 <Taskbar />
             </div>
         </div>
