@@ -20,13 +20,17 @@
     align-items: center;
     display: flex;
     margin-top: 5px;
+    position: absolute;
+    left: 10px;
 }
 
 
 .taskbar-right {
-    width: 12%;
+    width: 6em;
     height: 30px;
     margin-top: 5px;
+    position: absolute;
+    right: 15px;
     /*outline: 2px solid yellow; */
     display: flex;
     justify-content: center;
