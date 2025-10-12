@@ -26,7 +26,7 @@ function Taskbar() {
     }, []);
     
 
-    //TODO: either create new Start-button component in Components folder or find way to make this shit work lolol.
+    //For now, clock will NOT be a separate component. That will change later on.
     return(
         <div className="taskbar windows-box-shadow">
             <div className="taskbar-left">
