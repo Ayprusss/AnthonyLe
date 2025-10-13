@@ -3,7 +3,8 @@ import "./Taskbar.css";
 import "98.css";
 
 import StartButton from "../StartButton/StartButton.js";
-function Taskbar() {
+
+function Taskbar({ mainWebsiteOpen, mainWebsiteVisible, onMainWebsiteRestore }) {
     const [time, setTime] = useState('');
 
     useEffect(() => {
@@ -13,24 +14,41 @@ function Taskbar() {
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const seconds = now.getSeconds().toString().padStart(2, '0');
             const currentTime = `${hours}:${minutes}:${seconds}`;
-            console.log("current time: ", currentTime);
             setTime(currentTime);
         };  
-        
 
         updateTime();
         const intervalId = setInterval(updateTime, 1000);
 
-
         return () => clearInterval(intervalId);
     }, []);
-    
 
-    //For now, clock will NOT be a separate component. That will change later on.
+    const handleExplorerClick = () => {
+        if (!mainWebsiteVisible && onMainWebsiteRestore) {
+            onMainWebsiteRestore();
+        }
+    };
+
     return(
         <div className="taskbar windows-box-shadow">
             <div className="taskbar-left">
                 <StartButton />
+                {mainWebsiteOpen && (
+                    <button 
+                        className={`taskbar-item explorer-button ${mainWebsiteVisible ? 'active' : ''}`}
+                        onClick={handleExplorerClick}
+                        title="Internet Explorer"
+                    >
+                        <div className="taskbar-icon">
+                            <img 
+                                src="/windows-explorer.png" 
+                                alt="Explorer" 
+                                className="explorer-icon"
+                            />
+                        </div>
+                        <span className="taskbar-text">Internet Explorer</span>
+                    </button>
+                )}
             </div>  
             <div className="taskbar-center">
             </div>
@@ -44,7 +62,5 @@ function Taskbar() {
         </div>
     );
 }
-
-
 
 export default Taskbar;
