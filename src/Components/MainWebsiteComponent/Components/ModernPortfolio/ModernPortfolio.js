@@ -1,14 +1,33 @@
 /* filepath: c:\Users\Antho\Downloads\personalWebsiteP3\anthonyle\src\Components\MainWebsiteComponent\Components\ModernPortfolio\ModernPortfolio.js */
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './ModernPortfolio.css';
+import HeaderComponent from '../HeaderComponent/HeaderComponent.js';
 
-function ModernPortfolio() {
+function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) {
     const portfolioRef = useRef(null);
     const contentRef = useRef(null);
-    const h1Ref = useRef(null);
-    const h2Ref = useRef(null);
-    const p1Ref = useRef(null);
-    const p2Ref = useRef(null);
+    const typingTextRef = useRef(null);
+    const cursorRef = useRef(null);
+    const subheaderRef = useRef(null);
+    const headerRef = useRef(null);
+    
+    // Initialize state from props if available
+    const [animationsCompleted, setAnimationsCompleted] = useState(
+        initialAnimationState ? initialAnimationState.completed : false
+    );
+    const [currentDisplayText, setCurrentDisplayText] = useState(
+        initialAnimationState ? initialAnimationState.text : ''
+    );
+    const [typingComplete, setTypingComplete] = useState(
+        initialAnimationState ? initialAnimationState.completed : false
+    );
+    const [subheaderAnimated, setSubheaderAnimated] = useState(
+        initialAnimationState ? initialAnimationState.completed : false
+    );
+    const [headerAnimated, setHeaderAnimated] = useState(
+        initialAnimationState ? initialAnimationState.completed : false
+    );
+    const [currentSection, setCurrentSection] = useState('home');
 
     // Utility functions for animation
     const lerp = (start, end, progress) => start + (end - start) * progress;
@@ -37,17 +56,180 @@ function ModernPortfolio() {
         return rgbToHex(r, g, b);
     };
 
-    // Easing function for smoother animations
     const easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
+    // Separate effect for cursor blinking only (always runs when typing complete)
     useEffect(() => {
+        let cursorAnimationId;
+        
+        const animateCursor = () => {
+            const currentTime = Date.now();
+            
+            if (cursorRef.current && typingComplete) {
+                const showCursor = Math.floor(currentTime / 500) % 2 === 0;
+                cursorRef.current.style.opacity = showCursor ? 1 : 0;
+            }
+            
+            cursorAnimationId = requestAnimationFrame(animateCursor);
+        };
+        
+        // Start cursor animation if typing is complete
+        if (typingComplete) {
+            cursorAnimationId = requestAnimationFrame(animateCursor);
+        }
+        
+        return () => {
+            if (cursorAnimationId) {
+                cancelAnimationFrame(cursorAnimationId);
+            }
+        };
+    }, [typingComplete]);
+
+    // Combined effect for subheader and header animation (runs only once)
+    useEffect(() => {
+        // Only run if typing is complete AND animations haven't been completed yet
+        if (!typingComplete || (subheaderAnimated && headerAnimated)) {
+            return;
+        }
+
+        let animationId;
+        let startTime = null;
+        const delay = 1500; // Delay after cursor starts blinking
+        const duration = 1000; // Animation duration
+        
+        const animateElements = () => {
+            const currentTime = Date.now();
+            
+            // Start animation timer
+            if (startTime === null) {
+                startTime = currentTime;
+            }
+            
+            const elapsed = currentTime - startTime;
+            
+            if (elapsed >= delay) {
+                const progress = Math.min((elapsed - delay) / duration, 1);
+                const easedProgress = easeInOutCubic(progress);
+                
+                // Animate subheader
+                if (subheaderRef.current && !subheaderAnimated) {
+                    const opacity = easedProgress;
+                    const translateY = lerp(20, 0, easedProgress);
+                    subheaderRef.current.style.opacity = opacity;
+                    subheaderRef.current.style.transform = `translateY(${translateY}px)`;
+                }
+                
+                // Animate header with same timing
+                if (headerRef.current && !headerAnimated) {
+                    const opacity = easedProgress;
+                    const translateY = lerp(-20, 0, easedProgress);
+                    headerRef.current.style.opacity = opacity;
+                    headerRef.current.style.transform = `translateY(${translateY}px)`;
+                    
+                    // Ensure pointer events are enabled during and after animation
+                    headerRef.current.style.pointerEvents = 'auto';
+                }
+                
+                // Mark animations as completed
+                if (progress >= 1) {
+                    setSubheaderAnimated(true);
+                    setHeaderAnimated(true);
+                    setAnimationsCompleted(true);
+                    
+                    // Ensure final state has proper pointer events
+                    if (headerRef.current) {
+                        headerRef.current.style.pointerEvents = 'auto';
+                        headerRef.current.style.zIndex = '1000';
+                    }
+                    
+                    // Notify parent component
+                    if (onAnimationComplete) {
+                        const animationState = {
+                            completed: true,
+                            text: currentDisplayText || 'Anthony Le.'
+                        };
+                        onAnimationComplete(animationState);
+                    }
+                    return; // Stop the animation loop
+                }
+            }
+            
+            animationId = requestAnimationFrame(animateElements);
+        };
+        
+        // Start animation
+        animationId = requestAnimationFrame(animateElements);
+        
+        return () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        };
+    }, [typingComplete, subheaderAnimated, headerAnimated, currentDisplayText, onAnimationComplete]);
+
+    // Main animation effect (only runs once)
+    useEffect(() => {
+        // If animations are already completed, set up the final state immediately
+        if (animationsCompleted) {
+            // Set final background
+            if (portfolioRef.current) {
+                portfolioRef.current.style.background = `linear-gradient(60deg, #6497bc 0%, #1d1921 100%)`;
+            }
+            
+            // Set final content state
+            if (contentRef.current) {
+                contentRef.current.style.opacity = 1;
+                contentRef.current.style.transform = 'translateY(0px)';
+            }
+            
+            // Set final typing state
+            if (typingTextRef.current) {
+                typingTextRef.current.textContent = currentDisplayText || 'Anthony Le.';
+                if (typingTextRef.current.parentElement) {
+                    typingTextRef.current.parentElement.style.opacity = 1;
+                    typingTextRef.current.parentElement.style.transform = 'translateX(0)';
+                }
+            }
+            
+            // Set final subheader state
+            if (subheaderRef.current) {
+                subheaderRef.current.style.opacity = 1;
+                subheaderRef.current.style.transform = 'translateY(0)';
+            }
+            
+            // Set final header state with proper interaction
+            if (headerRef.current) {
+                headerRef.current.style.opacity = 1;
+                headerRef.current.style.transform = 'translateY(0)';
+                headerRef.current.style.pointerEvents = 'auto';
+                headerRef.current.style.zIndex = '1000';
+            }
+            
+            setTypingComplete(true);
+            setSubheaderAnimated(true);
+            setHeaderAnimated(true);
+            return; // Don't run animations again
+        }
+
         let animationId;
         const startTime = Date.now();
-        const delayTime = 2000; // 2 second delay
-        const backgroundDuration = 4000; // 4 seconds for background
-        const contentDelay = 4000; // Content starts after background
-        const contentDuration = 1500; // Content animation duration
-        const textStagger = 300; // 300ms between each text element
+        const delayTime = 2000;
+        const backgroundDuration = 4000;
+        const contentDelay = 4000;
+        const contentDuration = 1500;
+
+        // Typing animation variables
+        const typingStartDelay = 6000;
+        const text1 = "Hi!";
+        const text2 = "Anthony Le.";
+        const typeSpeed = 150;
+        const deleteSpeed = 100;
+        const pauseDuration = 1500;
+
+        let typingPhase = 'waiting';
+        let currentText = '';
+        let charIndex = 0;
+        let lastTypingTime = 0;
 
         // Color stops for gradient animation
         const gradientStops = [
@@ -69,7 +251,6 @@ function ModernPortfolio() {
                 const backgroundProgress = Math.min((elapsed - delayTime) / backgroundDuration, 1);
                 const easedProgress = easeInOutCubic(backgroundProgress);
                 
-                // Calculate which gradient stops to interpolate between
                 const totalStops = gradientStops.length - 1;
                 const scaledProgress = easedProgress * totalStops;
                 const stopIndex = Math.floor(scaledProgress);
@@ -101,30 +282,76 @@ function ModernPortfolio() {
                 }
             }
 
-            // Text animations (staggered)
-            const textElements = [
-                { ref: h1Ref, delay: 500 },
-                { ref: h2Ref, delay: 800 },
-                { ref: p1Ref, delay: 1100 },
-                { ref: p2Ref, delay: 1400 }
-            ];
-
-            textElements.forEach(({ ref, delay }) => {
-                if (elapsed >= delayTime + contentDelay + delay) {
-                    const textProgress = Math.min((elapsed - delayTime - contentDelay - delay) / 800, 1);
-                    const easedTextProgress = easeInOutCubic(textProgress);
-                    
-                    if (ref.current) {
-                        const opacity = easedTextProgress;
-                        const translateX = lerp(-30, 0, easedTextProgress);
-                        ref.current.style.opacity = opacity;
-                        ref.current.style.transform = `translateX(${translateX}px)`;
+            // Typing animation
+            if (elapsed >= delayTime + typingStartDelay) {
+                if (typingPhase === 'waiting') {
+                    typingPhase = 'typing1';
+                    charIndex = 0;
+                    lastTypingTime = currentTime;
+                }
+                
+                if (typingPhase === 'typing1') {
+                    if (currentTime - lastTypingTime >= typeSpeed) {
+                        if (charIndex < text1.length) {
+                            currentText = text1.slice(0, charIndex + 1);
+                            charIndex++;
+                            lastTypingTime = currentTime;
+                        } else {
+                            typingPhase = 'pausing';
+                            lastTypingTime = currentTime;
+                        }
                     }
                 }
-            });
+                
+                if (typingPhase === 'pausing') {
+                    if (currentTime - lastTypingTime >= pauseDuration) {
+                        typingPhase = 'deleting';
+                        lastTypingTime = currentTime;
+                    }
+                }
+                
+                if (typingPhase === 'deleting') {
+                    if (currentTime - lastTypingTime >= deleteSpeed) {
+                        if (currentText.length > 0) {
+                            currentText = currentText.slice(0, -1);
+                            lastTypingTime = currentTime;
+                        } else {
+                            typingPhase = 'typing2';
+                            charIndex = 0;
+                            lastTypingTime = currentTime;
+                        }
+                    }
+                }
+                
+                if (typingPhase === 'typing2') {
+                    if (currentTime - lastTypingTime >= typeSpeed) {
+                        if (charIndex < text2.length) {
+                            currentText = text2.slice(0, charIndex + 1);
+                            charIndex++;
+                            lastTypingTime = currentTime;
+                        } else {
+                            typingPhase = 'complete';
+                            // Mark typing as completed and save final text
+                            setTypingComplete(true);
+                            setCurrentDisplayText(text2);
+                        }
+                    }
+                }
+                
+                // Update the typing text
+                if (typingTextRef.current) {
+                    typingTextRef.current.textContent = currentText;
+                    
+                    // Show the typing text and h1 container
+                    if (typingTextRef.current.parentElement) {
+                        typingTextRef.current.parentElement.style.opacity = 1;
+                        typingTextRef.current.parentElement.style.transform = 'translateX(0)';
+                    }
+                }
+            }
 
-            // Continue animation if not complete
-            if (elapsed < delayTime + contentDelay + 2000) {
+            // Continue animation until typing is complete
+            if (typingPhase !== 'complete') {
                 animationId = requestAnimationFrame(animate);
             }
         };
@@ -138,41 +365,87 @@ function ModernPortfolio() {
                 cancelAnimationFrame(animationId);
             }
         };
-    }, []);
+    }, []); // Remove dependencies to prevent re-running
 
+    const handleNavigation = (sectionId) => {
+        setCurrentSection(sectionId);
+        console.log('Navigation clicked:', sectionId); // Debug log
+        // Future: Add section transition animations here
+    };
+    
     return (
         <div className="modern-portfolio" ref={portfolioRef}>
+            <div 
+                ref={headerRef}
+                style={{
+                    opacity: animationsCompleted ? 1 : 0,
+                    transform: animationsCompleted ? 'translateY(0)' : 'translateY(-20px)',
+                    transition: 'none', // Prevent CSS transitions from interfering
+                    pointerEvents: animationsCompleted ? 'auto' : 'none', // Enable pointer events when ready
+                    position: 'relative',
+                    zIndex: 1000, // Ensure it's above other content
+                    width: '100%'
+                }}
+            >
+                <HeaderComponent 
+                    onNavigate={handleNavigation}
+                    currentSection={currentSection}
+                />
+            </div>
             <div className="portfolio-content" ref={contentRef}>
-                <h1 ref={h1Ref}>Modern Portfolio</h1>
-                <h2 ref={h2Ref}>Anthony Le</h2>
-                <p ref={p1Ref}>This is a modern, sleek portfolio component with Inter font.</p>
-                <p ref={p2Ref}>The content stays within the window body boundaries.</p>
+                <h1 style={{
+                    fontSize: '5rem',
+                    fontWeight: '700',
+                    margin: '0 0 1rem 0',
+                    letterSpacing: '-1px',
+                    opacity: animationsCompleted ? 1 : 0,
+                    transform: animationsCompleted ? 'translateX(0)' : 'translateX(-30px)',
+                    minHeight: '6rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    color: 'white'
+                }}>
+                    <span 
+                        ref={typingTextRef}
+                        style={{
+                            display: 'inline-block',
+                            color: 'white'
+                        }}
+                    >
+                        {animationsCompleted ? currentDisplayText : ''}
+                    </span>
+                    <span 
+                        ref={cursorRef} 
+                        style={{
+                            opacity: 0,
+                            marginLeft: '2px',
+                            fontSize: '5rem',
+                            fontWeight: '700',
+                            color: 'white',
+                            display: 'inline-block'
+                        }}
+                    >
+                        |
+                    </span>
+                </h1>
                 
-                {/* Add more content to test scrolling */}
-                <div className="portfolio-section">
-                    <h3>About Me</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                </div>
-                
-                <div className="portfolio-section">
-                    <h3>Skills</h3>
-                    <p>React, JavaScript, CSS, HTML, Node.js, and many more technologies.</p>
-                </div>
-                
-                <div className="portfolio-section">
-                    <h3>Projects</h3>
-                    <p>Various projects showcasing different skills and technologies.</p>
-                </div>
-                
-                <div className="portfolio-section">
-                    <h3>Experience</h3>
-                    <p>Professional experience and achievements in software development.</p>
-                </div>
-                
-                <div className="portfolio-section">
-                    <h3>Contact</h3>
-                    <p>Get in touch for collaborations and opportunities.</p>
-                </div>
+                <h2 
+                    ref={subheaderRef}
+                    style={{
+                        fontSize: '1.4rem',
+                        fontWeight: '400',
+                        margin: '0 0 2rem 0',
+                        letterSpacing: '0.5px',
+                        opacity: animationsCompleted ? 1 : 0,
+                        transform: animationsCompleted ? 'translateY(0)' : 'translateY(20px)',
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        textAlign: 'center'
+                    }}
+                >
+                    4th Year Comp Sci @ uOttawa | Software Developer
+                </h2>
             </div>
         </div>
     );
