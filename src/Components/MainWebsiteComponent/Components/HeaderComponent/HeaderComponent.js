@@ -7,6 +7,8 @@ function HeaderComponent({ onNavigate, currentSection = 'home' }) {
     const [activeSection, setActiveSection] = useState(currentSection);
     const [isAnimating, setIsAnimating] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [scrollY, setScrollY] = useState(0);
 
     // Navigation items (removed icons)
     const navigationItems = [
@@ -21,6 +23,31 @@ function HeaderComponent({ onNavigate, currentSection = 'home' }) {
     useEffect(() => {
         setActiveSection(currentSection);
     }, [currentSection]);
+
+    // Handle scroll events for dynamic header behavior
+    useEffect(() => {
+        const handleScroll = () => {
+            // Find the scrollable container (modern-portfolio)
+            const scrollContainer = document.querySelector('.modern-portfolio');
+            if (scrollContainer) {
+                const currentScrollY = scrollContainer.scrollTop;
+                setScrollY(currentScrollY);
+                setIsScrolled(currentScrollY > 10); // Much lower threshold for immediate feedback
+            }
+        };
+
+        // Find the scrollable container and add scroll listener
+        const scrollContainer = document.querySelector('.modern-portfolio');
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+            
+            // Initial call to set state based on current scroll position
+            handleScroll();
+            
+            // Cleanup
+            return () => scrollContainer.removeEventListener('scroll', handleScroll);
+        }
+    }, []);
 
     // Handle navigation click
     const handleNavClick = async (e, sectionId) => {
@@ -71,7 +98,7 @@ function HeaderComponent({ onNavigate, currentSection = 'home' }) {
     }, [isMobileMenuOpen]);
 
     return (
-        <header className="header-component">
+        <header className={`header-component ${isScrolled ? 'scrolled' : ''}`}>
             <nav className="navigation-bar">
                 <div className="nav-container">
                     {/* Logo/Brand - Replace emoji with logo */}

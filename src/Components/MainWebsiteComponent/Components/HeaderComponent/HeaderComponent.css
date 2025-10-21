@@ -1,15 +1,20 @@
 .header-component {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    right: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 8px; /* Leave space for scrollbar */
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: auto;
+    width: calc(100% - 8px); /* Account for scrollbar space */
+    margin: 0;
+    padding: 25px 20px;
+    box-sizing: border-box;
+    transform: translateZ(0);
+    will-change: transform, background-color, backdrop-filter;
 }
 
 .navigation-bar {
@@ -24,7 +29,8 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
-    height: 60px;
+    height: 70px; /* Larger initial height for dramatic change */
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Brand/Logo - Logo Image */
@@ -35,10 +41,10 @@
 }
 
 .brand-logo {
-    height: 40px;
+    height: 45px; /* Larger initial size */
     width: auto;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-    transition: transform 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition */
     object-fit: contain;
 }
 
@@ -323,9 +329,11 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .header-component {
-        top: 10px;
-        left: 10px;
-        right: 10px;
+        top: 0;
+        left: 0;
+        right: 6px; /* Smaller scrollbar space on mobile */
+        padding: 15px 10px;
+        width: calc(100% - 6px);
     }
     
     .nav-container {
@@ -417,7 +425,27 @@
 
 /* Scrolling enhancements - navbar background changes on scroll */
 .header-component.scrolled {
-    background: rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.05); /* Keep same background as initial state */
+    backdrop-filter: blur(25px) !important; /* Much stronger blur */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+    padding: 12px 20px; /* Much more compact */
+    transform: scale(0.98); /* Slight scale change for dramatic effect */
+    right: 8px; /* Leave space for scrollbar */
+}
+
+.header-component.scrolled .nav-container {
+    height: 50px; /* Much more compact */
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-component.scrolled .brand-logo {
+    height: 30px; /* Smaller logo */
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-component.scrolled .nav-link {
+    font-size: 0.9rem; /* Smaller text */
+    padding: 0.5rem 0; /* Less padding */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
