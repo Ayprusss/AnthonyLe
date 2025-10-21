@@ -9,14 +9,15 @@
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
-    overflow: hidden;
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     /* Start with black background - JS will animate this */
     background: #000000;
     color: white;
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    /* Remove centering to allow natural flow */
     align-items: center;
     text-align: center;
     /* Remove absolute positioning that was causing overflow */
@@ -34,10 +35,9 @@
     padding: 0 2rem;
     width: 100%;
     max-width: 1200px;
-    height: 100%;
+    /* Remove min-height constraint to allow natural flow */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     /* Start hidden - JS will animate this */
     opacity: 0;
@@ -48,9 +48,23 @@
     z-index: 1;
 }
 
-/* Ensure header doesn't interfere with content */
-.portfolio-content {
-    padding-top: 100px; /* Add space for the header */
+/* Hero section takes full viewport */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-top: 120px; /* Space for header */
+    box-sizing: border-box;
+}
+
+/* Skills section positioned below hero */
+.skills-section-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem 0;
 }
 
 /* Text styling - remove CSS animations */
@@ -67,7 +81,7 @@
 .modern-portfolio h2 {
     font-size: 2.5rem;
     font-weight: 600;
-    margin: 0 0 2rem 0;
+    margin: 0 0 0 0; /* Remove bottom margin for compact hero */
     letter-spacing: -0.5px;
     width: 100%;
     /* Start hidden - JS will animate this */
@@ -85,7 +99,6 @@
 }
 
 /* Ensure sections have proper spacing */
-.skills-section,
 .projects-section,
 .experience-section,
 .contact-section {
@@ -113,7 +126,23 @@
 
 @media (max-width: 768px) {
     .portfolio-content {
-        padding: 1rem;
-        padding-top: 80px; /* Smaller padding for mobile */
+        padding: 0 1rem;
+    }
+    
+    .hero-section {
+        padding-top: 100px; /* Less space for header on mobile */
+    }
+    
+    .modern-portfolio h1 {
+        font-size: 2.5rem;
+    }
+    
+    .modern-portfolio h2 {
+        font-size: 2rem;
+        margin: 0 0 0 0; /* Keep compact on mobile */
+    }
+    
+    .skills-section-wrapper {
+        padding: 1rem 0;
     }
 }

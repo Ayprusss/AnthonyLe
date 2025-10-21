@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './ModernPortfolio.css';
 import HeaderComponent from '../HeaderComponent/HeaderComponent.js';
-
+import SkillsSectionComponent from '../SkillsSectionComponent/SkillsSectionComponent.js';
 function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) {
     const portfolioRef = useRef(null);
     const contentRef = useRef(null);
@@ -374,16 +374,20 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
     };
     
     return (
-        <div className="modern-portfolio" ref={portfolioRef}>
+        <div className="modern-portfolio-container" style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Header positioned absolutely within container */}
             <div 
                 ref={headerRef}
                 style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
                     opacity: animationsCompleted ? 1 : 0,
                     transform: animationsCompleted ? 'translateY(0)' : 'translateY(-20px)',
-                    transition: 'none', // Prevent CSS transitions from interfering
-                    pointerEvents: animationsCompleted ? 'auto' : 'none', // Enable pointer events when ready
-                    position: 'relative',
-                    zIndex: 1000, // Ensure it's above other content
+                    transition: 'none',
+                    pointerEvents: animationsCompleted ? 'auto' : 'none',
                     width: '100%'
                 }}
             >
@@ -392,63 +396,75 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
                     currentSection={currentSection}
                 />
             </div>
+            
+            {/* Scrollable content */}
+            <div className="modern-portfolio" ref={portfolioRef}>
             <div className="portfolio-content" ref={contentRef}>
-                <h1 style={{
-                    fontSize: '5rem',
-                    fontWeight: '700',
-                    margin: '0 0 1rem 0',
-                    letterSpacing: '-1px',
-                    opacity: animationsCompleted ? 1 : 0,
-                    transform: animationsCompleted ? 'translateX(0)' : 'translateX(-30px)',
-                    minHeight: '6rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative',
-                    color: 'white'
-                }}>
-                    <span 
-                        ref={typingTextRef}
-                        style={{
-                            display: 'inline-block',
-                            color: 'white'
-                        }}
-                    >
-                        {animationsCompleted ? currentDisplayText : ''}
-                    </span>
-                    <span 
-                        ref={cursorRef} 
-                        style={{
-                            opacity: 0,
-                            marginLeft: '2px',
-                            fontSize: '5rem',
-                            fontWeight: '700',
-                            color: 'white',
-                            display: 'inline-block'
-                        }}
-                    >
-                        |
-                    </span>
-                </h1>
-                
-                <h2 
-                    ref={subheaderRef}
-                    style={{
-                        fontSize: '1.4rem',
-                        fontWeight: '400',
-                        margin: '0 0 2rem 0',
-                        letterSpacing: '0.5px',
+                <div className="hero-section">
+                    <h1 style={{
+                        fontSize: '5rem',
+                        fontWeight: '700',
+                        margin: '0 0 1rem 0',
+                        letterSpacing: '-1px',
                         opacity: animationsCompleted ? 1 : 0,
-                        transform: animationsCompleted ? 'translateY(0)' : 'translateY(20px)',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        textAlign: 'center'
-                    }}
-                >
-                    4th Year Comp Sci @ uOttawa | Software Developer
-                </h2>
+                        transform: animationsCompleted ? 'translateX(0)' : 'translateX(-30px)',
+                        minHeight: '6rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        color: 'white'
+                    }}>
+                        <span 
+                            ref={typingTextRef}
+                            style={{
+                                display: 'inline-block',
+                                color: 'white'
+                            }}
+                        >
+                            {animationsCompleted ? currentDisplayText : ''}
+                        </span>
+                        <span 
+                            ref={cursorRef} 
+                            style={{
+                                opacity: 0,
+                                marginLeft: '2px',
+                                fontSize: '5rem',
+                                fontWeight: '700',
+                                color: 'white',
+                                display: 'inline-block'
+                            }}
+                        >
+                            |
+                        </span>
+                    </h1>
+                    
+                    <h2 
+                        ref={subheaderRef}
+                        style={{
+                            fontSize: '1.4rem',
+                            fontWeight: '400',
+                            margin: '0 0 0 0',
+                            letterSpacing: '0.5px',
+                            opacity: animationsCompleted ? 1 : 0,
+                            transform: animationsCompleted ? 'translateY(0)' : 'translateY(20px)',
+                            color: 'rgba(255, 255, 255, 0.9)',
+                            textAlign: 'center'
+                        }}
+                    >
+                        4th Year Comp Sci @ uOttawa | Software Developer
+                    </h2>
+                </div>
+                
+                <div className="skills-section-wrapper">
+                    <SkillsSectionComponent 
+                        shouldAnimate={headerAnimated && subheaderAnimated}
+                    />
+                </div>
             </div>
         </div>
+        </div>
     );
-}
+};
 
 export default ModernPortfolio;
