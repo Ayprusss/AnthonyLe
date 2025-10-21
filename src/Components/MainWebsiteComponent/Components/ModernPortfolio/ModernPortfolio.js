@@ -3,6 +3,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import './ModernPortfolio.css';
 import HeaderComponent from '../HeaderComponent/HeaderComponent.js';
 import SkillsSectionComponent from '../SkillsSectionComponent/SkillsSectionComponent.js';
+import ProjectsComponent from '../ProjectsComponent/ProjectsComponent.js';
+import ExperienceComponent from '../ExperienceComponent/ExperienceComponent.js';
+import ContactComponent from '../ContactComponent/ContactComponent.js';
+import FooterComponent from '../FooterComponent/FooterComponent.js';
 function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) {
     const portfolioRef = useRef(null);
     const contentRef = useRef(null);
@@ -28,6 +32,51 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
         initialAnimationState ? initialAnimationState.completed : false
     );
     const [currentSection, setCurrentSection] = useState('home');
+
+    // Scroll spy effect to update current section based on scroll position
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollContainer = document.querySelector('.modern-portfolio');
+            if (!scrollContainer) return;
+            
+            const sections = [
+                { id: 'home', element: document.querySelector('.hero-section') },
+                { id: 'skills', element: document.querySelector('.skills-section-wrapper') },
+                { id: 'projects', element: document.querySelector('.projects-section-wrapper') },
+                { id: 'experience', element: document.querySelector('.experience-section-wrapper') },
+                { id: 'contact', element: document.querySelector('.contact-section-wrapper') }
+            ];
+            
+            let currentSectionId = 'home';
+            
+            // Find which section is currently in view
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const section = sections[i];
+                if (section.element) {
+                    const rect = section.element.getBoundingClientRect();
+                    const containerRect = scrollContainer.getBoundingClientRect();
+                    
+                    // Check if section is in viewport (with some offset for header)
+                    if (rect.top <= containerRect.top + 100) {
+                        currentSectionId = section.id;
+                        break;
+                    }
+                }
+            }
+            
+            setCurrentSection(currentSectionId);
+        };
+        
+        const scrollContainer = document.querySelector('.modern-portfolio');
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+            
+            // Initial call
+            handleScroll();
+            
+            return () => scrollContainer.removeEventListener('scroll', handleScroll);
+        }
+    }, [animationsCompleted]); // Only start after animations are complete
 
     // Utility functions for animation
     const lerp = (start, end, progress) => start + (end - start) * progress;
@@ -369,8 +418,36 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
 
     const handleNavigation = (sectionId) => {
         setCurrentSection(sectionId);
-        console.log('Navigation clicked:', sectionId); // Debug log
-        // Future: Add section transition animations here
+        
+        // Find the target section and scroll to it
+        let targetElement = null;
+        
+        switch(sectionId) {
+            case 'home':
+                targetElement = document.querySelector('.hero-section');
+                break;
+            case 'skills':
+                targetElement = document.querySelector('.skills-section-wrapper');
+                break;
+            case 'projects':
+                targetElement = document.querySelector('.projects-section-wrapper');
+                break;
+            case 'experience':
+                targetElement = document.querySelector('.experience-section-wrapper');
+                break;
+            case 'contact':
+                targetElement = document.querySelector('.contact-section-wrapper');
+                break;
+            default:
+                targetElement = document.querySelector('.hero-section');
+        }
+        
+        if (targetElement) {
+            targetElement.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
     };
     
     return (
@@ -400,20 +477,22 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
             {/* Scrollable content */}
             <div className="modern-portfolio" ref={portfolioRef}>
             <div className="portfolio-content" ref={contentRef}>
-                <div className="hero-section">
+                <div className="hero-section" id="home">
                     <h1 style={{
-                        fontSize: '5rem',
+                        fontSize: 'clamp(2rem, 8vw, 5rem)', // Responsive font size
                         fontWeight: '700',
                         margin: '0 0 1rem 0',
                         letterSpacing: '-1px',
                         opacity: animationsCompleted ? 1 : 0,
                         transform: animationsCompleted ? 'translateX(0)' : 'translateX(-30px)',
-                        minHeight: '6rem',
+                        minHeight: 'auto', // Changed from fixed height
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         position: 'relative',
-                        color: 'white'
+                        color: 'white',
+                        textAlign: 'center',
+                        wordBreak: 'break-word' // Prevent text overflow
                     }}>
                         <span 
                             ref={typingTextRef}
@@ -429,7 +508,7 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
                             style={{
                                 opacity: 0,
                                 marginLeft: '2px',
-                                fontSize: '5rem',
+                                fontSize: 'clamp(2rem, 8vw, 5rem)', // Match h1 font size
                                 fontWeight: '700',
                                 color: 'white',
                                 display: 'inline-block'
@@ -442,25 +521,103 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
                     <h2 
                         ref={subheaderRef}
                         style={{
-                            fontSize: '1.4rem',
+                            fontSize: 'clamp(1rem, 3vw, 1.4rem)', // Responsive subheader size
                             fontWeight: '400',
                             margin: '0 0 0 0',
                             letterSpacing: '0.5px',
                             opacity: animationsCompleted ? 1 : 0,
                             transform: animationsCompleted ? 'translateY(0)' : 'translateY(20px)',
                             color: 'rgba(255, 255, 255, 0.9)',
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            maxWidth: '100%',
+                            wordWrap: 'break-word'
                         }}
                     >
                         4th Year Comp Sci @ uOttawa | Software Developer
                     </h2>
+                    
+                    {/* Scroll down indicator */}
+                    <div 
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            marginTop: '3rem',
+                            opacity: animationsCompleted ? 1 : 0,
+                            transform: animationsCompleted ? 'translateY(0)' : 'translateY(20px)',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer'
+                        }}
+                        onClick={() => {
+                            const skillsSection = document.querySelector('.skills-section-wrapper');
+                            if (skillsSection) {
+                                skillsSection.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }}
+                    >
+                        <div 
+                            style={{
+                                fontSize: '2rem',
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                animation: 'bounce 2s infinite',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.color = 'rgba(255, 255, 255, 1)';
+                                e.target.style.transform = 'translateY(-3px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+                                e.target.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            ↓
+                        </div>
+                        <div 
+                            style={{
+                                fontSize: 'clamp(0.8rem, 2vw, 1rem)',
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                marginTop: '0.5rem',
+                                textAlign: 'center',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.color = 'rgba(255, 255, 255, 0.9)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.color = 'rgba(255, 255, 255, 0.6)';
+                            }}
+                        >
+                            scroll down.
+                        </div>
+                    </div>
                 </div>
                 
-                <div className="skills-section-wrapper">
+                <div className="skills-section-wrapper" id="skills">
                     <SkillsSectionComponent 
                         shouldAnimate={headerAnimated && subheaderAnimated}
                     />
                 </div>
+                
+                <div className="projects-section-wrapper" id="projects">
+                    <ProjectsComponent 
+                        shouldAnimate={headerAnimated && subheaderAnimated}
+                    />
+                </div>
+                
+                <div className="experience-section-wrapper" id="experience">
+                    <ExperienceComponent 
+                        shouldAnimate={headerAnimated && subheaderAnimated}
+                    />
+                </div>
+                
+                <div className="contact-section-wrapper" id="contact">
+                    <ContactComponent 
+                        shouldAnimate={headerAnimated && subheaderAnimated}
+                    />
+                </div>
+                
+                <FooterComponent />
             </div>
         </div>
         </div>
