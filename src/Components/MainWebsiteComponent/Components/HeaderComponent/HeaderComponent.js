@@ -9,6 +9,7 @@ function HeaderComponent({ onNavigate, currentSection = 'home' }) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [scrollY, setScrollY] = useState(0);
+    const [scrollProgress, setScrollProgress] = useState(0);
 
     // Navigation items (removed icons)
     const navigationItems = [
@@ -24,15 +25,21 @@ function HeaderComponent({ onNavigate, currentSection = 'home' }) {
         setActiveSection(currentSection);
     }, [currentSection]);
 
-    // Handle scroll events for dynamic header behavior
+    // Handle scroll events for dynamic header behavior and progress tracking
     useEffect(() => {
         const handleScroll = () => {
             // Find the scrollable container (modern-portfolio)
             const scrollContainer = document.querySelector('.modern-portfolio');
             if (scrollContainer) {
                 const currentScrollY = scrollContainer.scrollTop;
+                const maxScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+                
                 setScrollY(currentScrollY);
                 setIsScrolled(currentScrollY > 10); // Much lower threshold for immediate feedback
+                
+                // Calculate scroll progress as percentage
+                const progress = maxScroll > 0 ? (currentScrollY / maxScroll) * 100 : 0;
+                setScrollProgress(Math.min(progress, 100));
             }
         };
 
@@ -143,12 +150,13 @@ function HeaderComponent({ onNavigate, currentSection = 'home' }) {
                     </button>
                 </div>
 
-                {/* Progress indicator (for future use) */}
+                {/* Scroll progress indicator */}
                 <div className="nav-progress">
                     <div 
                         className="progress-bar"
                         style={{
-                            transform: `translateX(${navigationItems.findIndex(item => item.id === activeSection) * 20}%)`
+                            width: `${scrollProgress}%`,
+                            transform: 'translateX(0)'
                         }}
                     ></div>
                 </div>
