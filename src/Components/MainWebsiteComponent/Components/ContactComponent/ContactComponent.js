@@ -46,13 +46,11 @@ function ContactComponent({ shouldAnimate = false }) {
 
     const handleInputFocus = (e) => {
         const element = e.currentTarget;
-        element.style.borderColor = 'rgba(100, 151, 188, 0.8)';
         element.style.boxShadow = '0 0 0 2px rgba(100, 151, 188, 0.2)';
     };
 
     const handleInputBlur = (e) => {
         const element = e.currentTarget;
-        element.style.borderColor = 'rgba(255, 255, 255, 0.2)';
         element.style.boxShadow = 'none';
     };
 
@@ -205,6 +203,16 @@ function ContactComponent({ shouldAnimate = false }) {
                         >
                             <span className="social-icon">📧</span>
                             <span className="social-label">Email</span>
+                        </a>
+                        <a 
+                            href="../../ResumeWindow/Resume__using_overleaf_template_alternate.pdf" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="social-link resume"
+                            aria-label="Resume link"
+                        >
+                            <span className="social-icon">📄</span>
+                            <span className="social-label">Resume</span>
                         </a>
                     </div>
                 </div>

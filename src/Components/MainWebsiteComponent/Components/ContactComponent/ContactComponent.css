@@ -159,7 +159,7 @@
 .form-input,
 .form-textarea {
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: none;
     border-radius: 8px;
     padding: 1rem;
     color: white;
@@ -178,7 +178,6 @@
 .form-textarea:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(100, 151, 188, 0.8);
     box-shadow: 0 0 0 2px rgba(100, 151, 188, 0.2);
 }
 
