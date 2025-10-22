@@ -33,6 +33,30 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
     );
     const [currentSection, setCurrentSection] = useState('home');
 
+    // Gradient configurations for each section (memoized to prevent re-renders)
+    const sectionGradients = React.useMemo(() => ({
+        home: {
+            colors: ['#6497bc', '#1d1921'],
+            angle: 60
+        },
+        skills: {
+            colors: ['#9d79f1ff', '#1E293B'],
+            angle: 135
+        },
+        projects: {
+            colors: ['#059669', '#0F172A'],
+            angle: 45
+        },
+        experience: {
+            colors: ['#de4545ff', '#18181B'],
+            angle: 90
+        },
+        contact: {
+            colors: ['#6562bfff', '#0C0A09'],
+            angle: 30
+        }
+    }), []);
+
     // Scroll spy effect to update current section based on scroll position
     useEffect(() => {
         const handleScroll = () => {
@@ -77,6 +101,100 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
             return () => scrollContainer.removeEventListener('scroll', handleScroll);
         }
     }, [animationsCompleted]); // Only start after animations are complete
+
+    // Dynamic gradient effect based on scroll position and current section
+    useEffect(() => {
+        if (!animationsCompleted) return;
+
+        // Helper function to interpolate between hex colors
+        const interpolateColorHex = (color1, color2, progress) => {
+            const rgb1 = hexToRgb(color1);
+            const rgb2 = hexToRgb(color2);
+            
+            if (!rgb1 || !rgb2) return color1;
+            
+            const r = Math.round(rgb1.r + (rgb2.r - rgb1.r) * progress);
+            const g = Math.round(rgb1.g + (rgb2.g - rgb1.g) * progress);
+            const b = Math.round(rgb1.b + (rgb2.b - rgb1.b) * progress);
+            
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        };
+
+        const updateGradient = () => {
+            const scrollContainer = document.querySelector('.modern-portfolio');
+            if (!scrollContainer || !portfolioRef.current) return;
+
+            const scrollTop = scrollContainer.scrollTop;
+            const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            const scrollProgress = Math.min(scrollTop / scrollHeight, 1);
+
+            // Get current section gradient
+            const currentGradient = sectionGradients[currentSection] || sectionGradients.home;
+            
+            // Create smooth transitions between sections by blending with adjacent sections
+            const sections = ['home', 'skills', 'projects', 'experience', 'contact'];
+            
+            let finalGradient = currentGradient;
+            
+            // Check if we're transitioning between sections
+            const sectionElements = sections.map(id => ({
+                id,
+                element: document.querySelector(`#${id}`)
+            })).filter(s => s.element);
+            
+            // Find the exact position within sections for smoother transitions
+            for (let i = 0; i < sectionElements.length - 1; i++) {
+                const currentSectionEl = sectionElements[i];
+                const nextSectionEl = sectionElements[i + 1];
+                
+                if (currentSectionEl.id === currentSection) {
+                    
+                    // Calculate transition progress (0 to 1) as we scroll through current section
+                    const sectionHeight = currentSectionEl.element.offsetHeight;
+                    const sectionTop = currentSectionEl.element.offsetTop;
+                    const sectionProgress = Math.min(Math.max((scrollTop - sectionTop) / sectionHeight, 0), 1);
+                    
+                    // If we're in the last 30% of the section, start blending with next section
+                    if (sectionProgress > 0.7 && nextSectionEl) {
+                        const blendProgress = (sectionProgress - 0.7) / 0.3; // 0 to 1 over last 30%
+                        const nextGradient = sectionGradients[nextSectionEl.id];
+                        
+                        if (nextGradient) {
+                            // Interpolate colors
+                            const color1 = interpolateColorHex(currentGradient.colors[0], nextGradient.colors[0], blendProgress);
+                            const color2 = interpolateColorHex(currentGradient.colors[1], nextGradient.colors[1], blendProgress);
+                            
+                            // Interpolate angle
+                            const angle = currentGradient.angle + (nextGradient.angle - currentGradient.angle) * blendProgress;
+                            
+                            finalGradient = {
+                                colors: [color1, color2],
+                                angle: angle
+                            };
+                        }
+                    }
+                    break;
+                }
+            }
+            
+            // Add subtle scroll-based angle variation for more dynamism
+            const dynamicAngle = finalGradient.angle + Math.sin(scrollProgress * Math.PI * 2) * 5;
+            
+            // Apply the gradient
+            portfolioRef.current.style.background = 
+                `linear-gradient(${dynamicAngle}deg, ${finalGradient.colors[0]} 0%, ${finalGradient.colors[1]} 100%)`;
+        };
+
+        const scrollContainer = document.querySelector('.modern-portfolio');
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', updateGradient, { passive: true });
+            
+            // Initial gradient update
+            updateGradient();
+            
+            return () => scrollContainer.removeEventListener('scroll', updateGradient);
+        }
+    }, [currentSection, animationsCompleted, sectionGradients]);
 
     // Utility functions for animation
     const lerp = (start, end, progress) => start + (end - start) * progress;
@@ -220,9 +338,11 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
     useEffect(() => {
         // If animations are already completed, set up the final state immediately
         if (animationsCompleted) {
-            // Set final background
+            // Set final background using current section gradient
             if (portfolioRef.current) {
-                portfolioRef.current.style.background = `linear-gradient(60deg, #6497bc 0%, #1d1921 100%)`;
+                const gradient = sectionGradients[currentSection] || sectionGradients.home;
+                portfolioRef.current.style.background = 
+                    `linear-gradient(${gradient.angle}deg, ${gradient.colors[0]} 0%, ${gradient.colors[1]} 100%)`;
             }
             
             // Set final content state
@@ -280,7 +400,8 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
         let charIndex = 0;
         let lastTypingTime = 0;
 
-        // Color stops for gradient animation
+        // Color stops for gradient animation - transition to home section gradient
+        const homeGradient = sectionGradients.home;
         const gradientStops = [
             { color1: '#000000', color2: '#000000' },
             { color1: '#1a1a1a', color2: '#1f1f1f' },
@@ -288,7 +409,7 @@ function ModernPortfolio({ initialAnimationState = null, onAnimationComplete }) 
             { color1: '#3a4555', color2: '#28252a' },
             { color1: '#4a6580', color2: '#221f26' },
             { color1: '#5a7ea0', color2: '#1e1c23' },
-            { color1: '#6497bc', color2: '#1d1921' }
+            { color1: homeGradient.colors[0], color2: homeGradient.colors[1] }
         ];
 
         const animate = () => {
