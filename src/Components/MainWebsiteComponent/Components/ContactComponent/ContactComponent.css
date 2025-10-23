@@ -178,7 +178,6 @@
 .form-textarea:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 2px rgba(100, 151, 188, 0.2);
 }
 
 .form-input:disabled,
