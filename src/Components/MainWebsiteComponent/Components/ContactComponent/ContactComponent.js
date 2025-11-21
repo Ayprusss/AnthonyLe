@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import "./ContactComponent.css";
 import emailjs from "@emailjs/browser";
+import Resume from "./Resume__using_overleaf_template_alternate.pdf";
+
 
 function ContactComponent({ shouldAnimate = false }) {
     const contactSectionRef = useRef(null);
@@ -56,7 +58,7 @@ function ContactComponent({ shouldAnimate = false }) {
 
     return (
         <div className="contact-section" ref={contactSectionRef}>
-            <h1 className="contact-header">Get In Touch</h1>
+            <h1 className="contact-header">Contact</h1>
             
             <div className="contact-container">
                 <div className="contact-intro">
@@ -177,7 +179,7 @@ function ContactComponent({ shouldAnimate = false }) {
                     <p className="social-text">You can also find me on:</p>
                     <div className="social-icons">
                         <a 
-                            href="https://github.com/yourusername" 
+                            href="https://github.com/Ayprusss" 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="social-link github"
@@ -187,7 +189,7 @@ function ContactComponent({ shouldAnimate = false }) {
                             <span className="social-label">GitHub</span>
                         </a>
                         <a 
-                            href="https://linkedin.com/in/yourusername" 
+                            href="https://www.linkedin.com/in/anthonykhle/" 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="social-link linkedin"
@@ -197,7 +199,7 @@ function ContactComponent({ shouldAnimate = false }) {
                             <span className="social-label">LinkedIn</span>
                         </a>
                         <a 
-                            href="mailto:your.email@example.com" 
+                            href="mailto:anthonykhle@gmail.com" 
                             className="social-link email"
                             aria-label="Send Email"
                         >
@@ -205,7 +207,7 @@ function ContactComponent({ shouldAnimate = false }) {
                             <span className="social-label">Email</span>
                         </a>
                         <a 
-                            href="../../ResumeWindow/Resume__using_overleaf_template_alternate.pdf" 
+                            href="{Resume}" 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="social-link resume"
