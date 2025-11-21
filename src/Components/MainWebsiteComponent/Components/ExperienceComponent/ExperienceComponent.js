@@ -8,58 +8,69 @@ function ExperienceComponent({ shouldAnimate = false }) {
     const experiences = [
         {
             id: 1,
-            title: "Software Developer Intern",
-            company: "Tech Innovations Inc.",
-            duration: "May 2024 - Aug 2024",
+            title: "Bachelor of Science - Computer Science Student",
+            company: "University of Ottawa",
+            duration: "Sept 2022 - Apr 2027",
             location: "Ottawa, ON",
             description: "Developed responsive web applications using React and Node.js. Collaborated with senior developers on feature implementation and bug fixes. Participated in agile development processes and code reviews.",
-            technologies: ["React", "Node.js", "JavaScript", "Git", "Agile"],
-            type: "internship",
-            current: false
-        },
-        {
-            id: 2,
-            title: "Junior Web Developer",
-            company: "Digital Solutions Co.",
-            duration: "Sep 2023 - Apr 2024",
-            location: "Ottawa, ON",
-            description: "Built and maintained client websites using modern web technologies. Worked closely with design team to implement pixel-perfect UI components. Optimized website performance and accessibility.",
-            technologies: ["HTML5", "CSS3", "JavaScript", "React", "WordPress"],
-            type: "part-time",
-            current: false
-        },
-        {
-            id: 3,
-            title: "Computer Science Student",
-            company: "University of Ottawa",
-            duration: "Sep 2021 - Present",
-            location: "Ottawa, ON",
-            description: "Pursuing Bachelor's degree in Computer Science with focus on software engineering and web development. Relevant coursework includes Data Structures, Algorithms, Database Systems, and Software Engineering.",
-            technologies: ["Java", "Python", "C++", "SQL", "Data Structures"],
+            technologies: [],
             type: "education",
             current: true
         },
         {
+            id: 2,
+            title: "Software Engineering Intern",
+            company: "Canada Revenue Agency",
+            duration: "Sep 2023 - Aug 2024",
+            location: "Ottawa, ON",
+            description: "Built and maintained client websites using modern web technologies. Worked closely with design team to implement pixel-perfect UI components. Optimized website performance and accessibility.",
+            technologies: ["HTML5", "CSS3", "JavaScript", "React", "WordPress"],
+            type: "internship",
+            current: false
+        },
+        {
+            id: 3,
+            title: "Community Coordinator",
+            company: "UOttaHack VI",
+            duration: "Oct 2023 - Jan 2024",
+            location: "Ottawa, ON",
+            description: "Pursuing Bachelor's degree in Computer Science with focus on software engineering and web development. Relevant coursework includes Data Structures, Algorithms, Database Systems, and Software Engineering.",
+            technologies: ["Java", "Python", "C++", "SQL", "Data Structures"],
+            type: "academic",
+            current: false
+        },
+        {
             id: 4,
-            title: "Freelance Web Developer",
-            company: "Self-Employed",
-            duration: "Jan 2023 - Present",
+            title: "Director Of Logistics",
+            company: "uOttaHack VII",
+            duration: "Mar 2024 - Jan 2025",
             location: "Ottawa, ON",
             description: "Created custom websites and web applications for small businesses and personal clients. Managed complete project lifecycle from requirements gathering to deployment and maintenance.",
             technologies: ["React", "Node.js", "MongoDB", "Express", "AWS"],
-            type: "freelance",
-            current: true
+            type: "academic",
+            current: false
         },
         {
             id: 5,
-            title: "Teaching Assistant",
+            title: "Full-Stack Developer Intern",
             company: "University of Ottawa",
-            duration: "Sep 2023 - Dec 2023",
+            duration: "Jan 2025 - Apr 2025",
             location: "Ottawa, ON",
             description: "Assisted students in introductory programming courses. Conducted lab sessions, graded assignments, and provided one-on-one tutoring for struggling students.",
             technologies: ["Java", "Python", "Teaching", "Mentoring"],
-            type: "academic",
+            type: "internship",
             current: false
+        },
+        {
+            id: 6,
+            title: "Full-Stack Developer Intern",
+            company: "Magnet Forensics",
+            duration: "Sep 2025 - Apr 2026",
+            location: "Ottawa, ON",
+            description: "Assisted students in introductory programming courses. Conducted lab sessions, graded assignments, and provided one-on-one tutoring for struggling students.",
+            technologies: ["Java", "Python", "Teaching", "Mentoring"],
+            type: "internship",
+            current: true
         }
     ];
 
