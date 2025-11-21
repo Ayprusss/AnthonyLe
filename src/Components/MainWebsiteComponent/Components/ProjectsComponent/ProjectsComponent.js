@@ -1,6 +1,10 @@
 import React, { useRef } from "react";
 import "./ProjectsComponent.css";
 
+import photo1 from "./ppptailoringcourier.png";
+import photo2 from "./ehotels.png";
+import photo3 from "./AnthonyLe.png";
+
 function ProjectsComponent({ shouldAnimate = false }) {
     const projectsSectionRef = useRef(null);
 
@@ -8,43 +12,43 @@ function ProjectsComponent({ shouldAnimate = false }) {
     const projects = [
         {
             id: 1,
-            title: "E-Commerce Platform",
-            description: "A full-stack e-commerce application with React frontend, Node.js backend, and MongoDB database. Features include user authentication, shopping cart, payment integration, and admin dashboard.",
-            technologies: ["React", "Node.js", "MongoDB", "Express", "Stripe API"],
-            image: "https://via.placeholder.com/400x250?text=E-Commerce+Platform",
-            githubUrl: "https://github.com/yourusername/ecommerce-platform",
-            liveUrl: "https://your-ecommerce-demo.com",
+            title: "PPPTAILORINGCOURIER",
+            description: "A front-end focused website made in React mimicking a clothing brand that provides tailoring services. Provides Minimalist design upholding UI principles and features and AI chatbot. Backend and Admin page on its way.",
+            technologies: ["React", "CSS", "HTML", "UI Principles"],
+            image: photo1,
+            githubUrl: "https://github.com/Ayprusss/PPPTAILORINGCOURIER",
+            liveUrl: "https://ppptailoringcourier.vercel.app/home",
             featured: true
         },
         {
             id: 2,
-            title: "Task Management App",
-            description: "A collaborative task management application built with React and Firebase. Includes real-time updates, team collaboration, drag-and-drop functionality, and deadline tracking.",
+            title: "eHotels",
+            description: "A full-stack project made with a PERN stack showcasing a hotel reservation website. Features both a client and admin side and has full ",
             technologies: ["React", "Firebase", "Material-UI", "Redux"],
-            image: "https://via.placeholder.com/400x250?text=Task+Management",
-            githubUrl: "https://github.com/yourusername/task-manager",
-            liveUrl: "https://your-taskmanager-demo.com",
+            image: photo2,
+            githubUrl: "https://github.com/Ayprusss/eHotels-Project",
+            liveUrl: null,
             featured: true
         },
         {
             id: 3,
-            title: "Weather Dashboard",
-            description: "A responsive weather dashboard that displays current weather conditions and forecasts. Built with vanilla JavaScript and integrates with multiple weather APIs for accurate data.",
-            technologies: ["JavaScript", "HTML5", "CSS3", "Weather API"],
+            title: "Health Management App",
+            description: "Mobile App made with Java showcasing a management app for a hospital for both client and admin.",
+            technologies: ["Java", "Android Studio"],
             image: "https://via.placeholder.com/400x250?text=Weather+Dashboard",
-            githubUrl: "https://github.com/yourusername/weather-dashboard",
-            liveUrl: "https://your-weather-demo.com",
+            githubUrl: "https://github.com/Ayprusss/Health-Management-App",
+            liveUrl: null,
             featured: false
         },
         {
             id: 4,
             title: "Portfolio Website",
-            description: "A modern, responsive portfolio website built with React. Features smooth animations, dynamic content, and optimized performance. The site you're currently viewing!",
-            technologies: ["React", "CSS3", "JavaScript", "React Router"],
-            image: "https://via.placeholder.com/400x250?text=Portfolio+Website",
-            githubUrl: "https://github.com/yourusername/portfolio",
-            liveUrl: "https://your-portfolio.com",
-            featured: false
+            description: "The site you're currently viewing!",
+            technologies: ["React", "CSS3", "JavaScript", "HTML"],
+            image: photo3,
+            githubUrl: "https://github.com/Ayprusss/AnthonyLe",
+            liveUrl: "https://ayprusss.dev",
+            featured: true
         }
     ];
 
@@ -109,17 +113,24 @@ function ProjectsComponent({ shouldAnimate = false }) {
                                     <span>GitHub</span>
                                 </a>
                             )}
-                            {project.liveUrl && (
-                                <a 
-                                    href={project.liveUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="project-link live-link"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
+                            <div 
+                                className={`project-link live-link ${!project.liveUrl ? 'crossed-out' : ''}`}
+                                onClick={project.liveUrl ? (e) => e.stopPropagation() : undefined}
+                            >
+                                {project.liveUrl ? (
+                                    <a 
+                                        href={project.liveUrl} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="live-demo-link"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <span>Live Demo</span>
+                                    </a>
+                                ) : (
                                     <span>Live Demo</span>
-                                </a>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
