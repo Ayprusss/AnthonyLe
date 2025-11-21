@@ -4,7 +4,7 @@ import "98.css";
 
 import StartButton from "../StartButton/StartButton.js";
 
-function Taskbar({ mainWebsiteOpen, mainWebsiteVisible, onMainWebsiteRestore }) {
+function Taskbar({ mainWebsiteOpen, mainWebsiteVisible, onMainWebsiteRestore, onMainWebsiteOpen }) {
     const [time, setTime] = useState('');
 
     useEffect(() => {
@@ -32,7 +32,7 @@ function Taskbar({ mainWebsiteOpen, mainWebsiteVisible, onMainWebsiteRestore }) 
     return(
         <div className="taskbar windows-box-shadow">
             <div className="taskbar-left">
-                <StartButton />
+                <StartButton onMainWebsiteOpen={onMainWebsiteOpen} />
                 {mainWebsiteOpen && (
                     <button 
                         className={`taskbar-item explorer-button ${mainWebsiteVisible ? 'active' : ''}`}
