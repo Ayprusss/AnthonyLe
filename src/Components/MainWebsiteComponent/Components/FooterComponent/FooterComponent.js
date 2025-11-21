@@ -1,6 +1,5 @@
 import React from "react";
 import "./FooterComponent.css";
-
 function FooterComponent() {
     const currentYear = new Date().getFullYear();
 
@@ -20,7 +19,7 @@ function FooterComponent() {
                     <div className="footer-right">
                         <div className="social-icons">
                             <a 
-                                href="https://linkedin.com/in/anthony-le-ayprusss" 
+                                href="https://www.linkedin.com/in/anthonykhle/" 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
                                 className="social-icon linkedin"
