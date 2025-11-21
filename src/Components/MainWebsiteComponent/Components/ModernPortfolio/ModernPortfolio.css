@@ -44,14 +44,14 @@
 
 /* Hero section takes available container height */
 .hero-section {
-    min-height: calc(100vh - 100px); /* Account for header space */
+    min-height: calc(100vh - 80px);
     height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 100px 2rem 2rem 2rem; /* Top padding for header, sides for spacing */
+    padding: 6rem 2rem 2rem 2rem;
     box-sizing: border-box;
     position: relative;
 }
@@ -162,8 +162,8 @@
     }
     
     .hero-section {
-        min-height: calc(100vh - 80px); /* Less header space on mobile */
-        padding: 80px 1rem 1rem 1rem; /* Reduced padding for mobile */
+        min-height: calc(100vh - 60px);
+        padding: 5rem 1rem 2rem 1rem;
     }
     
     .hero-section h1 {
