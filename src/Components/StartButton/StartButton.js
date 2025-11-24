@@ -9,9 +9,9 @@ import ResumeWindow from "../ResumeWindow/ResumeWindow";
 import ExperienceComponent from "../ExperienceComponent/ExperienceComponent";
 import ContactComponent from "../ContactComponent/ContactComponent";
 
-function StartButton() {
+function StartButton({ onMainWebsiteOpen }) {
     const [isStartMenuVisible, setIsStartMenuVisible] = useState(false);
-    const [isPhotoVisible, setPhotoVisible] = useState(true);
+    const [isPhotoVisible, setPhotoVisible] = useState(false);
     const [isAboutVisible, setAboutVisible] = useState(false);
     const [isResumeVisible, setResumeVisible] = useState(false);
     const [isContactVisible, setContactVisible] = useState(false);
@@ -60,6 +60,8 @@ function StartButton() {
                     setResumeVisible={handleResumeVisibility}
                     setExperienceVisible={handleExperienceVisibility}
                     setContactVisible={handleContactVisibility}
+                    onMainWebsiteOpen={onMainWebsiteOpen}
+                    closeStartMenu={() => setIsStartMenuVisible(false)}
                 />
             )}
             {isPhotoVisible && (

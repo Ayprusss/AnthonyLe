@@ -3,7 +3,8 @@ import "./Taskbar.css";
 import "98.css";
 
 import StartButton from "../StartButton/StartButton.js";
-function Taskbar() {
+
+function Taskbar({ mainWebsiteOpen, mainWebsiteVisible, onMainWebsiteRestore, onMainWebsiteOpen }) {
     const [time, setTime] = useState('');
 
     useEffect(() => {
@@ -13,24 +14,41 @@ function Taskbar() {
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const seconds = now.getSeconds().toString().padStart(2, '0');
             const currentTime = `${hours}:${minutes}:${seconds}`;
-            console.log("current time: ", currentTime);
             setTime(currentTime);
         };  
-        
 
         updateTime();
         const intervalId = setInterval(updateTime, 1000);
 
-
         return () => clearInterval(intervalId);
     }, []);
-    
 
-    //TODO: either create new Start-button component in Components folder or find way to make this shit work lolol.
+    const handleExplorerClick = () => {
+        if (!mainWebsiteVisible && onMainWebsiteRestore) {
+            onMainWebsiteRestore();
+        }
+    };
+
     return(
         <div className="taskbar windows-box-shadow">
             <div className="taskbar-left">
-                <StartButton />
+                <StartButton onMainWebsiteOpen={onMainWebsiteOpen} />
+                {mainWebsiteOpen && (
+                    <button 
+                        className={`taskbar-item explorer-button ${mainWebsiteVisible ? 'active' : ''}`}
+                        onClick={handleExplorerClick}
+                        title="Internet Explorer"
+                    >
+                        <div className="taskbar-icon">
+                            <img 
+                                src="/windows-explorer.png" 
+                                alt="Explorer" 
+                                className="explorer-icon"
+                            />
+                        </div>
+                        <span className="taskbar-text">Internet Explorer</span>
+                    </button>
+                )}
             </div>  
             <div className="taskbar-center">
             </div>
@@ -44,7 +62,5 @@ function Taskbar() {
         </div>
     );
 }
-
-
 
 export default Taskbar;
