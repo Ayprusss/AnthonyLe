@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { Frown } from 'lucide-react';
 import './Projects.css';
 
-```javascript
-import { /* ExternalLink, Github, */ Frown } from 'lucide-react';
-```
+///javascript
+///import { /* ExternalLink, Github, */ Frown } from 'lucide-react';
+
 // const projects = [
 // ];
 
