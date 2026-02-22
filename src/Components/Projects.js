@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Github, Frown } from 'lucide-react';
+import { Frown } from 'lucide-react';
 import './Projects.css';
 
+```javascript
+import { /* ExternalLink, Github, */ Frown } from 'lucide-react';
+```
 // const projects = [
 // ];
 
