@@ -1,17 +1,1 @@
-.App {
-  text-align: center;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-}
 
-
-body {
-  /* background-color: #008080; */
-  background-image: url("desktop-windows-97.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: none;
-  margin: 0;
-  overflow: hidden;
-  z-index: 0;
-}

@@ -1,41 +1,25 @@
-.home {
-    height: 100%;
-    width: 100%;
+.home-container {
     display: flex;
-    justify-content: center;
     flex-direction: column;
     min-height: 100vh;
-    margin: 0;
-    -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-
-.home .taskbar {
-  margin-top: auto;
+main {
+    flex-grow: 1;
 }
 
-.home-container {
-  display: flex;
-  height: 100%;
-  width: 100%;
+main>div {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
-.home-right {
-   /* outline: 2px solid red; */
-   width: 50%;
-   height: 695px;
-   align-items: center;
-   display: flex;
-   margin-top: 0;
+#hero {
+    min-height: 100vh;
+    padding-top: 5rem;
+    /* Space for fixed navbar */
 }
-
-
-.home-left {
-   /*outline: 2px solid green;*/ 
-   width: 50%;
-   height: 695px;
-   display: flex;
-   margin-top: 0;
-}
-

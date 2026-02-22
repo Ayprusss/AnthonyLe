@@ -1,0 +1,78 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5rem;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    background-color: transparent;
+}
+
+.navbar.scrolled {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo-img {
+    height: 2.5rem;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-menu li {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.nav-menu a {
+    cursor: pointer;
+    transition: color 0.3s ease;
+    padding-bottom: 4px;
+}
+
+.nav-menu a:hover {
+    color: var(--text-main);
+}
+
+.nav-menu a.active {
+    color: var(--text-main);
+    border-bottom: 2px solid var(--accent);
+}
+
+@media (max-width: 768px) {
+    .nav-menu {
+        display: none;
+        /* Hide on mobile for simplicity in MVP, could add hamburger */
+    }
+}
