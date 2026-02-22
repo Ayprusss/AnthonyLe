@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Twitter } from 'lucide-react';
+import { Github, Linkedin } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import './Contact.css';
 
@@ -66,8 +66,7 @@ const Contact = () => {
 
                 <div className="social-links">
                     <a href="https://github.com/Ayprusss" target="_blank" rel="noreferrer" aria-label="GitHub"><Github size={24} /></a>
-                    <a href="https://linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
-                    <a href="https://twitter.com/" target="_blank" rel="noreferrer" aria-label="Twitter"><Twitter size={24} /></a>
+                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
                 </div>
             </motion.div>
 

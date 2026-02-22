@@ -4,16 +4,24 @@ import './Skills.css';
 
 const skillCategories = [
     {
+        title: "Languages",
+        skills: ["Python", "Java", "C#", "C++", "JavaScript", "TypeScript", "HTML", "CSS", "SQL", "Prolog", "Go", "XML", "Bash"]
+    },
+    {
         title: "Frontend",
-        skills: ["React", "Next.js", "TypeScript", "JavaScript", "HTML5", "CSS3", "TailwindCSS", "Framer Motion"]
+        skills: ["React.JS", "React Native", "Angular", "TailwindCSS", "React Redux", "Redux Saga", "MudBlazor", "Next.js", "Framer Motion"]
     },
     {
-        title: "Backend",
-        skills: ["Node.js", "Python", "SQL", "PostgreSQL", "REST APIs"]
+        title: "Backend & API",
+        skills: ["Node.Js", "Express.js", "Springboot", "REST API", "MVC", "Entity Framework", "Axios", "PostgreSQL"]
     },
     {
-        title: "Tools & Cloud",
-        skills: ["Git", "GitHub", "AWS", "Vercel", "Docker", "Postman"]
+        title: "Tools & DevOps",
+        skills: ["Git", "GitHub", "Docker", "Kubernetes", "Jenkins", "CI/CD Development", "Agile", "JIRA", "Jasmine", "Karma", "Maven"]
+    },
+    {
+        title: "IDEs, OS & Cloud",
+        skills: ["VsCode", "Visual Studio", "Cursor", "CoPilot", "Android Studio", "Notepad++", "Eclipse", "Linux", "Operating Systems", "AWS", "Microsoft Azure", "Firebase", "Postman", "Google Claude CLI"]
     },
     {
         title: "Design",
