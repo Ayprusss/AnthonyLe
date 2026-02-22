@@ -1,0 +1,76 @@
+.experience-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.experience-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -1.75rem;
+    top: 0.5rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    border: 4px solid var(--bg-color);
+    box-sizing: content-box;
+    transition: background-color 0.3s;
+}
+
+.timeline-item:hover .timeline-dot {
+    background-color: var(--text-main);
+}
+
+.timeline-content {
+    padding-bottom: 1rem;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.role-title {
+    font-size: 1.25rem;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.period {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+.company-name {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin: 0 0 1rem 0;
+}
+
+.role-description {
+    margin: 0;
+    max-width: 700px;
+}
