@@ -65,9 +65,9 @@ const Contact = () => {
                 </form>
 
                 <div className="social-links">
-                    <a href="#" aria-label="GitHub"><Github size={24} /></a>
-                    <a href="#" aria-label="LinkedIn"><Linkedin size={24} /></a>
-                    <a href="#" aria-label="Twitter"><Twitter size={24} /></a>
+                    <a href="https://github.com/Ayprusss" target="_blank" rel="noreferrer" aria-label="GitHub"><Github size={24} /></a>
+                    <a href="https://linkedin.com/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
+                    <a href="https://twitter.com/" target="_blank" rel="noreferrer" aria-label="Twitter"><Twitter size={24} /></a>
                 </div>
             </motion.div>
 
