@@ -1,0 +1,95 @@
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 500px;
+    margin-bottom: 3rem;
+    width: 100%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.75rem 0;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    outline: none;
+    border-bottom-color: var(--text-main);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.contact-form .btn-primary {
+    align-self: flex-start;
+    margin-top: 1rem;
+}
+
+.contact-form .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.form-message {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.form-message.success {
+    color: #4ade80;
+    /* Subtle green for success */
+}
+
+.form-message.error {
+    color: #f87171;
+    /* Subtle red for error */
+}
+
+.social-links {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+}
+
+.social-links a {
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.social-links a:hover {
+    color: var(--text-main);
+    transform: translateY(-2px);
+}
+
+.footer {
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.footer p {
+    font-size: 0.85rem;
+    font-family: monospace;
+}
