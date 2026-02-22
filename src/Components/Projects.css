@@ -9,16 +9,16 @@
     border: 1px solid var(--border-color);
     padding: 2rem;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.01);
+    background: var(--bg-color);
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
 }
 
 .project-card:hover {
-    border-color: var(--text-muted);
+    border-color: var(--text-main);
     transform: translateY(-4px);
-    background: rgba(255, 255, 255, 0.03);
+    box-shadow: 0 4px 12px rgba(var(--bg-rgb), 0.1);
 }
 
 .project-header {

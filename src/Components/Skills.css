@@ -58,7 +58,7 @@
 
 .skill-pill:hover {
     border-color: var(--text-main);
-    color: var(--text-main);
+    color: var(--bg-color);
     transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--text-main);
 }
