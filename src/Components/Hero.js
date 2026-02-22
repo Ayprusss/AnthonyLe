@@ -1,8 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import { Link } from 'react-scroll';
 import './Hero.css';
+
+const TypewriterText = ({ text }) => {
+    const [currentText, setCurrentText] = useState('');
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        if (currentIndex < text.length) {
+            const timeout = setTimeout(() => {
+                setCurrentText(prevText => prevText + text[currentIndex]);
+                setCurrentIndex(prevIndex => prevIndex + 1);
+            }, 150);
+            return () => clearTimeout(timeout);
+        }
+    }, [currentIndex, text]);
+
+    return (
+        <span style={{ display: 'inline-block' }}>
+            {currentText}
+            <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                style={{ marginLeft: '2px', fontWeight: 'normal', color: 'var(--text-main)' }}
+            >
+                |
+            </motion.span>
+        </span>
+    );
+};
 
 const Hero = () => {
     return (
@@ -13,7 +41,7 @@ const Hero = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
             >
                 <h1 className="hero-title">
-                    Hi, I'm Anthony. <br />
+                    Hi, I'm <TypewriterText text="Anthony." /> <br />
                     <span className="text-muted">4th Year Comp Sci @ uOttawa.</span>
                 </h1>
                 <p className="hero-subtitle">
