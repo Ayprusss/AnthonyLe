@@ -21,7 +21,7 @@
     top: 0;
     bottom: 0;
     left: 50%;
-    width: min(150vw, 2200px);
+    width: max(100vw, calc(100% + clamp(18rem, 30vw, 44rem)));
     height: 100%;
     transform: translateX(-50%);
     z-index: 0;

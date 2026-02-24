@@ -1,11 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
-const BASE_SPACING = 24;
-const FIELD_WIDTH_RATIO = 0.98;
-const FIELD_HEIGHT_RATIO = 0.92;
 const RIPPLE_SPEED = 0.0082;
 const RIPPLE_FREQUENCY = 0.07;
-const BASE_WAVE_AMPLITUDE = 12.8;
 const PARTICLE_SIZE_MULTIPLIER = 1.15;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -36,30 +32,34 @@ const HeroRippleBackground = () => {
     let fieldHalfWidth = 0;
     let fieldHalfHeight = 0;
     let maxDistance = 1;
+    let spacing = 24;
+    let waveAmplitude = 12.8;
+    let drawScale = 1;
 
-    const getSpacing = () => {
-      if (width < 520) {
-        return 30;
-      }
-      if (width < 900) {
-        return 27;
-      }
-      return BASE_SPACING;
+    const computeDynamicConfig = () => {
+      const minDim = Math.min(width, height);
+      const aspectRatio = width / Math.max(height, 1);
+      const widthRatio = clamp(0.88 + (aspectRatio - 1) * 0.08, 0.9, 1.12);
+      const heightRatio = clamp(0.86 + (1 / Math.max(aspectRatio, 0.01) - 0.6) * 0.07, 0.84, 0.98);
+
+      fieldHalfWidth = width * widthRatio * 0.5;
+      fieldHalfHeight = height * heightRatio * 0.5;
+      maxDistance = Math.max(Math.hypot(fieldHalfWidth, fieldHalfHeight), 1);
+      spacing = clamp(minDim * 0.03, 18, 30);
+      waveAmplitude = clamp(minDim * 0.016, 8, 18);
+      drawScale = clamp(minDim / 950, 0.9, 1.28);
     };
 
     const createPoints = () => {
       points.length = 0;
-      const spacing = getSpacing();
-      fieldHalfWidth = width * FIELD_WIDTH_RATIO * 0.5;
-      fieldHalfHeight = height * FIELD_HEIGHT_RATIO * 0.5;
-      maxDistance = Math.max(Math.hypot(fieldHalfWidth, fieldHalfHeight), 1);
+      computeDynamicConfig();
 
       for (let y = -fieldHalfHeight; y <= fieldHalfHeight; y += spacing) {
         for (let x = -fieldHalfWidth; x <= fieldHalfWidth; x += spacing) {
           const distanceFromCenter = Math.hypot(x, y);
           const distanceFactor = clamp(distanceFromCenter / maxDistance, 0, 1);
           const angle = Math.atan2(y, x);
-          const size = (1 + distanceFactor * 3) * PARTICLE_SIZE_MULTIPLIER;
+          const size = (1 + distanceFactor * 3) * PARTICLE_SIZE_MULTIPLIER * drawScale;
           points.push({ x, y, angle, size, distanceFromCenter });
         }
       }
@@ -104,7 +104,7 @@ const HeroRippleBackground = () => {
 
       for (const point of points) {
         const centerNormalized = point.distanceFromCenter / maxDistance;
-        const offset = Math.sin(point.distanceFromCenter * RIPPLE_FREQUENCY - timeWave) * BASE_WAVE_AMPLITUDE;
+        const offset = Math.sin(point.distanceFromCenter * RIPPLE_FREQUENCY - timeWave) * waveAmplitude;
         const dx = Math.cos(point.angle) * offset;
         const dy = Math.sin(point.angle) * offset;
         const alpha = 0.18 + centerNormalized * 0.44;
@@ -156,6 +156,13 @@ const HeroRippleBackground = () => {
       animationFrameId = window.requestAnimationFrame(drawFrame);
     };
 
+    const resizeObserver = new ResizeObserver(() => {
+      resize();
+      if (reducedMotionQuery.matches) {
+        drawReducedMotion();
+      }
+    });
+
     resize();
     if (reducedMotionQuery.matches) {
       drawReducedMotion();
@@ -166,6 +173,7 @@ const HeroRippleBackground = () => {
     document.addEventListener('visibilitychange', onVisibilityChange);
     window.addEventListener('resize', onResize);
     reducedMotionQuery.addEventListener('change', onMotionPreferenceChange);
+    resizeObserver.observe(canvas);
 
     return () => {
       isRunning = false;
@@ -175,6 +183,7 @@ const HeroRippleBackground = () => {
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('resize', onResize);
       reducedMotionQuery.removeEventListener('change', onMotionPreferenceChange);
+      resizeObserver.disconnect();
     };
   }, []);
 
