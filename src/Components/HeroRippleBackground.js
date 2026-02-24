@@ -59,7 +59,7 @@ const HeroRippleBackground = () => {
           const distanceFromCenter = Math.hypot(x, y);
           const distanceFactor = clamp(distanceFromCenter / maxDistance, 0, 1);
           const angle = Math.atan2(y, x);
-          const size = (1 + distanceFactor * 3) * PARTICLE_SIZE_MULTIPLIER * drawScale;
+          const size = (1 + distanceFactor * 5) * PARTICLE_SIZE_MULTIPLIER * drawScale;
           points.push({ x, y, angle, size, distanceFromCenter });
         }
       }
