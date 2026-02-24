@@ -3,9 +3,34 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
+    overflow: visible;
     height: 100%;
     flex-grow: 1;
     width: 100%;
+}
+
+.hero-ripple-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.hero-ripple-canvas {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: min(150vw, 2200px);
+    height: 100%;
+    transform: translateX(-50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
 }
 
 .hero-title {
@@ -65,9 +90,10 @@
 
 .scroll-indicator {
     position: absolute;
-    bottom: -1rem;
+    bottom: 0.75rem;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 1;
     cursor: pointer;
     color: var(--text-muted);
     transition: color 0.3s;
@@ -99,3 +125,10 @@
         transform: translateY(-5px);
     }
 }
+
+@media (max-width: 768px) {
+    .hero-actions {
+        flex-wrap: wrap;
+    }
+}
+
