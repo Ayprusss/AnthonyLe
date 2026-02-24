@@ -21,5 +21,8 @@ main>div {
 #hero {
     min-height: 100vh;
     padding-top: 5rem;
+    max-width: none;
+    width: 100%;
+    margin: 0;
     /* Space for fixed navbar */
 }
