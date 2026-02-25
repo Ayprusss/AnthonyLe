@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
 import { Link } from 'react-scroll';
 import './Hero.css';
 import HeroRippleBackground from './HeroRippleBackground';
@@ -75,9 +74,6 @@ const Hero = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.5, duration: 1 }}
             >
-                <Link to="skills" smooth={true} duration={500}>
-                    <ArrowDown className="bounce" size={24} />
-                </Link>
             </motion.div>
         </section>
     );

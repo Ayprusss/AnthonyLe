@@ -105,9 +105,6 @@
     color: var(--text-main);
 }
 
-.bounce {
-    animation: bounce 2s infinite;
-}
 
 @keyframes bounce {
 
