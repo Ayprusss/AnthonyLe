@@ -1,58 +1,109 @@
 :root {
-    /* Default base theme variables if no data-theme is matched (Hero/Black) */
     --bg-color: #000000;
     --text-main: #ffffff;
     --text-muted: #a1a1aa;
     --accent: #ffffff;
     --border-color: #27272a;
     --bg-rgb: 0, 0, 0;
+    --ripple-rgb: 255, 255, 255;
 }
 
-[data-theme="hero"] {
+[data-mode="dark"][data-section="hero"] {
     --bg-color: #000000;
     --text-main: #ffffff;
     --text-muted: #a1a1aa;
     --accent: #ffffff;
     --border-color: #27272a;
     --bg-rgb: 0, 0, 0;
+    --ripple-rgb: 255, 255, 255;
 }
 
-[data-theme="skills"] {
-    /* Dark gray */
+[data-mode="dark"][data-section="skills"] {
     --bg-color: #3f3f46;
     --text-main: #ffffff;
     --text-muted: #d4d4d8;
     --accent: #ffffff;
     --border-color: #52525b;
     --bg-rgb: 63, 63, 70;
+    --ripple-rgb: 255, 255, 255;
 }
 
-[data-theme="projects"] {
-    /* Medium gray */
+[data-mode="dark"][data-section="projects"] {
     --bg-color: #a1a1aa;
     --text-main: #18181b;
     --text-muted: #3f3f46;
     --accent: #18181b;
     --border-color: #71717a;
     --bg-rgb: 161, 161, 170;
+    --ripple-rgb: 24, 24, 27;
 }
 
-[data-theme="experience"] {
-    /* Light gray */
+[data-mode="dark"][data-section="experience"] {
     --bg-color: #e4e4e7;
     --text-main: #18181b;
     --text-muted: #52525b;
     --accent: #18181b;
     --border-color: #d4d4d8;
     --bg-rgb: 228, 228, 231;
+    --ripple-rgb: 24, 24, 27;
 }
 
-[data-theme="contact"] {
-    /* White */
+[data-mode="dark"][data-section="contact"] {
     --bg-color: #ffffff;
     --text-main: #000000;
     --text-muted: #52525b;
     --accent: #000000;
     --border-color: #e4e4e7;
     --bg-rgb: 255, 255, 255;
+    --ripple-rgb: 0, 0, 0;
+}
+
+[data-mode="light"][data-section="hero"] {
+    --bg-color: #ffffff;
+    --text-main: #000000;
+    --text-muted: #52525b;
+    --accent: #000000;
+    --border-color: #e4e4e7;
+    --bg-rgb: 255, 255, 255;
+    --ripple-rgb: 0, 0, 0;
+}
+
+[data-mode="light"][data-section="skills"] {
+    --bg-color: #e4e4e7;
+    --text-main: #18181b;
+    --text-muted: #52525b;
+    --accent: #18181b;
+    --border-color: #d4d4d8;
+    --bg-rgb: 228, 228, 231;
+    --ripple-rgb: 24, 24, 27;
+}
+
+[data-mode="light"][data-section="projects"] {
+    --bg-color: #a1a1aa;
+    --text-main: #18181b;
+    --text-muted: #3f3f46;
+    --accent: #18181b;
+    --border-color: #71717a;
+    --bg-rgb: 161, 161, 170;
+    --ripple-rgb: 24, 24, 27;
+}
+
+[data-mode="light"][data-section="experience"] {
+    --bg-color: #3f3f46;
+    --text-main: #ffffff;
+    --text-muted: #d4d4d8;
+    --accent: #ffffff;
+    --border-color: #52525b;
+    --bg-rgb: 63, 63, 70;
+    --ripple-rgb: 255, 255, 255;
+}
+
+[data-mode="light"][data-section="contact"] {
+    --bg-color: #000000;
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    --accent: #ffffff;
+    --border-color: #27272a;
+    --bg-rgb: 0, 0, 0;
+    --ripple-rgb: 255, 255, 255;
 }
