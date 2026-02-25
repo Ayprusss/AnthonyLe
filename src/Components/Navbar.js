@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-scroll';
+import { Moon, Sun } from 'lucide-react';
 import './Navbar.css';
 
-const Navbar = () => {
+const Navbar = ({ mode, onToggleMode }) => {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -15,6 +16,18 @@ const Navbar = () => {
 
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+            <button
+                type="button"
+                className={`theme-toggle ${mode === 'light' ? 'light' : 'dark'}`}
+                onClick={onToggleMode}
+                aria-label={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
+            >
+                <span className="theme-toggle-track">
+                    <span className="theme-toggle-thumb">
+                        {mode === 'dark' ? <Moon size={16} strokeWidth={2.2} /> : <Sun size={16} strokeWidth={2.2} />}
+                    </span>
+                </span>
+            </button>
             <div className="nav-container">
                 <Link to="hero" spy={true} smooth={true} duration={500} className="nav-logo">
                     <img src="/ppp-logo-white.png" alt="Logo" className="nav-logo-img" />
