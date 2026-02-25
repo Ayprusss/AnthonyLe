@@ -9,6 +9,62 @@
     background-color: transparent;
 }
 
+.theme-toggle {
+    position: fixed;
+    top: 2.5rem;
+    right: 1rem;
+    transform: translateY(-50%);
+    z-index: 1100;
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+    line-height: 0;
+}
+
+.theme-toggle-track {
+    width: 102px;
+    height: 54px;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(var(--bg-rgb), 0.14);
+    border: 2px solid rgba(var(--bg-rgb), 0.23);
+    backdrop-filter: blur(4px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+.theme-toggle-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-main);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
+    transform: translateX(0);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), color 0.35s ease, background-color 0.35s ease, border-color 0.35s ease;
+}
+
+.theme-toggle.light .theme-toggle-thumb {
+    transform: translateX(46px);
+}
+
+.theme-toggle:hover .theme-toggle-track {
+    border-color: rgba(var(--bg-rgb), 0.34);
+}
+
+.theme-toggle:focus-visible .theme-toggle-track {
+    outline: 2px solid var(--text-main);
+    outline-offset: 3px;
+}
+
 .navbar.scrolled {
     background-color: rgba(var(--bg-rgb), 0.8);
     backdrop-filter: blur(10px);
@@ -71,6 +127,25 @@
 }
 
 @media (max-width: 768px) {
+    .theme-toggle {
+        top: 2.5rem;
+        right: 0.75rem;
+    }
+
+    .theme-toggle-track {
+        width: 92px;
+        height: 48px;
+    }
+
+    .theme-toggle-thumb {
+        width: 38px;
+        height: 38px;
+    }
+
+    .theme-toggle.light .theme-toggle-thumb {
+        transform: translateX(42px);
+    }
+
     .nav-menu {
         display: none;
         /* Hide on mobile for simplicity in MVP, could add hamburger */
