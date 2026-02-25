@@ -35,6 +35,18 @@ const HeroRippleBackground = () => {
     let spacing = 24;
     let waveAmplitude = 12.8;
     let drawScale = 1;
+    let rippleRgb = '255, 255, 255';
+
+    const updateRippleColor = () => {
+      const nextRippleRgb = window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue('--ripple-rgb')
+        .trim();
+
+      if (nextRippleRgb) {
+        rippleRgb = nextRippleRgb;
+      }
+    };
 
     const computeDynamicConfig = () => {
       const minDim = Math.min(width, height);
@@ -89,7 +101,7 @@ const HeroRippleBackground = () => {
         const particleX = centerX + point.x;
         const particleY = centerY + point.y;
         const alpha = 0.2 + (point.distanceFromCenter / maxDistance) * 0.35;
-        context.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(3)})`;
+        context.fillStyle = `rgba(${rippleRgb}, ${alpha.toFixed(3)})`;
         context.fillRect(particleX, particleY, point.size * 1.4, point.size * 0.7);
       }
     };
@@ -113,7 +125,7 @@ const HeroRippleBackground = () => {
         context.save();
         context.translate(centerX + point.x + dx, centerY + point.y + dy);
         context.rotate(point.angle);
-        context.fillStyle = `rgba(255, 255, 255, ${alpha.toFixed(3)})`;
+        context.fillStyle = `rgba(${rippleRgb}, ${alpha.toFixed(3)})`;
         context.fillRect(-point.size * 0.5, -point.size * 0.22, point.size * stretch, point.size * 0.44);
         context.restore();
       }
@@ -162,8 +174,15 @@ const HeroRippleBackground = () => {
         drawReducedMotion();
       }
     });
+    const themeObserver = new MutationObserver(() => {
+      updateRippleColor();
+      if (reducedMotionQuery.matches) {
+        drawReducedMotion();
+      }
+    });
 
     resize();
+    updateRippleColor();
     if (reducedMotionQuery.matches) {
       drawReducedMotion();
     } else {
@@ -174,6 +193,10 @@ const HeroRippleBackground = () => {
     window.addEventListener('resize', onResize);
     reducedMotionQuery.addEventListener('change', onMotionPreferenceChange);
     resizeObserver.observe(canvas);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-mode', 'data-section'],
+    });
 
     return () => {
       isRunning = false;
@@ -184,6 +207,7 @@ const HeroRippleBackground = () => {
       window.removeEventListener('resize', onResize);
       reducedMotionQuery.removeEventListener('change', onMotionPreferenceChange);
       resizeObserver.disconnect();
+      themeObserver.disconnect();
     };
   }, []);
 
