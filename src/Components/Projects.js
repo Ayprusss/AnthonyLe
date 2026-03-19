@@ -1,13 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Frown } from 'lucide-react';
+import { Github } from 'lucide-react';
 import './Projects.css';
 
-///javascript
-///import { /* ExternalLink, Github, */ Frown } from 'lucide-react';
-
-// const projects = [
-// ];
+const projects = [
+    {
+        title: 'dejavu',
+        description:
+            'A full webstore project mocking "Vuja De" — a complete e-commerce experience with a dedicated backend and frontend, featuring product browsing, and a modern storefront UI.',
+        tech: ['JavaScript', 'CSS', 'HTML', 'Express', 'Supabase', 'Vite.js', 'Stripe'],
+        github: 'https://github.com/Ayprusss/dejavu',
+    },
+    {
+        title: '\"PPPTAILORINGCOURIER\"',
+        description:
+            'A UI-focused webstore mock built for SEG 3125, featuring a tailoring courier service interface with an integrated chatbot, responsive design, and a polished user experience.',
+        tech: ['JavaScript', 'CSS', 'HTML', 'React'],
+        github: 'https://github.com/Ayprusss/PPPTAILORINGCOURIER',
+    },
+];
 
 const Projects = () => {
     return (
@@ -22,7 +33,7 @@ const Projects = () => {
                 <div className="section-divider"></div>
             </motion.div>
 
-            {/* <div className="projects-grid">
+            <div className="projects-grid">
                 {projects.map((project, idx) => (
                     <motion.div
                         className="project-card"
@@ -35,8 +46,9 @@ const Projects = () => {
                         <div className="project-header">
                             <h3 className="project-title">{project.title}</h3>
                             <div className="project-links">
-                                <a href={project.github} target="_blank" rel="noreferrer"><Github size={20} /></a>
-                                <a href={project.live} target="_blank" rel="noreferrer"><ExternalLink size={20} /></a>
+                                <a href={project.github} target="_blank" rel="noreferrer">
+                                    <Github size={20} />
+                                </a>
                             </div>
                         </div>
                         <p className="project-description">{project.description}</p>
@@ -47,27 +59,7 @@ const Projects = () => {
                         </div>
                     </motion.div>
                 ))}
-            </div> */}
-
-            <motion.div
-                className="projects-empty"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '6rem 0',
-                    color: 'var(--text-muted)',
-                    gap: '1rem'
-                }}
-            >
-                <Frown size={48} strokeWidth={1.5} />
-                <p style={{ fontFamily: 'monospace', fontSize: '1rem' }}>projects to come.</p>
-            </motion.div>
+            </div>
         </section>
     );
 };
