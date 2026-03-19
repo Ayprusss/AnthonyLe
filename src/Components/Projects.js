@@ -12,7 +12,7 @@ const projects = [
         github: 'https://github.com/Ayprusss/dejavu',
     },
     {
-        title: '\"PPPTAILORINGCOURIER\"',
+        title: '"PPPTAILORINGCOURIER"',
         description:
             'A UI-focused webstore mock built for SEG 3125, featuring a tailoring courier service interface with an integrated chatbot, responsive design, and a polished user experience.',
         tech: ['JavaScript', 'CSS', 'HTML', 'React'],
