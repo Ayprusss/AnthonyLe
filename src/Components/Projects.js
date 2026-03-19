@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Github } from 'lucide-react';
+import { Github, ExternalLink } from 'lucide-react';
 import './Projects.css';
 
 const projects = [
@@ -10,6 +10,7 @@ const projects = [
             'A full webstore project mocking "Vuja De" — a complete e-commerce experience with a dedicated backend and frontend, featuring product browsing, and a modern storefront UI.',
         tech: ['JavaScript', 'CSS', 'HTML', 'Express', 'Supabase', 'Vite.js', 'Stripe'],
         github: 'https://github.com/Ayprusss/dejavu',
+        live: 'https://dejavu-ten.vercel.app/'
     },
     {
         title: '"PPPTAILORINGCOURIER"',
@@ -17,6 +18,7 @@ const projects = [
             'A UI-focused webstore mock built for SEG 3125, featuring a tailoring courier service interface with an integrated chatbot, responsive design, and a polished user experience.',
         tech: ['JavaScript', 'CSS', 'HTML', 'React'],
         github: 'https://github.com/Ayprusss/PPPTAILORINGCOURIER',
+        live: 'https://ppptailoringcourier.vercel.app/',
     },
 ];
 
@@ -48,6 +50,9 @@ const Projects = () => {
                             <div className="project-links">
                                 <a href={project.github} target="_blank" rel="noreferrer">
                                     <Github size={20} />
+                                </a>
+                                <a href={project.live} target="_blank" rel="noreferrer">
+                                    <ExternalLink size={20} />
                                 </a>
                             </div>
                         </div>
