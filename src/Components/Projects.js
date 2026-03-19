@@ -10,7 +10,7 @@ const projects = [
             'A full webstore project mocking "Vuja De" — a complete e-commerce experience with a dedicated backend and frontend, featuring product browsing, and a modern storefront UI.',
         tech: ['JavaScript', 'CSS', 'HTML', 'Express', 'Supabase', 'Vite.js', 'Stripe'],
         github: 'https://github.com/Ayprusss/dejavu',
-        live: 'https://dejavu-ten.vercel.app/'
+        live: 'https://dejavustudio.xyz/'
     },
     {
         title: '"PPPTAILORINGCOURIER"',
