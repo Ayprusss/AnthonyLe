@@ -11,9 +11,8 @@
 
 .theme-toggle {
     position: fixed;
-    top: 2.5rem;
-    right: 1rem;
-    transform: translateY(-50%);
+    bottom: 2rem;
+    right: 2rem;
     z-index: 1100;
     border: none;
     background: transparent;
@@ -128,8 +127,8 @@
 
 @media (max-width: 768px) {
     .theme-toggle {
-        top: 2.5rem;
-        right: 0.75rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
     }
 
     .theme-toggle-track {
