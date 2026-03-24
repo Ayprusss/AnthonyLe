@@ -15,7 +15,7 @@ const Navbar = ({ mode, onToggleMode }) => {
     }, []);
 
     return (
-        <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+        <>
             <button
                 type="button"
                 className={`theme-toggle ${mode === 'light' ? 'light' : 'dark'}`}
@@ -28,18 +28,20 @@ const Navbar = ({ mode, onToggleMode }) => {
                     </span>
                 </span>
             </button>
-            <div className="nav-container">
-                <Link to="hero" spy={true} smooth={true} duration={500} className="nav-logo">
-                    <img src="/ppp-logo-white.png" alt="Logo" className="nav-logo-img" />
-                </Link>
-                <ul className="nav-menu">
-                    <li><Link to="skills" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Skills</Link></li>
-                    <li><Link to="projects" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Projects</Link></li>
-                    <li><Link to="experience" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Experience</Link></li>
-                    <li><Link to="contact" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Contact</Link></li>
-                </ul>
-            </div>
-        </nav>
+            <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+                <div className="nav-container">
+                    <Link to="hero" spy={true} smooth={true} duration={500} className="nav-logo">
+                        <img src="/ppp-logo-white.png" alt="Logo" className="nav-logo-img" />
+                    </Link>
+                    <ul className="nav-menu">
+                        <li><Link to="skills" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Skills</Link></li>
+                        <li><Link to="projects" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Projects</Link></li>
+                        <li><Link to="experience" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Experience</Link></li>
+                        <li><Link to="contact" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Contact</Link></li>
+                    </ul>
+                </div>
+            </nav>
+        </>
     );
 };
 
