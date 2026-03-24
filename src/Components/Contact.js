@@ -41,12 +41,13 @@ const Contact = () => {
                 <h2 className="section-title">Contact.</h2>
                 <div className="section-divider"></div>
                 <p className="section-subtitle">
-                    I'm currently open to new opportunities. Send a message and I will get back to you ASAP.
+                    I'm currently open to new opportunities. Send a message and I will get back to you ASAP.<br />
+                    You can also reach me directly at <a href="mailto:anthonykhle@gmail.com" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 'bold' }}>anthonykhle@gmail.com</a>.
                 </p>
 
                 <form ref={formRef} onSubmit={sendEmail} className="contact-form">
                     <div className="form-group">
-                        <input type="email" name="user_email" placeholder="Your Email" required className="form-input" defaultValue="anthonykhle@gmail.com" />
+                        <input type="email" name="user_email" placeholder="Your Email" required className="form-input" />
                     </div>
                     <div className="form-group">
                         <input type="text" name="subject" placeholder="Subject" required className="form-input" />

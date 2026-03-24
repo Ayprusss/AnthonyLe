@@ -55,7 +55,7 @@ const Hero = () => {
                         <span className="text-muted">4th Year Comp Sci @ uOttawa.</span>
                     </h1>
                     <p className="hero-subtitle">
-                        SDE Intern @ Magnet Forensics, Exploring different worlds of Software Engineering.
+                        SDE Intern @ Magnet Forensics, Prev @ University of Ottawa, Canada Revenue Agency.
                     </p>
                     <div className="hero-actions">
                         <Link to="projects" smooth={true} duration={500} className="btn-primary">
