@@ -5,6 +5,13 @@ import './Projects.css';
 
 const projects = [
     {
+        title: 'Gladius',
+        description:
+            'A multi-agent AI pipeline utilizing three different instances of the Claude Code CLI. Orchestrates complex tasks through planning, execution, and review phases with an interactive REPL.',
+        tech: ['Python', 'Claude Code', 'Pydantic'],
+        github: 'https://github.com/Ayprusss/Gladius',
+    },
+    {
         title: 'dejavu',
         description:
             'A full webstore project mocking "Vuja De" — a complete e-commerce experience with a dedicated backend and frontend, featuring product browsing, and a modern storefront UI.',
@@ -48,12 +55,16 @@ const Projects = () => {
                         <div className="project-header">
                             <h3 className="project-title">{project.title}</h3>
                             <div className="project-links">
-                                <a href={project.github} target="_blank" rel="noreferrer">
-                                    <Github size={20} />
-                                </a>
-                                <a href={project.live} target="_blank" rel="noreferrer">
-                                    <ExternalLink size={20} />
-                                </a>
+                                {project.github && (
+                                    <a href={project.github} target="_blank" rel="noreferrer">
+                                        <Github size={20} />
+                                    </a>
+                                )}
+                                {project.live && (
+                                    <a href={project.live} target="_blank" rel="noreferrer">
+                                        <ExternalLink size={20} />
+                                    </a>
+                                )}
                             </div>
                         </div>
                         <p className="project-description">{project.description}</p>
