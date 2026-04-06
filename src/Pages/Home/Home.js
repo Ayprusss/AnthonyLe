@@ -5,6 +5,7 @@ import Hero from '../../Components/Hero';
 import Skills from '../../Components/Skills';
 import Projects from '../../Components/Projects';
 import Experience from '../../Components/Experience';
+import Resume from '../../Components/Resume';
 import Contact from '../../Components/Contact';
 
 const Home = () => {
@@ -60,6 +61,7 @@ const Home = () => {
         <div id="skills"><Skills /></div>
         <div id="projects"><Projects /></div>
         <div id="experience"><Experience /></div>
+        <div id="resume"><Resume /></div>
         <div id="contact"><Contact /></div>
       </main>
     </div>
