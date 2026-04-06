@@ -37,6 +37,7 @@ const Navbar = ({ mode, onToggleMode }) => {
                         <li><Link to="skills" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Skills</Link></li>
                         <li><Link to="projects" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Projects</Link></li>
                         <li><Link to="experience" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Experience</Link></li>
+                        <li><Link to="resume" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Resume</Link></li>
                         <li><Link to="contact" spy={true} smooth={true} offset={0} duration={500} activeClass="active">Contact</Link></li>
                     </ul>
                 </div>
