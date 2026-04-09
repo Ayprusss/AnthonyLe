@@ -30,7 +30,7 @@ const projects = [
     {
         title: 'Crux',
         description: 'A full-stack web application that serves as a comprehensive climbing map platform, allowing users to discover, share, and manage climbing locations worldwide.',
-        tech: ['Next.js', 'Tailwind CSS', 'MapLibre GL', 'Supabase', 'PostGIS'],
+        tech: ['Next.js', 'Tailwind CSS', 'MapLibre GL', 'Supabase', 'PostGIS', 'TypeScript', 'HTML'],
         github: 'https://github.com/Ayprusss/crux',
     }
 ];
