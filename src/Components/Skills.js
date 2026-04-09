@@ -13,7 +13,7 @@ const skillCategories = [
     },
     {
         title: "Backend & API",
-        skills: ["Node.Js", "Express.js", "Springboot", "REST API", "MVC", "Entity Framework", "Axios", "PostgreSQL"]
+        skills: ["Node.Js", "Express.js", "Springboot", "REST API", "MVC", "Entity Framework", "Axios", "PostgreSQL", "Supabase", "PostGIS", "MapLibre GL"]
     },
     {
         title: "Tools & DevOps",
