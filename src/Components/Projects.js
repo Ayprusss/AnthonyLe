@@ -27,6 +27,12 @@ const projects = [
         github: 'https://github.com/Ayprusss/PPPTAILORINGCOURIER',
         live: 'https://ppptailoringcourier.vercel.app/',
     },
+    {
+        title: 'Crux',
+        description: 'A full-stack web application that serves as a comprehensive climbing map platform, allowing users to discover, share, and manage climbing locations worldwide.',
+        tech: ['Next.js', 'Tailwind CSS', 'MapLibre GL', 'Supabase', 'PostGIS'],
+        github: 'https://github.com/Ayprusss/crux',
+    }
 ];
 
 const Projects = () => {
