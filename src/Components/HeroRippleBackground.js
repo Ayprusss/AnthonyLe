@@ -72,7 +72,19 @@ const HeroRippleBackground = () => {
           const distanceFactor = clamp(distanceFromCenter / maxDistance, 0, 1);
           const angle = Math.atan2(y, x);
           const size = (1 + distanceFactor * 5) * PARTICLE_SIZE_MULTIPLIER * drawScale;
-          points.push({ x, y, angle, size, distanceFromCenter });
+          points.push({
+            x,
+            y,
+            angle,
+            size,
+            distanceFromCenter,
+            cosAngle: Math.cos(angle),
+            sinAngle: Math.sin(angle),
+            rippleFreqDist: distanceFromCenter * RIPPLE_FREQUENCY,
+            alpha: 0.18 + distanceFactor * 0.44,
+            stretch: 1 + distanceFactor * 1.75,
+            reducedAlpha: 0.2 + distanceFactor * 0.35,
+          });
         }
       }
     };
@@ -100,8 +112,7 @@ const HeroRippleBackground = () => {
       for (const point of points) {
         const particleX = centerX + point.x;
         const particleY = centerY + point.y;
-        const alpha = 0.2 + (point.distanceFromCenter / maxDistance) * 0.35;
-        context.fillStyle = `rgba(${rippleRgb}, ${alpha.toFixed(3)})`;
+        context.fillStyle = `rgba(${rippleRgb}, ${point.reducedAlpha.toFixed(3)})`;
         context.fillRect(particleX, particleY, point.size * 1.4, point.size * 0.7);
       }
     };
@@ -115,18 +126,20 @@ const HeroRippleBackground = () => {
       const timeWave = timestamp * RIPPLE_SPEED;
 
       for (const point of points) {
-        const centerNormalized = point.distanceFromCenter / maxDistance;
-        const offset = Math.sin(point.distanceFromCenter * RIPPLE_FREQUENCY - timeWave) * waveAmplitude;
-        const dx = Math.cos(point.angle) * offset;
-        const dy = Math.sin(point.angle) * offset;
-        const alpha = 0.18 + centerNormalized * 0.44;
-        const stretch = 1 + centerNormalized * 1.75;
+        const offset = Math.sin(point.rippleFreqDist - timeWave) * waveAmplitude;
+        const dx = point.cosAngle * offset;
+        const dy = point.sinAngle * offset;
 
         context.save();
         context.translate(centerX + point.x + dx, centerY + point.y + dy);
         context.rotate(point.angle);
-        context.fillStyle = `rgba(${rippleRgb}, ${alpha.toFixed(3)})`;
-        context.fillRect(-point.size * 0.5, -point.size * 0.22, point.size * stretch, point.size * 0.44);
+        context.fillStyle = `rgba(${rippleRgb}, ${point.alpha.toFixed(3)})`;
+        context.fillRect(
+          -point.size * 0.5,
+          -point.size * 0.22,
+          point.size * point.stretch,
+          point.size * 0.44
+        );
         context.restore();
       }
 
