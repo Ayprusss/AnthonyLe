@@ -187,11 +187,17 @@ const HeroRippleBackground = () => {
         drawReducedMotion();
       }
     });
+    let themeUpdateFrameId = null;
     const themeObserver = new MutationObserver(() => {
-      updateRippleColor();
-      if (reducedMotionQuery.matches) {
-        drawReducedMotion();
+      if (themeUpdateFrameId) {
+        window.cancelAnimationFrame(themeUpdateFrameId);
       }
+      themeUpdateFrameId = window.requestAnimationFrame(() => {
+        updateRippleColor();
+        if (reducedMotionQuery.matches) {
+          drawReducedMotion();
+        }
+      });
     });
 
     resize();
@@ -215,6 +221,9 @@ const HeroRippleBackground = () => {
       isRunning = false;
       if (animationFrameId) {
         window.cancelAnimationFrame(animationFrameId);
+      }
+      if (themeUpdateFrameId) {
+        window.cancelAnimationFrame(themeUpdateFrameId);
       }
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('resize', onResize);
