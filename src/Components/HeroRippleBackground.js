@@ -43,8 +43,13 @@ const HeroRippleBackground = () => {
         .getPropertyValue('--ripple-rgb')
         .trim();
 
-      if (nextRippleRgb) {
+      if (nextRippleRgb && nextRippleRgb !== rippleRgb) {
         rippleRgb = nextRippleRgb;
+        // Update precomputed colors if points exist
+        for (const point of points) {
+          point.fillStyle = `rgba(${rippleRgb}, ${point.alpha.toFixed(3)})`;
+          point.reducedFillStyle = `rgba(${rippleRgb}, ${point.reducedAlpha.toFixed(3)})`;
+        }
       }
     };
 
@@ -72,6 +77,8 @@ const HeroRippleBackground = () => {
           const distanceFactor = clamp(distanceFromCenter / maxDistance, 0, 1);
           const angle = Math.atan2(y, x);
           const size = (1 + distanceFactor * 5) * PARTICLE_SIZE_MULTIPLIER * drawScale;
+          const alpha = 0.18 + distanceFactor * 0.44;
+          const reducedAlpha = 0.2 + distanceFactor * 0.35;
           points.push({
             x,
             y,
@@ -81,9 +88,11 @@ const HeroRippleBackground = () => {
             cosAngle: Math.cos(angle),
             sinAngle: Math.sin(angle),
             rippleFreqDist: distanceFromCenter * RIPPLE_FREQUENCY,
-            alpha: 0.18 + distanceFactor * 0.44,
+            alpha,
             stretch: 1 + distanceFactor * 1.75,
-            reducedAlpha: 0.2 + distanceFactor * 0.35,
+            reducedAlpha,
+            fillStyle: `rgba(${rippleRgb}, ${alpha.toFixed(3)})`,
+            reducedFillStyle: `rgba(${rippleRgb}, ${reducedAlpha.toFixed(3)})`,
           });
         }
       }
@@ -112,7 +121,7 @@ const HeroRippleBackground = () => {
       for (const point of points) {
         const particleX = centerX + point.x;
         const particleY = centerY + point.y;
-        context.fillStyle = `rgba(${rippleRgb}, ${point.reducedAlpha.toFixed(3)})`;
+        context.fillStyle = point.reducedFillStyle;
         context.fillRect(particleX, particleY, point.size * 1.4, point.size * 0.7);
       }
     };
@@ -127,21 +136,29 @@ const HeroRippleBackground = () => {
 
       for (const point of points) {
         const offset = Math.sin(point.rippleFreqDist - timeWave) * waveAmplitude;
-        const dx = point.cosAngle * offset;
-        const dy = point.sinAngle * offset;
+        const tx = centerX + point.x + point.cosAngle * offset;
+        const ty = centerY + point.y + point.sinAngle * offset;
 
-        context.save();
-        context.translate(centerX + point.x + dx, centerY + point.y + dy);
-        context.rotate(point.angle);
-        context.fillStyle = `rgba(${rippleRgb}, ${point.alpha.toFixed(3)})`;
+        context.setTransform(
+          point.cosAngle * dpr,
+          point.sinAngle * dpr,
+          -point.sinAngle * dpr,
+          point.cosAngle * dpr,
+          tx * dpr,
+          ty * dpr
+        );
+
+        context.fillStyle = point.fillStyle;
         context.fillRect(
           -point.size * 0.5,
           -point.size * 0.22,
           point.size * point.stretch,
           point.size * 0.44
         );
-        context.restore();
       }
+
+      // Reset transform for the next frame's clearRect
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       animationFrameId = window.requestAnimationFrame(drawFrame);
     };
