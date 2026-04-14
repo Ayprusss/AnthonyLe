@@ -51,7 +51,7 @@ const Hero = () => {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                     <h1 className="hero-title">
-                        Hi, I'm <TypewriterText text="Anthony." /> <br />
+                        Hello! My name is <TypewriterText text="Anthony." /> <br />
                         <span className="text-muted">4th Year Comp Sci @ uOttawa.</span>
                     </h1>
                     <p className="hero-subtitle">
