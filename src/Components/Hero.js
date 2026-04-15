@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-scroll';
 import './Hero.css';
-import HeroRippleBackground from './HeroRippleBackground';
 
 const TypewriterText = ({ text }) => {
     const [currentText, setCurrentText] = useState('');
@@ -35,15 +34,6 @@ const TypewriterText = ({ text }) => {
 const Hero = () => {
     return (
         <section className="hero-section">
-            <motion.div
-                className="hero-ripple-layer"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-                <HeroRippleBackground />
-            </motion.div>
-
             <div className="hero-content">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -80,4 +70,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
