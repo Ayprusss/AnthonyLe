@@ -162,10 +162,19 @@ const HeroRippleBackground = () => {
       }
     };
 
-    const onResize = () => {
+    let resizeAnimationFrameId = null;
+
+    const performResizeUpdate = () => {
       resize();
       if (reducedMotionQuery.matches) {
         drawReducedMotion();
+      }
+      resizeAnimationFrameId = null;
+    };
+
+    const onResize = () => {
+      if (!resizeAnimationFrameId) {
+        resizeAnimationFrameId = window.requestAnimationFrame(performResizeUpdate);
       }
     };
 
@@ -182,9 +191,8 @@ const HeroRippleBackground = () => {
     };
 
     const resizeObserver = new ResizeObserver(() => {
-      resize();
-      if (reducedMotionQuery.matches) {
-        drawReducedMotion();
+      if (!resizeAnimationFrameId) {
+        resizeAnimationFrameId = window.requestAnimationFrame(performResizeUpdate);
       }
     });
     let themeUpdateFrameId = null;
