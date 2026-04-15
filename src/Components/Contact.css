@@ -1,3 +1,67 @@
+/* ── Email floating card ── */
+.email-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    background: rgba(var(--bg-rgb), 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--bg-rgb), 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.email-card:hover {
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.email-card-address {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color 0.2s ease;
+}
+
+.email-card-address:hover {
+    color: var(--accent, var(--text-main));
+}
+
+.email-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.email-copy-btn:hover {
+    background: rgba(var(--bg-rgb), 0.4);
+    color: var(--text-main);
+    border-color: var(--text-muted);
+}
+
+.email-copy-btn:active {
+    transform: scale(0.92);
+}
+
+/* Green check state after copy */
+.email-copy-btn:has(svg.lucide-check) {
+    color: #4ade80;
+    border-color: #4ade80;
+}
+
 .contact-form {
     display: flex;
     flex-direction: column;
