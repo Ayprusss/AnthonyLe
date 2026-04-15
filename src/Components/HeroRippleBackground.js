@@ -43,8 +43,12 @@ const HeroRippleBackground = () => {
         .getPropertyValue('--ripple-rgb')
         .trim();
 
-      if (nextRippleRgb) {
+      if (nextRippleRgb && nextRippleRgb !== rippleRgb) {
         rippleRgb = nextRippleRgb;
+        for (const point of points) {
+          point.colorStyle = `rgba(${rippleRgb}, ${point.alpha.toFixed(3)})`;
+          point.reducedColorStyle = `rgba(${rippleRgb}, ${point.reducedAlpha.toFixed(3)})`;
+        }
       }
     };
 
@@ -72,6 +76,9 @@ const HeroRippleBackground = () => {
           const distanceFactor = clamp(distanceFromCenter / maxDistance, 0, 1);
           const angle = Math.atan2(y, x);
           const size = (1 + distanceFactor * 5) * PARTICLE_SIZE_MULTIPLIER * drawScale;
+          const rippleFreqDist = distanceFromCenter * RIPPLE_FREQUENCY;
+          const alpha = 0.18 + distanceFactor * 0.44;
+          const reducedAlpha = 0.2 + distanceFactor * 0.35;
           points.push({
             x,
             y,
@@ -80,10 +87,14 @@ const HeroRippleBackground = () => {
             distanceFromCenter,
             cosAngle: Math.cos(angle),
             sinAngle: Math.sin(angle),
-            rippleFreqDist: distanceFromCenter * RIPPLE_FREQUENCY,
-            alpha: 0.18 + distanceFactor * 0.44,
+            rippleFreqDist,
+            cosRipple: Math.cos(rippleFreqDist),
+            sinRipple: Math.sin(rippleFreqDist),
+            alpha,
             stretch: 1 + distanceFactor * 1.75,
-            reducedAlpha: 0.2 + distanceFactor * 0.35,
+            reducedAlpha,
+            colorStyle: `rgba(${rippleRgb}, ${alpha.toFixed(3)})`,
+            reducedColorStyle: `rgba(${rippleRgb}, ${reducedAlpha.toFixed(3)})`,
           });
         }
       }
@@ -112,7 +123,7 @@ const HeroRippleBackground = () => {
       for (const point of points) {
         const particleX = centerX + point.x;
         const particleY = centerY + point.y;
-        context.fillStyle = `rgba(${rippleRgb}, ${point.reducedAlpha.toFixed(3)})`;
+        context.fillStyle = point.reducedColorStyle;
         context.fillRect(particleX, particleY, point.size * 1.4, point.size * 0.7);
       }
     };
@@ -124,24 +135,45 @@ const HeroRippleBackground = () => {
 
       context.clearRect(0, 0, width, height);
       const timeWave = timestamp * RIPPLE_SPEED;
+      const cosTimeWave = Math.cos(timeWave);
+      const sinTimeWave = Math.sin(timeWave);
 
       for (const point of points) {
-        const offset = Math.sin(point.rippleFreqDist - timeWave) * waveAmplitude;
+        // sin(A - B) = sin(A)cos(B) - cos(A)sin(B)
+        const offset = (point.sinRipple * cosTimeWave - point.cosRipple * sinTimeWave) * waveAmplitude;
         const dx = point.cosAngle * offset;
         const dy = point.sinAngle * offset;
 
-        context.save();
-        context.translate(centerX + point.x + dx, centerY + point.y + dy);
-        context.rotate(point.angle);
-        context.fillStyle = `rgba(${rippleRgb}, ${point.alpha.toFixed(3)})`;
+        // Apply point transformations using context.setTransform directly instead of save/translate/rotate/restore stack.
+        // The transformation matrix elements are [a, b, c, d, e, f].
+        // Set context.setTransform(a, b, c, d, e, f) where:
+        // a = horizontal scaling (cos of rotation angle)
+        // b = vertical skewing (sin of rotation angle)
+        // c = horizontal skewing (-sin of rotation angle)
+        // d = vertical scaling (cos of rotation angle)
+        // e = horizontal translation
+        // f = vertical translation
+
+        context.setTransform(
+          point.cosAngle * dpr,
+          point.sinAngle * dpr,
+          -point.sinAngle * dpr,
+          point.cosAngle * dpr,
+          (centerX + point.x + dx) * dpr,
+          (centerY + point.y + dy) * dpr
+        );
+
+        context.fillStyle = point.colorStyle;
         context.fillRect(
           -point.size * 0.5,
           -point.size * 0.22,
           point.size * point.stretch,
           point.size * 0.44
         );
-        context.restore();
       }
+
+      // Reset transform after all points are drawn to restore standard coordinates
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       animationFrameId = window.requestAnimationFrame(drawFrame);
     };
