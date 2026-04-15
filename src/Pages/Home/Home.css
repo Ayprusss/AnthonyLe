@@ -18,11 +18,3 @@ main>div {
     margin: 0 auto;
 }
 
-#hero {
-    min-height: 100vh;
-    padding-top: 5rem;
-    max-width: none;
-    width: 100%;
-    margin: 0;
-    /* Space for fixed navbar */
-}

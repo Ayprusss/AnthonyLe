@@ -5,7 +5,9 @@
 }
 
 .resume-card {
-    background-color: var(--bg-color);
+    background-color: rgba(var(--bg-rgb), 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 2.5rem;
