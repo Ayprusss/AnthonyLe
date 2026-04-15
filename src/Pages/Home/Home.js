@@ -13,6 +13,7 @@ const Home = () => {
     try {
       return localStorage.getItem('site-mode') === 'light' ? 'light' : 'dark';
     } catch (error) {
+      console.error('Error reading from localStorage:', error);
       return 'dark';
     }
   });
@@ -22,7 +23,7 @@ const Home = () => {
     try {
       localStorage.setItem('site-mode', mode);
     } catch (error) {
-      // Ignore storage failures and keep current mode in memory.
+      console.error('Error writing to localStorage:', error);
     }
   }, [mode]);
 
