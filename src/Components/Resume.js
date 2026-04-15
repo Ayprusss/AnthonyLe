@@ -14,17 +14,29 @@ const Resume = () => {
     const containerRef = useRef(null);
 
     useEffect(() => {
+        let ticking = false;
         const updateWidth = () => {
-            if (containerRef.current) {
-                // Determine responsive width depending on screen size
-                const containerWidth = containerRef.current.offsetWidth;
-                // Add some padding deduction
-                setWidth(Math.min(containerWidth - 40, 800)); 
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (containerRef.current) {
+                        // Determine responsive width depending on screen size
+                        const containerWidth = containerRef.current.offsetWidth;
+                        // Add some padding deduction
+                        setWidth(Math.min(containerWidth - 40, 800));
+                    }
+                    ticking = false;
+                });
+                ticking = true;
             }
         };
         
-        updateWidth();
-        window.addEventListener('resize', updateWidth);
+        // Initial setup without ticking
+        if (containerRef.current) {
+            const containerWidth = containerRef.current.offsetWidth;
+            setWidth(Math.min(containerWidth - 40, 800));
+        }
+
+        window.addEventListener('resize', updateWidth, { passive: true });
         return () => window.removeEventListener('resize', updateWidth);
     }, []);
 
