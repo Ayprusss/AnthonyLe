@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import './Home.css';
 import Navbar from '../../Components/Navbar';
 import Hero from '../../Components/Hero';
@@ -51,11 +51,15 @@ const Home = () => {
     return () => observer.disconnect();
   }, []);
 
+  const handleToggleMode = useCallback(() => {
+    setMode((currentMode) => (currentMode === 'dark' ? 'light' : 'dark'));
+  }, []);
+
   return (
     <div className="home-container">
       <Navbar
         mode={mode}
-        onToggleMode={() => setMode((currentMode) => (currentMode === 'dark' ? 'light' : 'dark'))}
+        onToggleMode={handleToggleMode}
       />
       <main>
         <div id="hero"><Hero /></div>
