@@ -3,6 +3,8 @@
 ## Overview
 Create Van Gogh paintings using SVG paths, animated progressively on scroll. Focus on the mesmerizing quality of watching vector paths build up like a plotter drawing, rather than mimicking brushstrokes.
 
+
+**COULD USE FIGMA TO TRY AND CONVERT A VAN GOGH PAINTING TO AN SVG**
 ## Core Philosophy
 
 **Canvas approach (VANGOGH.md):** Painterly, organic, texture-rich - like watching paint being applied  
