@@ -53,4 +53,4 @@ const Navbar = ({ mode, onToggleMode }) => {
     );
 };
 
-export default Navbar;
+export default React.memo(Navbar);
