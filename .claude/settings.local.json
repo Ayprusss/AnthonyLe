@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"D:\\\\coding_files\\\\personalwebsite\\\\anthonyle\"; Get-ChildItem -Force | Select-Object -Property Name, @{Name=\"IsFolder\";Expression={$_.PSIsContainer}})"
+    ]
+  }
+}

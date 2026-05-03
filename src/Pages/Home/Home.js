@@ -8,7 +8,7 @@ import Projects from '../../Components/Projects';
 import Experience from '../../Components/Experience';
 import Resume from '../../Components/Resume';
 import Contact from '../../Components/Contact';
-import PaintStrokeBackground from '../../Components/PaintStrokeBackground';
+import VectorPaintingBackground from '../../Components/VectorVanGogh/VectorPaintingBackground';
 
 const Home = () => {
   const [mode, setMode] = useState(() => {
@@ -67,7 +67,7 @@ const Home = () => {
           transition: 'background-color 0.8s ease'
         }}
       />
-      <PaintStrokeBackground />
+      <VectorPaintingBackground />
 
       {/* SVG filter definition (invisible) */}
       <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
