@@ -1,51 +1,119 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 
-:root {
-  --bg-color: #000000;
-  --text-main: #ffffff;
-  --text-muted: #a1a1aa;
-  --accent: #ffffff;
-  --border-color: #27272a;
-  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --bg-rgb: 0, 0, 0;
+/* ── Reset ── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  font-family: var(--font-inter);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.8s ease, color 0.8s ease;
+html, body, #root {
+    min-height: 100%;
+    width: 100%;
 }
 
-* {
-  box-sizing: border-box;
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    overflow-x: hidden;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0;
-  font-weight: 600;
+/* Hide default cursor on pointer devices — custom cursor takes over */
+@media (pointer: fine) {
+    * { cursor: none !important; }
 }
 
-p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.6;
+h1, h2, h3, h4, h5, h6 { font-weight: 400; }
+p  { line-height: 1.65; color: var(--text-dim); }
+a  { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* ── Shared section chrome ── */
+.section-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.section-title {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    letter-spacing: 0.03em;
+    color: var(--text);
+    line-height: 0.9;
+    margin-bottom: 3rem;
+}
+
+.section-divider { display: none; }
+
+.section-subtitle {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    max-width: 520px;
+    margin-bottom: 3rem;
+    line-height: 1.75;
+    letter-spacing: 0.02em;
+}
+
+/* ── Shared buttons ── */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.85rem 1.75rem;
+    border: none;
+    border-radius: 2px;
+    transition: background 0.2s ease;
+}
+
+.btn-primary:hover { background: var(--accent); }
+.btn-primary:disabled { opacity: 0.4; }
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--text-dim);
+    padding: 0.85rem 1.75rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-secondary:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* ── Ghost section numbers ── */
+main { counter-reset: section-counter; }
+main > div { counter-increment: section-counter; }
+
+.section-container::before {
+    content: counter(section-counter, decimal-leading-zero);
+    position: absolute;
+    top: -2.5rem;
+    right: -1rem;
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 13vw, 10rem);
+    color: rgba(var(--text-rgb), 0.03);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    letter-spacing: 0.05em;
 }

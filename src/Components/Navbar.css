@@ -3,150 +3,82 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 5rem;
     z-index: 1000;
-    transition: all 0.3s ease;
-    background-color: transparent;
-}
-
-.theme-toggle {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 1100;
-    border: none;
-    background: transparent;
-    color: inherit;
-    padding: 0;
-    cursor: pointer;
-    line-height: 0;
-}
-
-.theme-toggle-track {
-    width: 102px;
-    height: 54px;
-    display: inline-flex;
-    align-items: center;
-    padding: 4px;
-    border-radius: 999px;
-    background: rgba(var(--bg-rgb), 0.14);
-    border: 2px solid rgba(var(--bg-rgb), 0.23);
-    backdrop-filter: blur(4px);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-    transition: background-color 0.35s ease, border-color 0.35s ease;
-}
-
-.theme-toggle-thumb {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-main);
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 16px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.15);
-    transform: translateX(0);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), color 0.35s ease, background-color 0.35s ease, border-color 0.35s ease;
-}
-
-.theme-toggle.light .theme-toggle-thumb {
-    transform: translateX(46px);
-}
-
-.theme-toggle:hover .theme-toggle-track {
-    border-color: rgba(var(--bg-rgb), 0.34);
-}
-
-.theme-toggle:focus-visible .theme-toggle-track {
-    outline: 2px solid var(--text-main);
-    outline-offset: 3px;
+    padding: 1.75rem 4rem;
+    transition: padding 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+    border-bottom: 1px solid transparent;
 }
 
 .navbar.scrolled {
-    background-color: rgba(var(--bg-rgb), 0.8);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border-color);
+    padding: 1.1rem 4rem;
+    background: rgba(var(--bg-rgb), 0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom-color: var(--border);
 }
 
-.nav-container {
-    max-width: 1000px;
+.nav-inner {
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 0 2rem;
-    height: 100%;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .nav-logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-main);
-    cursor: pointer;
-    letter-spacing: -1px;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    line-height: 1;
+}
+
+.nav-logo-period { color: var(--accent); }
+
+.nav-links {
     display: flex;
-    align-items: center;
+    gap: 2.5rem;
 }
 
-.nav-logo-img {
-    height: 2.5rem;
-    width: auto;
-    object-fit: contain;
+.nav-links li a {
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: color 0.2s ease;
 }
 
-.nav-menu {
-    list-style: none;
-    display: flex;
-    gap: 2rem;
-    margin: 0;
-    padding: 0;
+.nav-links li a:hover { color: var(--text); }
+
+.nav-links li a.active {
+    color: var(--text);
 }
 
-.nav-menu li {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-muted);
+.nav-links li a.active::before {
+    content: '—\00a0';
+    color: var(--accent);
 }
 
-.nav-menu a {
-    cursor: pointer;
-    transition: color 0.3s ease;
-    padding-bottom: 4px;
+.nav-mode-btn {
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.4rem 0.85rem;
+    border-radius: 2px;
+    transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.nav-menu a:hover {
-    color: var(--text-main);
-}
-
-.nav-menu a.active {
-    color: var(--text-main);
-    border-bottom: 2px solid var(--accent);
+.nav-mode-btn:hover {
+    color: var(--text);
+    border-color: var(--text-dim);
 }
 
 @media (max-width: 768px) {
-    .theme-toggle {
-        bottom: 1.5rem;
-        right: 1.5rem;
-    }
-
-    .theme-toggle-track {
-        width: 92px;
-        height: 48px;
-    }
-
-    .theme-toggle-thumb {
-        width: 38px;
-        height: 38px;
-    }
-
-    .theme-toggle.light .theme-toggle-thumb {
-        transform: translateX(42px);
-    }
-
-    .nav-menu {
-        display: none;
-        /* Hide on mobile for simplicity in MVP, could add hamburger */
-    }
+    .navbar         { padding: 1.5rem 1.5rem; }
+    .navbar.scrolled { padding: 1rem 1.5rem; }
+    .nav-links      { display: none; }
 }

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, Copy, Check } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import './Contact.css';
 
@@ -9,6 +9,17 @@ const Contact = () => {
     const [isSending, setIsSending] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyEmail = async () => {
+        try {
+            await navigator.clipboard.writeText('anthonykhle@gmail.com');
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy email:', err);
+        }
+    };
 
     const sendEmail = (e) => {
         e.preventDefault();
@@ -41,9 +52,22 @@ const Contact = () => {
                 <h2 className="section-title">Contact.</h2>
                 <div className="section-divider"></div>
                 <p className="section-subtitle">
-                    I'm currently open to new opportunities. Send a message and I will get back to you ASAP.<br />
-                    You can also reach me directly at <a href="mailto:anthonykhle@gmail.com" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 'bold' }}>anthonykhle@gmail.com</a>.
+                    I'm currently open to new opportunities. Send a message and I will get back to you ASAP.
                 </p>
+
+                <div className="email-card">
+                    <a href="mailto:anthonykhle@gmail.com" className="email-card-address">
+                        anthonykhle@gmail.com
+                    </a>
+                    <button
+                        className="email-copy-btn"
+                        onClick={handleCopyEmail}
+                        aria-label={copied ? 'Copied!' : 'Copy email address'}
+                        title={copied ? 'Copied!' : 'Copy email'}
+                    >
+                        {copied ? <Check size={16} /> : <Copy size={16} />}
+                    </button>
+                </div>
 
                 <form ref={formRef} onSubmit={sendEmail} className="contact-form">
                     <div className="form-group">
