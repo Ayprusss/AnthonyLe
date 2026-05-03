@@ -2,19 +2,88 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    position: relative;
+}
+
+.base-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -3;
+    background-color: var(--bg);
+    transition: background-color 0.5s ease;
 }
 
 main {
     flex-grow: 1;
 }
 
-main>div {
+main > div {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 4rem 2rem;
-    max-width: 1000px;
+    padding: 8rem 4rem;
+    max-width: 1160px;
     margin: 0 auto;
+    width: 100%;
 }
 
+/* Hero fills edge-to-edge and handles its own padding */
+main > div#hero {
+    padding: 0;
+    max-width: 100%;
+}
+
+/* ── Custom cursor ── */
+.cursor-dot {
+    position: fixed;
+    top: -3px;
+    left: -3px;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    will-change: transform;
+}
+
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    will-change: transform;
+}
+
+.cursor-ring-inner {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(var(--accent-rgb), 0.65);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.22s ease, height 0.22s ease, border-color 0.22s ease, opacity 0.22s ease;
+    opacity: 0.8;
+}
+
+.cursor-ring.hover .cursor-ring-inner {
+    width: 62px;
+    height: 62px;
+    border-color: rgba(var(--text-rgb), 0.35);
+    opacity: 1;
+}
+
+/* Hide cursor overlay on touch devices */
+@media (pointer: coarse) {
+    .cursor-dot,
+    .cursor-ring {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    main > div {
+        padding: 7rem 1.5rem 4rem;
+    }
+}
