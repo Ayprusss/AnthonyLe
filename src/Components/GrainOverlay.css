@@ -1,7 +1,7 @@
 .grain-overlay {
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: 10;
     pointer-events: none;
     width: 100%;
     height: 100%;
@@ -11,15 +11,13 @@
     content: '';
     position: absolute;
     inset: 0;
-    opacity: 0.06;
-    mix-blend-mode: multiply;
+    opacity: 0.055;
+    mix-blend-mode: screen;
     filter: url(#grainFilter);
     background: transparent;
-    width: 100%;
-    height: 100%;
 }
 
-[data-mode="dark"] .grain-overlay::after {
-    opacity: 0.10;
-    mix-blend-mode: screen;
+[data-mode="light"] .grain-overlay::after {
+    opacity: 0.04;
+    mix-blend-mode: multiply;
 }
