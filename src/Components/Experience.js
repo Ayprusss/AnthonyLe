@@ -6,7 +6,7 @@ const experiences = [
     {
         role: "Software Developer Intern",
         company: "Magnet Forensics",
-        period: "September 2025 - Present",
+        period: "September 2025 - April 2026",
         description: "Working on the Magnet AXIOM product, contributing to the development and maintenance of the software."
     },
     {

@@ -48,7 +48,7 @@ const Hero = () => (
         >
             <div className="hero-role">
                 <span className="hero-role-label">CURRENTLY</span>
-                <span className="hero-role-value">SDE Intern · Magnet Forensics</span>
+                <span className="hero-role-value">Exploring outer space...</span>
             </div>
             <div className="hero-actions">
                 <Link to="projects" smooth duration={600} className="hero-btn-primary">
