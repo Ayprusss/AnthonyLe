@@ -1,31 +1,42 @@
 :root {
-    --bg-color: #FAF8F5;
-    --text-main: #1a1a1a;
-    --text-muted: #5c5c5c;
-    --accent: #1a1a1a;
-    --border-color: #e0ddd8;
-    --bg-rgb: 250, 248, 245;
-    --canvas-bg: #FAF8F5;
+    --bg:          #09090b;
+    --bg-rgb:      9, 9, 11;
+    --surface:     #111113;
+    --text:        #f4f4f5;
+    --text-rgb:    244, 244, 245;
+    --text-dim:    rgba(244, 244, 245, 0.42);
+    --border:      rgba(244, 244, 245, 0.08);
+    --accent:      #ff6b2b;
+    --accent-rgb:  255, 107, 43;
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body:    'IBM Plex Mono', monospace;
+
+    /* Legacy aliases so untouched components still work */
+    --bg-color:    var(--bg);
+    --text-main:   var(--text);
+    --text-muted:  var(--text-dim);
+    --border-color: var(--border);
+    --bg-color:    var(--bg);
+    --svg-filter:  invert(1);
+    --ripple-rgb:  244, 244, 245;
 }
 
-/* ── Light mode (canvas-white) ── */
 [data-mode="light"] {
-    --bg-color: #FAF8F5;
-    --text-main: #1a1a1a;
-    --text-muted: #5c5c5c;
-    --accent: #1a1a1a;
-    --border-color: #e0ddd8;
-    --bg-rgb: 250, 248, 245;
-    --canvas-bg: #FAF8F5;
-}
+    --bg:          #f5f4ef;
+    --bg-rgb:      245, 244, 239;
+    --surface:     #eceae4;
+    --text:        #0d0d0d;
+    --text-rgb:    13, 13, 13;
+    --text-dim:    rgba(13, 13, 13, 0.45);
+    --border:      rgba(13, 13, 13, 0.1);
+    --accent:      #e85a1a;
+    --accent-rgb:  232, 90, 26;
 
-/* ── Dark mode (charcoal canvas) ── */
-[data-mode="dark"] {
-    --bg-color: #1c1c1e;
-    --text-main: #f0efeb;
-    --text-muted: #a1a1a6;
-    --accent: #f0efeb;
-    --border-color: #3a3a3c;
-    --bg-rgb: 28, 28, 30;
-    --canvas-bg: #1c1c1e;
+    --bg-color:    var(--bg);
+    --text-main:   var(--text);
+    --text-muted:  var(--text-dim);
+    --border-color: var(--border);
+    --svg-filter:  invert(0);
+    --ripple-rgb:  13, 13, 13;
 }
