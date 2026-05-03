@@ -1,72 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-scroll';
+import { ArrowRight } from 'lucide-react';
 import './Hero.css';
 
-const TypewriterText = ({ text }) => {
-    const [currentText, setCurrentText] = useState('');
-    const [currentIndex, setCurrentIndex] = useState(0);
+const ease = [0.16, 1, 0.3, 1];
 
-    useEffect(() => {
-        if (currentIndex < text.length) {
-            const timeout = setTimeout(() => {
-                setCurrentText(prevText => prevText + text[currentIndex]);
-                setCurrentIndex(prevIndex => prevIndex + 1);
-            }, 150);
-            return () => clearTimeout(timeout);
-        }
-    }, [currentIndex, text]);
+const Hero = () => (
+    <section className="hero-section">
+        {/* Status eyebrow */}
+        <motion.div
+            className="hero-eyebrow"
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15, ease }}
+        >
+            <span className="hero-status-dot" />
+            <span>COMPUTER SCIENCE · UOTTAWA · 2026</span>
+        </motion.div>
 
-    return (
-        <span style={{ display: 'inline-block' }}>
-            {currentText}
+        {/* Giant name block */}
+        <div className="hero-name-block">
             <motion.span
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                style={{ marginLeft: '2px', fontWeight: 'normal', color: 'var(--text-main)' }}
+                className="hero-name-first"
+                initial={{ opacity: 0, x: -48 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.9, delay: 0.3, ease }}
             >
-                |
+                ANTHONY
             </motion.span>
-        </span>
-    );
-};
-
-const Hero = () => {
-    return (
-        <section className="hero-section">
-            <div className="hero-content">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                >
-                    <h1 className="hero-title">
-                        Hi, I'm <TypewriterText text="Anthony." /> <br />
-                        <span className="text-muted">4th Year Comp Sci @ uOttawa.</span>
-                    </h1>
-                    <p className="hero-subtitle">
-                        SDE Intern @ Magnet Forensics, Prev @ University of Ottawa, Canada Revenue Agency.
-                    </p>
-                    <div className="hero-actions">
-                        <Link to="projects" smooth={true} duration={500} className="btn-primary">
-                            View Projects
-                        </Link>
-                        <Link to="contact" smooth={true} duration={500} className="btn-secondary">
-                            Contact Me
-                        </Link>
-                    </div>
-                </motion.div>
-            </div>
-
-            <motion.div
-                className="scroll-indicator"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.5, duration: 1 }}
+            <motion.span
+                className="hero-name-last"
+                initial={{ opacity: 0, x: 48 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.9, delay: 0.46, ease }}
             >
-            </motion.div>
-        </section>
-    );
-};
+                LE
+            </motion.span>
+        </div>
+
+        {/* Bottom row: current role + CTAs */}
+        <motion.div
+            className="hero-bottom"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.72, ease }}
+        >
+            <div className="hero-role">
+                <span className="hero-role-label">CURRENTLY</span>
+                <span className="hero-role-value">SDE Intern · Magnet Forensics</span>
+            </div>
+            <div className="hero-actions">
+                <Link to="projects" smooth duration={600} className="hero-btn-primary">
+                    VIEW WORK <ArrowRight size={13} strokeWidth={2} />
+                </Link>
+                <Link to="contact" smooth duration={600} className="hero-btn-secondary">
+                    GET IN TOUCH
+                </Link>
+            </div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+            className="hero-scroll-hint"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.3, duration: 0.8 }}
+        >
+            <div className="hero-scroll-line" />
+            <span>SCROLL</span>
+        </motion.div>
+    </section>
+);
 
 export default Hero;
