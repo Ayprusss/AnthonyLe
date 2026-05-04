@@ -103,6 +103,7 @@ const SpaceBackground = () => {
       ctx.clearRect(0, 0, W, H);
 
       // Stars
+      ctx.fillStyle = `rgb(${starRgb})`;
       for (const s of stars) {
         const px = (smoothNX - 0.5) * s.parallax * W;
         const py = (smoothNY - 0.5) * s.parallax * H;
@@ -117,11 +118,12 @@ const SpaceBackground = () => {
           opacity *= 0.55 + 0.45 * Math.sin(t);
         }
 
+        ctx.globalAlpha = opacity;
         ctx.beginPath();
         ctx.arc(x, y, s.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${starRgb},${opacity.toFixed(3)})`;
         ctx.fill();
       }
+      ctx.globalAlpha = 1.0;
 
       // Spawn / draw shooting stars
       if (Date.now() >= nextShootAt) spawnShooter();

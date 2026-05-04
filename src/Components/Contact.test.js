@@ -53,6 +53,15 @@ describe('Contact Component', () => {
   });
 
   test('handles successful form submission', async () => {
+    // Mock environment variables
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      REACT_APP_EMAILJS_SERVICE_ID: 'mock_service_id',
+      REACT_APP_EMAILJS_TEMPLATE_ID: 'mock_template_id',
+      REACT_APP_EMAILJS_PUBLIC_KEY: 'mock_public_key',
+    };
+
     // Mock the sendForm function to resolve successfully
     emailjs.sendForm.mockResolvedValue({ text: 'OK' });
 
@@ -75,11 +84,14 @@ describe('Contact Component', () => {
 
     // Assert that emailjs was called with correct parameters
     expect(emailjs.sendForm).toHaveBeenCalledWith(
-      'ayprusss_email_service',
-      'template_30qbmwr',
+      'mock_service_id',
+      'mock_template_id',
       expect.any(HTMLFormElement),
-      'ajgDW7hgrON568ajG'
+      'mock_public_key'
     );
+
+    // Restore original env
+    process.env = originalEnv;
 
     // Wait for the success message to appear
     await waitFor(() => {
