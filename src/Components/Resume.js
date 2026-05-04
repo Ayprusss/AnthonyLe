@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
