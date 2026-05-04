@@ -90,8 +90,8 @@ const Contact = () => {
                 </form>
 
                 <div className="social-links">
-                    <a href="https://github.com/Ayprusss" target="_blank" rel="noreferrer" aria-label="GitHub"><Github size={24} /></a>
-                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
+                    <a href="https://github.com/Ayprusss" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github size={24} /></a>
+                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
                 </div>
             </motion.div>
 
