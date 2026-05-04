@@ -26,7 +26,12 @@ const Contact = () => {
         setIsSending(true);
         setResponseMessage("");
 
-        emailjs.sendForm('ayprusss_email_service', 'template_30qbmwr', formRef.current, 'ajgDW7hgrON568ajG')
+        emailjs.sendForm(
+            process.env.REACT_APP_EMAILJS_SERVICE_ID,
+            process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+            formRef.current,
+            process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+        )
             .then((result) => {
                 console.log('Email sent successfully: ', result.text);
                 setResponseMessage("Message submitted. Thanks!");
