@@ -26,7 +26,12 @@ const Contact = () => {
         setIsSending(true);
         setResponseMessage("");
 
-        emailjs.sendForm('ayprusss_email_service', 'template_30qbmwr', formRef.current, 'ajgDW7hgrON568ajG')
+        emailjs.sendForm(
+            process.env.REACT_APP_EMAILJS_SERVICE_ID,
+            process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+            formRef.current,
+            process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+        )
             .then((result) => {
                 console.log('Email sent successfully: ', result.text);
                 setResponseMessage("Message submitted. Thanks!");
@@ -90,8 +95,8 @@ const Contact = () => {
                 </form>
 
                 <div className="social-links">
-                    <a href="https://github.com/Ayprusss" target="_blank" rel="noreferrer" aria-label="GitHub"><Github size={24} /></a>
-                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
+                    <a href="https://github.com/Ayprusss" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github size={24} /></a>
+                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
                 </div>
             </motion.div>
 

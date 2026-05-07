@@ -62,12 +62,12 @@ const Projects = () => {
                             <h3 className="project-title">{project.title}</h3>
                             <div className="project-links">
                                 {project.github && (
-                                    <a href={project.github} target="_blank" rel="noreferrer">
+                                    <a href={project.github} target="_blank" rel="noopener noreferrer">
                                         <Github size={20} />
                                     </a>
                                 )}
                                 {project.live && (
-                                    <a href={project.live} target="_blank" rel="noreferrer">
+                                    <a href={project.live} target="_blank" rel="noopener noreferrer">
                                         <ExternalLink size={20} />
                                     </a>
                                 )}
