@@ -8,6 +8,17 @@ const LAYERS = [
   { count: 30, size: [1.40, 2.20], opacity: [0.35, 0.60], parallax: 0.044, scroll: 0.095, twinkle: 0.10 },
 ];
 
+// Supernova sprite color palette — RGB triplets
+const SUPERNOVA_COLORS = [
+  [255, 247, 135], // hot yellow-white
+  [255, 183, 77],  // amber
+  [255, 107, 43],  // orange accent
+  [255, 56, 145],  // electric pink
+  [176, 68, 255],  // violet
+  [59, 158, 255],  // electric blue
+  [0, 255, 225],   // cyan
+];
+
 const rand = (a, b) => a + Math.random() * (b - a);
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -192,6 +203,10 @@ const SpaceBackground = () => {
     let smokeParticles = [];
     let nextRocketAt = Date.now() + rand(6000, 14000);
 
+    // ── Supernova (footer ambient bloom) ─────────────────────────────
+    let supernovaSprites = [];
+    let smoothSupernovaAlpha = 0;
+
     const spawnRocket = () => {
       const modelIdx = Math.floor(Math.random() * CRAFT.length);
       const model = CRAFT[modelIdx];
@@ -279,6 +294,172 @@ const SpaceBackground = () => {
       ctx.restore();
     };
 
+    const buildSupernovaSprites = () => {
+      supernovaSprites = [];
+      // Dense inner ring — vibrant cluster near core
+      for (let i = 0; i < 38; i++) {
+        const [r, g, b] = SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
+        const minD = rand(18, 55);
+        const maxD = rand(88, 160);
+        supernovaSprites.push({
+          angle: Math.random() * Math.PI * 2,
+          dist: rand(minD, maxD),
+          minDist: minD,
+          maxDist: maxD,
+          vAngle: rand(0.06, 0.24) * (Math.random() < 0.5 ? 1 : -1),
+          vDist: rand(4, 18) * (Math.random() < 0.5 ? 1 : -1),
+          size: rand(0.9, 2.7),
+          baseOpacity: rand(0.55, 0.95),
+          twinkleSpeed: rand(1.2, 3.5),
+          twinklePhase: Math.random() * Math.PI * 2,
+          r, g, b,
+        });
+      }
+      // Sparse outer spray — wider, dimmer
+      for (let i = 0; i < 22; i++) {
+        const [r, g, b] = SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
+        const minD = rand(130, 185);
+        const maxD = rand(225, 315);
+        supernovaSprites.push({
+          angle: Math.random() * Math.PI * 2,
+          dist: rand(minD, maxD),
+          minDist: minD,
+          maxDist: maxD,
+          vAngle: rand(0.02, 0.09) * (Math.random() < 0.5 ? 1 : -1),
+          vDist: rand(2, 10) * (Math.random() < 0.5 ? 1 : -1),
+          size: rand(0.5, 1.7),
+          baseOpacity: rand(0.28, 0.65),
+          twinkleSpeed: rand(0.7, 2.1),
+          twinklePhase: Math.random() * Math.PI * 2,
+          r, g, b,
+        });
+      }
+    };
+
+    const drawSupernova = (now, dt, alpha) => {
+      const cx = W / 2;
+      const cy = H * 0.9;
+
+      // Always advance sprite positions so they're animated when revealed
+      for (const sp of supernovaSprites) {
+        sp.angle += sp.vAngle * dt;
+        sp.dist += sp.vDist * dt;
+        if (sp.dist <= sp.minDist || sp.dist >= sp.maxDist) {
+          sp.vDist *= -1;
+          sp.dist = clamp(sp.dist, sp.minDist, sp.maxDist);
+        }
+      }
+
+      if (alpha < 0.005) return;
+
+      // Outer diffuse nebula — wide cool halo
+      const outerR = Math.min(W * 0.68, H * 0.78);
+      const g0 = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR);
+      g0.addColorStop(0.00, `rgba(176,68,255,${(0.13 * alpha).toFixed(3)})`);
+      g0.addColorStop(0.28, `rgba(59,158,255,${(0.11 * alpha).toFixed(3)})`);
+      g0.addColorStop(0.58, `rgba(0,220,255,${(0.06 * alpha).toFixed(3)})`);
+      g0.addColorStop(1.00, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+      ctx.fillStyle = g0;
+      ctx.fill();
+
+      // Mid warm corona
+      const midR = Math.min(W * 0.40, H * 0.50);
+      const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, midR);
+      g1.addColorStop(0.00, `rgba(255,220,80,${(0.28 * alpha).toFixed(3)})`);
+      g1.addColorStop(0.22, `rgba(255,107,43,${(0.22 * alpha).toFixed(3)})`);
+      g1.addColorStop(0.48, `rgba(255,56,145,${(0.13 * alpha).toFixed(3)})`);
+      g1.addColorStop(1.00, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, midR, 0, Math.PI * 2);
+      ctx.fillStyle = g1;
+      ctx.fill();
+
+      // Hot pulsing core
+      const pulse = 1 + 0.13 * Math.sin(now * 0.00092);
+      const coreR = 80 * pulse;
+      const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
+      g2.addColorStop(0.00, `rgba(255,255,235,${(0.96 * alpha).toFixed(3)})`);
+      g2.addColorStop(0.13, `rgba(255,245,160,${(0.86 * alpha).toFixed(3)})`);
+      g2.addColorStop(0.34, `rgba(255,200,80,${(0.60 * alpha).toFixed(3)})`);
+      g2.addColorStop(0.65, `rgba(255,100,40,${(0.26 * alpha).toFixed(3)})`);
+      g2.addColorStop(1.00, 'rgba(0,0,0,0)');
+      ctx.save();
+      ctx.shadowBlur = 75;
+      ctx.shadowColor = `rgba(255,200,60,${(0.52 * alpha).toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+      ctx.fillStyle = g2;
+      ctx.fill();
+      ctx.restore();
+
+      // Corona rays — 12 slow-rotating radial streaks
+      ctx.save();
+      ctx.lineCap = 'round';
+      const rotPhase = now * 0.00022;
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2 + rotPhase;
+        const len = 135 + 105 * Math.abs(Math.sin(now * 0.00068 + i * 0.79));
+        const rA = (0.22 + 0.11 * Math.sin(now * 0.00098 + i * 1.37)) * alpha;
+        const rx2 = cx + Math.cos(a) * len;
+        const ry2 = cy + Math.sin(a) * len;
+        if (ry2 > H + 20) continue; // skip rays purely below viewport
+        const rGrad = ctx.createLinearGradient(cx, cy, rx2, ry2);
+        rGrad.addColorStop(0.0, `rgba(255,230,120,${rA.toFixed(3)})`);
+        rGrad.addColorStop(0.5, `rgba(255,150,60,${(rA * 0.44).toFixed(3)})`);
+        rGrad.addColorStop(1.0, 'rgba(200,80,30,0)');
+        ctx.lineWidth = 0.8 + 0.8 * Math.abs(Math.sin(i * 2.1 + now * 0.00072));
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(rx2, ry2);
+        ctx.strokeStyle = rGrad;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Light sprites — orbiting colored particles with glow
+      ctx.save();
+      ctx.shadowBlur = 0; // set per-particle below
+      for (const sp of supernovaSprites) {
+        const sx = cx + Math.cos(sp.angle) * sp.dist;
+        const sy = cy + Math.sin(sp.angle) * sp.dist;
+        if (sy > H + 5) continue; // clip below viewport
+        const tPhase = now * 0.001 * sp.twinkleSpeed + sp.twinklePhase;
+        const flicker = 0.42 + 0.58 * Math.abs(Math.sin(tPhase));
+        const opacity = sp.baseOpacity * flicker * alpha;
+        if (opacity < 0.025) continue;
+        ctx.globalAlpha = opacity;
+        ctx.shadowBlur = sp.size * 5.5;
+        ctx.shadowColor = `rgb(${sp.r},${sp.g},${sp.b})`;
+        ctx.fillStyle = `rgb(${sp.r},${sp.g},${sp.b})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sp.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
+      // Central lens flare cross
+      const fA = (0.58 + 0.18 * Math.sin(now * 0.00128)) * alpha;
+      const fLen = 54 + 19 * Math.sin(now * 0.00155);
+      ctx.save();
+      ctx.shadowBlur = 32;
+      ctx.shadowColor = `rgba(255,240,160,${fA.toFixed(3)})`;
+      ctx.strokeStyle = `rgba(255,255,215,${fA.toFixed(3)})`;
+      ctx.lineWidth = 1.3;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(cx - fLen, cy); ctx.lineTo(cx + fLen, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, cy - fLen * 0.65); ctx.lineTo(cx, cy + fLen * 0.65); ctx.stroke();
+      const dLen = fLen * 0.62;
+      ctx.globalAlpha = fA * 0.42;
+      ctx.beginPath(); ctx.moveTo(cx - dLen, cy - dLen); ctx.lineTo(cx + dLen, cy + dLen); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + dLen, cy - dLen); ctx.lineTo(cx - dLen, cy + dLen); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    };
+
     // ── Helpers ──────────────────────────────────────────────────────
     const updateStarColor = () => {
       const v = window.getComputedStyle(document.documentElement)
@@ -329,6 +510,13 @@ const SpaceBackground = () => {
         ctx.fill();
       }
       ctx.globalAlpha = 1.0;
+
+      // Supernova — scroll-aware bloom that rises behind the footer
+      const scrollMax = document.documentElement.scrollHeight - H;
+      const rawScrollRatio = scrollMax > 10 ? clamp(pageScrollY / scrollMax, 0, 1) : 1;
+      const targetSupernovaAlpha = clamp((rawScrollRatio - 0.62) / 0.38, 0, 1);
+      smoothSupernovaAlpha = lerp(smoothSupernovaAlpha, targetSupernovaAlpha, 0.04);
+      drawSupernova(now, dt, smoothSupernovaAlpha);
 
       // Spawn / draw shooting stars
       if (Date.now() >= nextShootAt) spawnShooter();
@@ -459,6 +647,7 @@ const SpaceBackground = () => {
     });
 
     resize();
+    buildSupernovaSprites();
     updateStarColor();
     rafId = requestAnimationFrame(draw);
 
