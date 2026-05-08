@@ -74,29 +74,10 @@ const SpaceBackground = () => {
       nextShootAt = Date.now() + rand(5000, 13000);
     };
 
-    // ── Rocket ships ─────────────────────────────────────────────────
-    // Lucide "Rocket" icon (24×24). Nose points upper-right ≈ −45° in screen coords,
-    // so we rotate by (r.angle + π/4) to align the nose with the direction of travel.
-    // Path2D objects — created once, never inside the draw loop
-    const rocketBodyPath = new Path2D(
-      'M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z'
-    );
-    const rocketFinR = new Path2D('M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5');
-    const rocketFinL = new Path2D('M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05');
-    const rocketThruster = new Path2D(
-      'M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09'
-    );
-
     // ── Additional spacecraft models ─────────────────────────────────
     // Registered in CRAFT[] below — spawnRocket() picks one at random each pass.
 
     // --- Model: Saturn V (Apollo-era) ---------------------------------
-    // Nose points UP (−Y direction). Add −π/2 to r.angle when drawing.
-    const SATURN_V_SCALE = 1.5;
-    const SATURN_V_CX = 12;
-    const SATURN_V_CY = 12;
-    const SATURN_V_TAIL_D = 20;
-    const SATURN_V_NOSE_OFFSET = -Math.PI / 2;
     // Main fuselage — pointed nose cone → cylindrical body → tapered engine skirt
     const saturnVBody = new Path2D(
       'M12 0.5 Q13.4 2.8 14 5.5 L14 8 L14.6 8.6 L14.6 11.2 L14 11.8 L14 16.8' +
@@ -116,12 +97,6 @@ const SpaceBackground = () => {
     const saturnVTower = new Path2D('M12 0.5 L12 -1.8 M11.4 -1 L12 -2.2 L12.6 -1');
 
     // --- Model: Space Shuttle -----------------------------------------
-    // Nose points RIGHT (+X direction). Add 0 to r.angle when drawing.
-    const SHUTTLE_SCALE = 1.7;
-    const SHUTTLE_CX = 12;
-    const SHUTTLE_CY = 12;
-    const SHUTTLE_TAIL_D = 16;
-    const SHUTTLE_NOSE_OFFSET = 0;
     // Fuselage — blunt nose, payload bay, tapered aft
     const shuttleBody = new Path2D(
       'M23 11.5 Q23 10.8 22 10.5 L6 9.5 L3.5 10 L2 11 L2 13.5 L3.5 14.5 L6 14.5 L22 13.5 Q23 13.2 23 11.5 Z'
@@ -140,12 +115,6 @@ const SpaceBackground = () => {
     const shuttleEngines = new Path2D('M2 11 L0.5 10.5 M2 12 L0 12 M2 13 L0.5 13.5');
 
     // --- Model: Falcon 9 (SpaceX-style) ------------------------------
-    // Nose points UP (−Y direction). Add −π/2 to r.angle when drawing.
-    const FALCON9_SCALE = 1.4;
-    const FALCON9_CX = 12;
-    const FALCON9_CY = 12;
-    const FALCON9_TAIL_D = 18;
-    const FALCON9_NOSE_OFFSET = -Math.PI / 2;
     // Sleek cylindrical body — smooth nose fairing → interstage → first stage
     const falcon9Body = new Path2D(
       'M12 0 Q13.6 2 14 4.5 L14 5 Q14 5.6 13.6 5.8 L13.6 9 L14 9.5 L14 10.2' +
@@ -166,75 +135,6 @@ const SpaceBackground = () => {
     // Single Merlin engine bell
     const falcon9Engine = new Path2D(
       'M11 23.5 L10.5 24.8 Q12 25.5 13.5 24.8 L13 23.5'
-    );
-
-    // --- Model: Flying Saucer / UFO ----------------------------------
-    // Horizontal disc — "nose" points RIGHT (+X). Add 0 to r.angle when drawing.
-    const UFO_SCALE = 2.0;
-    const UFO_CX = 12;
-    const UFO_CY = 12;
-    const UFO_TAIL_D = 14;
-    const UFO_NOSE_OFFSET = 0;
-    // Glass dome on top
-    const ufoDome = new Path2D(
-      'M9 10 Q9 6 12 5 Q15 6 15 10 Z'
-    );
-    // Main saucer disc (wide ellipse)
-    const ufoDisc = new Path2D(
-      'M2 12 Q2 9.5 12 9 Q22 9.5 22 12 Q22 14.5 12 15 Q2 14.5 2 12 Z'
-    );
-    // Underside landing lights (small circles via arcs)
-    const ufoLightL = new Path2D();
-    ufoLightL.arc(8, 14, 0.7, 0, Math.PI * 2);
-    const ufoLightC = new Path2D();
-    ufoLightC.arc(12, 14.8, 0.7, 0, Math.PI * 2);
-    const ufoLightR = new Path2D();
-    ufoLightR.arc(16, 14, 0.7, 0, Math.PI * 2);
-    // Beam of light underneath (triangle)
-    const ufoBeam = new Path2D('M10 15 L12 22 L14 15');
-
-    // --- Model: Astronaut (EVA) ---------------------------------------
-    // Floating figure — "nose" points UP (−Y). Add −π/2 to r.angle when drawing.
-    const ASTRO_SCALE = 1.8;
-    const ASTRO_CX = 12;
-    const ASTRO_CY = 12;
-    const ASTRO_TAIL_D = 14;
-    const ASTRO_NOSE_OFFSET = -Math.PI / 2;
-    // Helmet (rounded rectangle / circle)
-    const astroHelmet = new Path2D(
-      'M10 2 Q10 0.5 12 0.5 Q14 0.5 14 2 L14 5 Q14 6.5 12 6.5 Q10 6.5 10 5 Z'
-    );
-    // Visor (reflective strip across helmet)
-    const astroVisor = new Path2D(
-      'M10.5 2.8 L13.5 2.8 L13.5 4.2 L10.5 4.2 Z'
-    );
-    // Suit torso (boxy)
-    const astroTorso = new Path2D(
-      'M9 6.5 L15 6.5 L15.5 7.5 L15.5 14 L14 15 L10 15 L8.5 14 L8.5 7.5 Z'
-    );
-    // PLSS backpack
-    const astroBackpack = new Path2D(
-      'M15 7.5 L17 7.5 L17 13 L15 13.5'
-    );
-    // Left arm (reaching out, slight bend)
-    const astroArmL = new Path2D(
-      'M9 7.5 L6.5 9 L5 12 L5.5 12.5 L7 10 L9 9'
-    );
-    // Right arm (relaxed, drifting)
-    const astroArmR = new Path2D(
-      'M15 8.5 L17.5 10 L19 9 L19.5 9.5 L18 11 L15.5 10'
-    );
-    // Left leg (slightly bent, floating)
-    const astroLegL = new Path2D(
-      'M10 15 L9.5 18 L9 21 L8 22 L9 22.5 L10 21 L10.5 18'
-    );
-    // Right leg (extended, drifting)
-    const astroLegR = new Path2D(
-      'M14 15 L14.5 18.5 L15.5 21.5 L16.5 22 L16 23 L14.5 21 L13.5 18'
-    );
-    // Tether line (curving away from suit)
-    const astroTether = new Path2D(
-      'M8.5 8 Q4 6 2 8 Q0 10 1 14'
     );
 
     // ── Spacecraft model registry ─────────────────────────────────────
