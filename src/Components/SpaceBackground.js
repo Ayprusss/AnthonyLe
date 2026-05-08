@@ -299,8 +299,8 @@ const SpaceBackground = () => {
       // Dense inner ring — vibrant cluster near core
       for (let i = 0; i < 38; i++) {
         const [r, g, b] = SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
-        const minD = rand(18, 55);
-        const maxD = rand(88, 160);
+        const minD = rand(27, 83);
+        const maxD = rand(132, 240);
         supernovaSprites.push({
           angle: Math.random() * Math.PI * 2,
           dist: rand(minD, maxD),
@@ -308,7 +308,7 @@ const SpaceBackground = () => {
           maxDist: maxD,
           vAngle: rand(0.06, 0.24) * (Math.random() < 0.5 ? 1 : -1),
           vDist: rand(4, 18) * (Math.random() < 0.5 ? 1 : -1),
-          size: rand(0.9, 2.7),
+          size: rand(1.4, 4.1),
           baseOpacity: rand(0.55, 0.95),
           twinkleSpeed: rand(1.2, 3.5),
           twinklePhase: Math.random() * Math.PI * 2,
@@ -318,8 +318,8 @@ const SpaceBackground = () => {
       // Sparse outer spray — wider, dimmer
       for (let i = 0; i < 22; i++) {
         const [r, g, b] = SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
-        const minD = rand(130, 185);
-        const maxD = rand(225, 315);
+        const minD = rand(195, 278);
+        const maxD = rand(338, 473);
         supernovaSprites.push({
           angle: Math.random() * Math.PI * 2,
           dist: rand(minD, maxD),
@@ -327,7 +327,7 @@ const SpaceBackground = () => {
           maxDist: maxD,
           vAngle: rand(0.02, 0.09) * (Math.random() < 0.5 ? 1 : -1),
           vDist: rand(2, 10) * (Math.random() < 0.5 ? 1 : -1),
-          size: rand(0.5, 1.7),
+          size: rand(0.75, 2.6),
           baseOpacity: rand(0.28, 0.65),
           twinkleSpeed: rand(0.7, 2.1),
           twinklePhase: Math.random() * Math.PI * 2,
@@ -353,7 +353,7 @@ const SpaceBackground = () => {
       if (alpha < 0.005) return;
 
       // Outer diffuse nebula — wide cool halo
-      const outerR = Math.min(W * 0.68, H * 0.78);
+      const outerR = Math.min(W * 1.02, H * 1.17);
       const g0 = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR);
       g0.addColorStop(0.00, `rgba(176,68,255,${(0.13 * alpha).toFixed(3)})`);
       g0.addColorStop(0.28, `rgba(59,158,255,${(0.11 * alpha).toFixed(3)})`);
@@ -365,7 +365,7 @@ const SpaceBackground = () => {
       ctx.fill();
 
       // Mid warm corona
-      const midR = Math.min(W * 0.40, H * 0.50);
+      const midR = Math.min(W * 0.60, H * 0.75);
       const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, midR);
       g1.addColorStop(0.00, `rgba(255,220,80,${(0.28 * alpha).toFixed(3)})`);
       g1.addColorStop(0.22, `rgba(255,107,43,${(0.22 * alpha).toFixed(3)})`);
@@ -378,7 +378,7 @@ const SpaceBackground = () => {
 
       // Hot pulsing core
       const pulse = 1 + 0.13 * Math.sin(now * 0.00092);
-      const coreR = 80 * pulse;
+      const coreR = 120 * pulse;
       const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
       g2.addColorStop(0.00, `rgba(255,255,235,${(0.96 * alpha).toFixed(3)})`);
       g2.addColorStop(0.13, `rgba(255,245,160,${(0.86 * alpha).toFixed(3)})`);
@@ -386,7 +386,7 @@ const SpaceBackground = () => {
       g2.addColorStop(0.65, `rgba(255,100,40,${(0.26 * alpha).toFixed(3)})`);
       g2.addColorStop(1.00, 'rgba(0,0,0,0)');
       ctx.save();
-      ctx.shadowBlur = 75;
+      ctx.shadowBlur = 112;
       ctx.shadowColor = `rgba(255,200,60,${(0.52 * alpha).toFixed(3)})`;
       ctx.beginPath();
       ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
@@ -400,7 +400,7 @@ const SpaceBackground = () => {
       const rotPhase = now * 0.00022;
       for (let i = 0; i < 12; i++) {
         const a = (i / 12) * Math.PI * 2 + rotPhase;
-        const len = 135 + 105 * Math.abs(Math.sin(now * 0.00068 + i * 0.79));
+        const len = 202 + 158 * Math.abs(Math.sin(now * 0.00068 + i * 0.79));
         const rA = (0.22 + 0.11 * Math.sin(now * 0.00098 + i * 1.37)) * alpha;
         const rx2 = cx + Math.cos(a) * len;
         const ry2 = cy + Math.sin(a) * len;
@@ -443,9 +443,9 @@ const SpaceBackground = () => {
 
       // Central lens flare cross
       const fA = (0.58 + 0.18 * Math.sin(now * 0.00128)) * alpha;
-      const fLen = 54 + 19 * Math.sin(now * 0.00155);
+      const fLen = 81 + 29 * Math.sin(now * 0.00155);
       ctx.save();
-      ctx.shadowBlur = 32;
+      ctx.shadowBlur = 48;
       ctx.shadowColor = `rgba(255,240,160,${fA.toFixed(3)})`;
       ctx.strokeStyle = `rgba(255,255,215,${fA.toFixed(3)})`;
       ctx.lineWidth = 1.3;
