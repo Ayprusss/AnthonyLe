@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { TextScramble } from './ui/TextScramble';
 import { Github, Linkedin, Copy, Check } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import './Contact.css';
@@ -54,7 +55,7 @@ const Contact = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <h2 className="section-title">Contact.</h2>
+                <TextScramble text="Contact." as="h2" className="section-title" inView />
                 <div className="section-divider"></div>
                 <p className="section-subtitle">
                     I'm currently open to new opportunities. Send a message and I will get back to you ASAP.
