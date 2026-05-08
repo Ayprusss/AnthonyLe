@@ -41,7 +41,7 @@ export function TextScramble({
     frameRef.current = 0;
 
     const nonSpaceLen = text.replace(/ /g, '').length;
-    const framesTotal = Math.max(Math.min(nonSpaceLen * 3, 30), 6);
+    const framesTotal = Math.max(Math.min(nonSpaceLen * 3, 40), 7);
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
@@ -66,7 +66,7 @@ export function TextScramble({
         setDisplayText(text);
         setIsScrambling(false);
       }
-    }, 30);
+    }, 50);
   }, [text]);
 
   useEffect(() => {
