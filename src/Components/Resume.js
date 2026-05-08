@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { TextScramble } from './ui/TextScramble';
 import { FileText, Download, ExternalLink } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -50,7 +51,7 @@ const Resume = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <h2 className="section-title">Resume.</h2>
+                <TextScramble text="Resume." as="h2" className="section-title" inView />
                 <div className="section-divider"></div>
             </motion.div>
 

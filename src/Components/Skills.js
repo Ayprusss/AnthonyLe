@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { TextScramble } from './ui/TextScramble';
 import './Skills.css';
 
 const skillCategories = [
@@ -52,7 +53,7 @@ const Skills = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <h2 className="section-title">Skills.</h2>
+                <TextScramble text="Skills." as="h2" className="section-title" inView />
                 <div className="section-divider"></div>
                 <p className="section-subtitle">
                     Technologies and tools I work with to build digital products.

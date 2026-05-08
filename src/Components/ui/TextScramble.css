@@ -1,0 +1,38 @@
+/* ts-root — inherits all typography from parent.
+   No display override: h2 stays block, span stays inline (flex blockifies it anyway). */
+
+/* each character is inline-block so individual scale/color transitions work */
+.ts-char {
+  display: inline-block;
+}
+
+/* scrambling character accent — accent color flashes during the reveal */
+.ts-char--scrambling {
+  color: var(--accent);
+}
+
+/* ── Hero name "LE" — stroke text fix ──────────────────────────────────────
+   -webkit-text-stroke is NOT inherited, so char spans need it explicitly.
+   hero-name-last sets color:transparent on the block; mirror that here.      */
+.hero-name-last .ts-char {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--text);
+}
+
+/* scrambling chars on stroke text: show as solid accent, no stroke */
+.hero-name-last .ts-char.ts-char--scrambling {
+  color: var(--accent);
+  -webkit-text-stroke: none;
+}
+
+@media (max-width: 900px) {
+  .hero-name-last .ts-char {
+    -webkit-text-stroke-width: 1.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-name-last .ts-char {
+    -webkit-text-stroke-width: 1px;
+  }
+}
