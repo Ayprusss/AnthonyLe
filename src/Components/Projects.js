@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { TextScramble } from './ui/TextScramble';
 import { Github, ExternalLink } from 'lucide-react';
 import './Projects.css';
 
@@ -44,7 +45,7 @@ const Projects = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <h2 className="section-title">Projects.</h2>
+                <TextScramble text="Projects." as="h2" className="section-title" inView />
                 <div className="section-divider"></div>
             </motion.div>
 
