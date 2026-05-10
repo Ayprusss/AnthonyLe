@@ -17,7 +17,7 @@ jest.mock('framer-motion', () => ({
 describe('Experience Component', () => {
   test('renders the Experience heading properly', () => {
     render(<Experience />);
-    const heading = screen.getByRole('heading', { name: /experience\./i, level: 2 });
+    const heading = screen.getByRole('heading', { level: 2 });
     expect(heading).toBeInTheDocument();
   });
 

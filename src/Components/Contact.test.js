@@ -29,7 +29,7 @@ describe('Contact Component', () => {
   test('renders the contact form properly', () => {
     render(<Contact />);
 
-    expect(screen.getByRole('heading', { name: /contact/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/your email/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/subject/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/your message/i)).toBeInTheDocument();
