@@ -68,26 +68,25 @@ const Home = () => {
         document.addEventListener('mousemove', onMove);
         rafId = requestAnimationFrame(tick);
 
-        const onEnter = () => ring.classList.add('hover');
-        const onLeave = () => ring.classList.remove('hover');
-
-        const attach = () => {
-            document.querySelectorAll('a, button').forEach(el => {
-                el.removeEventListener('mouseenter', onEnter);
-                el.removeEventListener('mouseleave', onLeave);
-                el.addEventListener('mouseenter', onEnter);
-                el.addEventListener('mouseleave', onLeave);
-            });
+        const onMouseOver = (e) => {
+            if (e.target.closest('a, button')) {
+                ring.classList.add('hover');
+            }
+        };
+        const onMouseOut = (e) => {
+            if (e.target.closest('a, button')) {
+                ring.classList.remove('hover');
+            }
         };
 
-        attach();
-        const mo = new MutationObserver(attach);
-        mo.observe(document.body, { childList: true, subtree: true });
+        document.addEventListener('mouseover', onMouseOver);
+        document.addEventListener('mouseout', onMouseOut);
 
         return () => {
             document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseover', onMouseOver);
+            document.removeEventListener('mouseout', onMouseOut);
             cancelAnimationFrame(rafId);
-            mo.disconnect();
         };
     }, []);
 
