@@ -84,6 +84,7 @@ const Resume = () => {
                         <a 
                             href="/Resume_Anthony_Le.pdf" 
                             download="Resume_Anthony_Le.pdf"
+                            rel="noopener noreferrer"
                             className="resume-btn secondary-btn"
                         >
                             <Download size={18} />
