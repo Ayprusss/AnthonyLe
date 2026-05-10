@@ -14,6 +14,13 @@ jest.mock('framer-motion', () => ({
   },
 }));
 
+// Mock TextScramble to bypass animation requirements during tests
+jest.mock('./ui/TextScramble', () => ({
+  TextScramble: ({ text, as: Tag = 'span', className }) => {
+    return <Tag className={className}>{text}</Tag>;
+  }
+}));
+
 describe('Experience Component', () => {
   test('renders the Experience heading properly', () => {
     render(<Experience />);

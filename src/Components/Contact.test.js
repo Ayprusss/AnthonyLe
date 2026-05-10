@@ -21,6 +21,13 @@ jest.mock('@emailjs/browser', () => ({
   sendForm: jest.fn(),
 }));
 
+// Mock TextScramble to render properly and bypass interval delay logic
+jest.mock('./ui/TextScramble', () => ({
+  TextScramble: ({ text, as: Tag = 'span', className }) => {
+    return <Tag className={className}>{text}</Tag>;
+  }
+}));
+
 describe('Contact Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
