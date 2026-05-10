@@ -148,6 +148,14 @@ const SpaceBackground = () => {
       'M11 23.5 L10.5 24.8 Q12 25.5 13.5 24.8 L13 23.5'
     );
 
+    let starRgbAlpha06 = '';
+    let starRgbAlpha08 = '';
+    let starRgbAlpha65 = '';
+    let starRgbAlpha68 = '';
+    let starRgbAlpha72 = '';
+    let starRgbAlpha90 = '';
+    let starRgbAlpha92 = '';
+
     // ── Spacecraft model registry ─────────────────────────────────────
     // scale      — SVG scale multiplier
     // cx/cy      — rotation pivot in SVG space (visual center of mass)
@@ -161,11 +169,11 @@ const SpaceBackground = () => {
         noseOffset: Math.PI / 2, hasFlame: true,
         draw(now) {
           ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-          ctx.fillStyle = `rgba(${starRgb}, 0.06)`; ctx.fill(saturnVBody);
-          ctx.strokeStyle = `rgba(${starRgb}, 0.9)`; ctx.stroke(saturnVBody);
+          ctx.fillStyle = starRgbAlpha06; ctx.fill(saturnVBody);
+          ctx.strokeStyle = starRgbAlpha90; ctx.stroke(saturnVBody);
           ctx.strokeStyle = 'rgba(255, 107, 43, 0.85)';
           ctx.stroke(saturnVFinL); ctx.stroke(saturnVFinR);
-          ctx.strokeStyle = `rgba(${starRgb}, 0.65)`;
+          ctx.strokeStyle = starRgbAlpha65;
           ctx.stroke(saturnVEngines); ctx.stroke(saturnVTower);
         },
       },
@@ -175,11 +183,11 @@ const SpaceBackground = () => {
         noseOffset: 0, hasFlame: true,
         draw(now) {
           ctx.lineWidth = 1.3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-          ctx.fillStyle = `rgba(${starRgb}, 0.08)`; ctx.fill(shuttleBody);
-          ctx.strokeStyle = `rgba(${starRgb}, 0.92)`; ctx.stroke(shuttleBody);
+          ctx.fillStyle = starRgbAlpha08; ctx.fill(shuttleBody);
+          ctx.strokeStyle = starRgbAlpha92; ctx.stroke(shuttleBody);
           ctx.strokeStyle = 'rgba(255, 107, 43, 0.82)';
           ctx.stroke(shuttleWing); ctx.stroke(shuttleWingTop);
-          ctx.strokeStyle = `rgba(${starRgb}, 0.72)`;
+          ctx.strokeStyle = starRgbAlpha72;
           ctx.stroke(shuttleTail); ctx.stroke(shuttleEngines);
         },
       },
@@ -189,11 +197,11 @@ const SpaceBackground = () => {
         noseOffset: Math.PI / 2, hasFlame: true,
         draw(now) {
           ctx.lineWidth = 1.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-          ctx.fillStyle = `rgba(${starRgb}, 0.06)`; ctx.fill(falcon9Body);
-          ctx.strokeStyle = `rgba(${starRgb}, 0.9)`; ctx.stroke(falcon9Body);
+          ctx.fillStyle = starRgbAlpha06; ctx.fill(falcon9Body);
+          ctx.strokeStyle = starRgbAlpha90; ctx.stroke(falcon9Body);
           ctx.strokeStyle = 'rgba(255, 107, 43, 0.82)';
           ctx.stroke(falcon9GridFinL); ctx.stroke(falcon9GridFinR);
-          ctx.strokeStyle = `rgba(${starRgb}, 0.68)`;
+          ctx.strokeStyle = starRgbAlpha68;
           ctx.stroke(falcon9LegL); ctx.stroke(falcon9LegR); ctx.stroke(falcon9Engine);
         },
       },
@@ -313,6 +321,7 @@ const SpaceBackground = () => {
           twinkleSpeed: rand(1.2, 3.5),
           twinklePhase: Math.random() * Math.PI * 2,
           r, g, b,
+          colorStr: `rgb(${r},${g},${b})`
         });
       }
       // Sparse outer spray — wider, dimmer
@@ -332,6 +341,7 @@ const SpaceBackground = () => {
           twinkleSpeed: rand(0.7, 2.1),
           twinklePhase: Math.random() * Math.PI * 2,
           r, g, b,
+          colorStr: `rgb(${r},${g},${b})`
         });
       }
     };
@@ -431,8 +441,8 @@ const SpaceBackground = () => {
         if (opacity < 0.025) continue;
         ctx.globalAlpha = opacity;
         ctx.shadowBlur = sp.size * 5.5;
-        ctx.shadowColor = `rgb(${sp.r},${sp.g},${sp.b})`;
-        ctx.fillStyle = `rgb(${sp.r},${sp.g},${sp.b})`;
+        ctx.shadowColor = sp.colorStr;
+        ctx.fillStyle = sp.colorStr;
         ctx.beginPath();
         ctx.arc(sx, sy, sp.size, 0, Math.PI * 2);
         ctx.fill();
@@ -464,7 +474,16 @@ const SpaceBackground = () => {
     const updateStarColor = () => {
       const v = window.getComputedStyle(document.documentElement)
         .getPropertyValue('--text-rgb').trim();
-      if (v) starRgb = v;
+      if (v) {
+        starRgb = v;
+        starRgbAlpha06 = `rgba(${starRgb}, 0.06)`;
+        starRgbAlpha08 = `rgba(${starRgb}, 0.08)`;
+        starRgbAlpha65 = `rgba(${starRgb}, 0.65)`;
+        starRgbAlpha68 = `rgba(${starRgb}, 0.68)`;
+        starRgbAlpha72 = `rgba(${starRgb}, 0.72)`;
+        starRgbAlpha90 = `rgba(${starRgb}, 0.9)`;
+        starRgbAlpha92 = `rgba(${starRgb}, 0.92)`;
+      }
     };
 
     const resize = () => {
@@ -537,15 +556,18 @@ const SpaceBackground = () => {
 
         const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
         grad.addColorStop(0, `rgba(${starRgb},0)`);
-        grad.addColorStop(0.6, `rgba(${starRgb},${(alpha * 0.4).toFixed(3)})`);
-        grad.addColorStop(1, `rgba(${starRgb},${alpha.toFixed(3)})`);
+        grad.addColorStop(0.6, `rgba(${starRgb},0.4)`);
+        grad.addColorStop(1, `rgba(${starRgb},1)`);
 
+        ctx.save();
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.moveTo(tailX, tailY);
         ctx.lineTo(headX, headY);
         ctx.strokeStyle = grad;
         ctx.lineWidth = 1.4;
         ctx.stroke();
+        ctx.restore();
       }
 
       // ── Rocket + smoke ────────────────────────────────────────────
@@ -598,12 +620,16 @@ const SpaceBackground = () => {
         if (alpha < 0.003) continue;
 
         const sg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
-        sg.addColorStop(0, `rgba(${starRgb},${alpha.toFixed(3)})`);
+        sg.addColorStop(0, `rgba(${starRgb},1)`);
         sg.addColorStop(1, `rgba(${starRgb},0)`);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
         ctx.beginPath();
         ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
         ctx.fillStyle = sg;
         ctx.fill();
+        ctx.restore();
       }
 
       // Update + draw rockets (in front of smoke)
