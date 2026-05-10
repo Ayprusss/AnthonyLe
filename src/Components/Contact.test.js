@@ -21,6 +21,11 @@ jest.mock('@emailjs/browser', () => ({
   sendForm: jest.fn(),
 }));
 
+// Mock TextScramble so it just renders the text instead of scrambling
+jest.mock('./ui/TextScramble', () => ({
+  TextScramble: ({ text, as: Tag = 'span', className }) => <Tag className={className}>{text}</Tag>,
+}));
+
 describe('Contact Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();

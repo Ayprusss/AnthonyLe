@@ -14,9 +14,15 @@ jest.mock('framer-motion', () => ({
   },
 }));
 
+// Mock TextScramble so it just renders the text instead of scrambling
+jest.mock('./ui/TextScramble', () => ({
+  TextScramble: ({ text, as: Tag = 'span', className }) => <Tag className={className}>{text}</Tag>,
+}));
+
 describe('Experience Component', () => {
   test('renders the Experience heading properly', () => {
     render(<Experience />);
+
     const heading = screen.getByRole('heading', { name: /experience\./i, level: 2 });
     expect(heading).toBeInTheDocument();
   });
