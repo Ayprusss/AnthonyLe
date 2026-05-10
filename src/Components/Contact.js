@@ -34,13 +34,11 @@ const Contact = () => {
             process.env.REACT_APP_EMAILJS_PUBLIC_KEY
         )
             .then((result) => {
-                console.log('Email sent successfully: ', result.text);
                 setResponseMessage("Message submitted. Thanks!");
                 setIsSuccess(true);
                 setIsSending(false);
                 formRef.current.reset();
             }, (error) => {
-                console.log('Failed to send email: ', error.text);
                 setResponseMessage("Error occurred. Please try again.");
                 setIsSuccess(false);
                 setIsSending(false);
