@@ -1,0 +1,84 @@
+.app-window {
+    display: flex;
+    flex-direction: column;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 2px 2px 0 #000000, inset 1px 1px 0 #dfdfdf;
+    overflow: hidden;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+}
+
+/* ── Title bar ── */
+.app-window-titlebar {
+    flex-shrink: 0;
+    cursor: default;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    padding: 3px 3px 3px 4px;
+}
+
+.app-window--focused .app-window-titlebar {
+    background: linear-gradient(to right, #000080, #1084d0);
+}
+
+.app-window:not(.app-window--focused) .app-window-titlebar {
+    background: linear-gradient(to right, #808080, #b0b0b0);
+}
+
+.app-window-title-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff;
+    user-select: none;
+}
+
+.app-window-icon {
+    font-size: 13px;
+    line-height: 1;
+}
+
+/* ── Window body ── */
+.app-window-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #c0c0c0;
+    padding: 0;
+    position: relative;
+}
+
+.app-window-interact-blocker {
+    position: absolute;
+    inset: 0;
+    z-index: 999;
+    background: transparent;
+}
+
+/* ── Resize grip ── */
+.app-window-resize-grip {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    cursor: se-resize !important;
+    z-index: 10;
+    background:
+        linear-gradient(135deg, transparent 0%, transparent 30%, #808080 30%, #808080 40%, transparent 40%, transparent 50%,
+            #808080 50%, #808080 60%, transparent 60%, transparent 70%,
+            #808080 70%, #808080 80%, transparent 80%),
+        linear-gradient(135deg, transparent 0%, transparent 32%, #ffffff 32%, #ffffff 42%, transparent 42%, transparent 52%,
+            #ffffff 52%, #ffffff 62%, transparent 62%, transparent 72%,
+            #ffffff 72%, #ffffff 82%, transparent 82%);
+}
