@@ -1,0 +1,330 @@
+/* ── Window container ── */
+.ie-window {
+    display: flex;
+    flex-direction: column;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 2px 2px 0 #000000, inset 1px 1px 0 #dfdfdf;
+    overflow: hidden;
+    min-width: 380px;
+    min-height: 280px;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+}
+
+.ie-window--hidden {
+    display: none;
+}
+
+/* ── Title bar ── */
+.ie-title-bar {
+    flex-shrink: 0;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    padding: 3px 3px 3px 4px;
+    gap: 0;
+    height: 22px;
+}
+
+/* Active title bar: gradient blue. Inactive: gray */
+.ie-window--focused .ie-title-bar {
+    background: linear-gradient(to right, #000080, #1084d0);
+}
+
+.ie-window:not(.ie-window--focused) .ie-title-bar {
+    background: linear-gradient(to right, #808080, #b0b0b0);
+}
+
+.ie-title-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    font-weight: bold;
+    color: #ffffff;
+    user-select: none;
+}
+
+/* ── Window body ── */
+.ie-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    background-color: #c0c0c0;
+    padding: 0;
+    margin: 0;
+}
+
+/* ── Menu bar ── */
+.ie-menu-bar {
+    display: flex;
+    align-items: center;
+    background-color: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    padding: 1px 2px;
+    flex-shrink: 0;
+}
+
+.ie-menu-item {
+    padding: 2px 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    height: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.ie-menu-item:hover,
+.ie-menu-item:focus {
+    border-color: #808080 #ffffff #ffffff #808080;
+    background-color: #c0c0c0;
+    outline: none;
+}
+
+.ie-menu-item:active {
+    border-color: #ffffff #808080 #808080 #ffffff;
+    padding-top: 3px;
+    padding-left: 7px;
+}
+
+/* ── Toolbar ── */
+.ie-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background-color: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    padding: 3px 4px;
+    flex-shrink: 0;
+}
+
+/* Nav buttons row */
+.ie-nav-btns {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.ie-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 6px;
+    height: 24px;
+    background-color: #c0c0c0;
+    border: 1px solid transparent;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    white-space: nowrap;
+}
+
+.ie-nav-btn:hover {
+    border-color: #808080 #ffffff #ffffff #808080;
+}
+
+.ie-nav-btn:active {
+    border-color: #ffffff #808080 #808080 #ffffff;
+    padding-top: 4px;
+    padding-left: 7px;
+}
+
+.ie-btn-label {
+    font-size: 11px;
+}
+
+/* Address bar row */
+.ie-address-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ie-address-label {
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ie-address-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset 1px 1px 0 #808080;
+    height: 22px;
+    padding: 0 2px;
+    min-width: 0;
+}
+
+.ie-address-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 3px;
+}
+
+.ie-address-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    min-width: 0;
+    height: 100%;
+}
+
+.ie-go-btn {
+    padding: 2px 10px;
+    height: 22px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    flex-shrink: 0;
+}
+
+.ie-go-btn:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset 1px 1px 0 #808080;
+    padding-top: 3px;
+    padding-left: 11px;
+}
+
+/* Toolbar divider */
+.ie-toolbar-divider {
+    height: 1px;
+    background-color: #808080;
+    box-shadow: 0 1px 0 #ffffff;
+    flex-shrink: 0;
+}
+
+/* ── Content area ── */
+.ie-content-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-color: #ffffff;
+    border: 2px inset #808080;
+    margin: 2px 2px 0 2px;
+}
+
+.ie-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #ffffff;
+}
+
+/* Blocker prevents iframe from capturing mouse during drag/resize */
+.ie-interaction-blocker {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: transparent;
+}
+
+/* ── Loading bar ── */
+.ie-loading-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #c0c0c0;
+    z-index: 5;
+}
+
+.ie-loading-bar-fill {
+    height: 100%;
+    width: 40%;
+    background: #000080;
+    animation: ie-loading 1.2s ease-in-out infinite;
+}
+
+@keyframes ie-loading {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+}
+
+/* ── Status bar ── */
+.ie-status-bar {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    background-color: #c0c0c0;
+    border-top: 1px solid #808080;
+    padding: 0 4px;
+    flex-shrink: 0;
+    gap: 4px;
+}
+
+.ie-status-text {
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 0 4px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.ie-status-spacer {
+    flex: 1;
+}
+
+/* ── Resize grip ── */
+.ie-resize-grip {
+    width: 16px;
+    height: 16px;
+    cursor: se-resize !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Responsive: on mobile, ensure window fills screen ── */
+@media (max-width: 767px) {
+    .ie-window {
+        min-width: 0 !important;
+    }
+    .ie-btn-label {
+        display: none;
+    }
+    .ie-address-label {
+        display: none;
+    }
+    .ie-nav-btn {
+        padding: 3px 4px;
+    }
+}
