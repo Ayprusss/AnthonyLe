@@ -1,0 +1,307 @@
+.solitaire {
+    display: flex;
+    flex-direction: column;
+    background-color: #008000;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    position: relative;
+    user-select: none;
+}
+
+/* ── Menu bar ── */
+.sol-menubar {
+    display: flex;
+    align-items: center;
+    background-color: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    padding: 1px 2px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 20;
+}
+
+.sol-menu-wrap {
+    position: relative;
+}
+
+.sol-menu-btn {
+    padding: 2px 8px;
+    height: 20px;
+    background: transparent;
+    border: 1px solid transparent;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    display: flex;
+    align-items: center;
+}
+
+.sol-menu-btn:hover,
+.sol-menu-btn--active {
+    background-color: #000080;
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.sol-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 160px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 2px 2px 0 #000000;
+    z-index: 100;
+    padding: 2px 0;
+}
+
+.sol-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 3px 20px 3px 8px;
+    background: transparent;
+    border: none;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    white-space: nowrap;
+}
+
+.sol-dropdown button:hover,
+.sol-dropdown button:focus {
+    background-color: #000080;
+    color: #ffffff;
+    outline: none;
+}
+
+.sol-dropdown-sep {
+    height: 1px;
+    background-color: #808080;
+    margin: 2px 4px;
+    box-shadow: 0 1px 0 #ffffff;
+}
+
+/* ── Top row (stock + waste + foundations) ── */
+.sol-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px 8px 4px 8px;
+    flex-shrink: 0;
+}
+
+.sol-spacer {
+    flex: 1;
+}
+
+/* ── Pile slot ── */
+.sol-pile-slot {
+    width: 71px;
+    height: 96px;
+    flex-shrink: 0;
+    position: relative;
+    cursor: default;
+}
+
+.sol-waste-stack {
+    position: relative;
+    width: 71px;
+    height: 96px;
+}
+
+/* ── Empty pile placeholder ── */
+.sol-empty-pile {
+    width: 71px;
+    height: 96px;
+    border: 2px dashed rgba(255, 255, 255, 0.35);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18px;
+    box-sizing: border-box;
+    cursor: default;
+}
+
+.sol-empty-pile--exhausted {
+    color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Cards ── */
+.sol-card {
+    width: 71px;
+    height: 96px;
+    background-color: #ffffff;
+    border: 1px solid #808080;
+    border-radius: 4px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    cursor: default;
+    flex-shrink: 0;
+}
+
+.sol-card--selected {
+    outline: 2px solid #ffff00;
+    outline-offset: 1px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 2px #ffff00;
+}
+
+.sol-card--red {
+    color: #cc0000;
+}
+
+.sol-card:not(.sol-card--red):not(.sol-card--facedown) {
+    color: #000000;
+}
+
+.sol-card--facedown {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #000080 0px, #000080 2px,
+            #0000cc 2px, #0000cc 6px
+        );
+    border: 1px solid #000044;
+    color: transparent;
+    cursor: default;
+}
+
+.sol-card--stock {
+    cursor: pointer;
+}
+
+/* Card labels */
+.sol-card-tl {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: center;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+}
+
+.sol-card-br {
+    position: absolute;
+    bottom: 3px;
+    right: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: center;
+    transform: rotate(180deg);
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+}
+
+.sol-card-suit {
+    font-size: 26px;
+    line-height: 1;
+}
+
+/* ── Tableau ── */
+.sol-tableau {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    padding: 4px 8px 8px 8px;
+    align-items: flex-start;
+    overflow: auto;
+}
+
+.sol-tableau-col {
+    flex: 1;
+    min-width: 71px;
+    max-width: 80px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 96px;
+    cursor: default;
+}
+
+.sol-tableau-col .sol-card,
+.sol-tableau-col .sol-card--facedown {
+    width: 100%;
+    max-width: 80px;
+}
+
+/* ── Status bar ── */
+.sol-statusbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 3px 8px;
+    background-color: #c0c0c0;
+    border-top: 1px solid #808080;
+    flex-shrink: 0;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+}
+
+/* ── Win overlay ── */
+.sol-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 128, 0, 0.82);
+    z-index: 50;
+}
+
+.sol-overlay-box {
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 2px 2px 0 #000000;
+    padding: 16px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sol-overlay-box p {
+    color: #000000;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.sol-overlay-sub {
+    font-size: 11px !important;
+    font-weight: normal !important;
+}
+
+.sol-overlay-box button {
+    margin-top: 4px;
+    padding: 4px 16px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    cursor: default;
+}
+
+.sol-overlay-box button:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding-top: 5px;
+    padding-left: 17px;
+}
