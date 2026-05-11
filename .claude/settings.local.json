@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "Bash(Get-ChildItem -Path \"D:\\\\coding_files\\\\personalwebsite\\\\anthonyle\" -Recurse -Force)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem \"D:\\\\coding_files\\\\personalwebsite\\\\anthonyle\\\\node_modules\\\\98.css\" -ErrorAction SilentlyContinue | Select-Object Name; if \\(-not $?\\) { \"Package not found\" })",
+      "Bash(npm start *)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_resize",
+      "Bash(Start-Sleep -Seconds 15)",
+      "Bash(Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 5)",
+      "Bash(Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(Start-Process -FilePath \"cmd.exe\" -ArgumentList \"/c\", \"cd /d D:\\\\coding_files\\\\personalwebsite\\\\anthonyle && npm start\" -WindowStyle Hidden; Write-Output \"Dev server starting...\")",
+      "PowerShell(Start-Sleep -Seconds 20; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 5; Write-Output \"Server up: $\\($r.StatusCode\\)\" } catch { Write-Output \"Not yet: $_\" })",
+      "mcp__plugin_playwright_playwright__browser_hover",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_wait_for",
+      "Bash(git cherry-pick *)"
+    ]
+  }
+}
