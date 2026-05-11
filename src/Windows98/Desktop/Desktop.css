@@ -1,0 +1,70 @@
+/* ── Restore default cursor for Win98 context (overrides the global cursor: none) ── */
+.win98-root,
+.win98-root * {
+    cursor: default !important;
+}
+
+.win98-root button,
+.win98-root [role="button"] {
+    cursor: default !important;
+}
+
+/* ── Desktop layout ── */
+.win98-desktop {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #008080;
+    background-image:
+        repeating-linear-gradient(
+            45deg,
+            rgba(0, 100, 100, 0.15) 0px,
+            rgba(0, 100, 100, 0.15) 1px,
+            transparent 1px,
+            transparent 4px
+        );
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    user-select: none;
+}
+
+/* ── Icon grid (top-left) ── */
+.win98-icon-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 12px;
+    flex: 1;
+}
+
+/* ── Override 98.css :root variable for Win98 context ── */
+.win98-root {
+    --surface: #c0c0c0;
+    --button-face: #dfdfdf;
+    --button-highlight: #ffffff;
+    --button-shadow: #808080;
+    --window-frame: #0a0a0a;
+    --dialog-blue: #000080;
+    --text-color: #000000;
+    --link-blue: #0000ff;
+}
+
+/* ── Ensure Win98 input/button fonts match Win98 look ── */
+.win98-root input,
+.win98-root button,
+.win98-root select,
+.win98-root textarea {
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+}
+
+@media (max-width: 600px) {
+    .win98-icon-grid {
+        padding: 8px 6px;
+        gap: 8px;
+    }
+}
