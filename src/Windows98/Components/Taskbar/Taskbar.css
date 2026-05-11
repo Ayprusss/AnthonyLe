@@ -1,0 +1,141 @@
+.win98-taskbar {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    min-height: 32px;
+    background-color: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    box-shadow: inset 0 2px 0 #dfdfdf, 0 -1px 0 #808080;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 4px;
+    z-index: 300;
+    flex-shrink: 0;
+}
+
+/* ── Start button ── */
+.win98-start-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 8px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    color: #000000;
+    cursor: default;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.win98-start-btn:active,
+.win98-start-btn--active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset 1px 1px 0 #808080;
+    padding-left: 9px;
+    padding-top: 1px;
+}
+
+.win98-logo-icon {
+    display: block;
+    flex-shrink: 0;
+}
+
+/* ── Separator ── */
+.win98-taskbar-sep {
+    width: 2px;
+    height: 24px;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #ffffff;
+    flex-shrink: 0;
+}
+
+/* ── Open windows area ── */
+.win98-taskbar-windows {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    overflow: hidden;
+    height: 100%;
+}
+
+.win98-taskbar-window-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    min-width: 60px;
+    max-width: 160px;
+    padding: 0 6px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.win98-taskbar-window-btn:active,
+.win98-taskbar-window-btn--active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset 1px 1px 0 #808080;
+    padding-left: 7px;
+    padding-top: 1px;
+    background-color: #b8b8b8;
+}
+
+.win98-taskbar-ie-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.win98-taskbar-window-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+/* ── System tray / clock ── */
+.win98-system-tray {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 6px;
+    border: 1px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    box-shadow: inset 1px 1px 0 #808080;
+    background-color: #c0c0c0;
+    flex-shrink: 0;
+}
+
+.win98-clock {
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    white-space: nowrap;
+}
+
+@media (max-width: 400px) {
+    .win98-taskbar-window-btn {
+        max-width: 100px;
+    }
+    .win98-start-btn span {
+        display: none;
+    }
+}
