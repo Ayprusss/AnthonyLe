@@ -1,4 +1,4 @@
-:root {
+html:root {
     --bg:          #09090b;
     --bg-rgb:      9, 9, 11;
     --surface:     #111113;
@@ -22,7 +22,7 @@
     --ripple-rgb:  244, 244, 245;
 }
 
-[data-mode="light"] {
+html[data-mode="light"] {
     --bg:          #f5f4ef;
     --bg-rgb:      245, 244, 239;
     --surface:     #eceae4;

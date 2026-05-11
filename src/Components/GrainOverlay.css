@@ -1,0 +1,8 @@
+.grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.05;
+    filter: url(#grainFilter);
+}
