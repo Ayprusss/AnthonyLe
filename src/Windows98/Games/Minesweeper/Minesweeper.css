@@ -1,0 +1,263 @@
+.minesweeper {
+    display: flex;
+    flex-direction: column;
+    background-color: #c0c0c0;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    position: relative;
+    user-select: none;
+}
+
+/* ── Menu bar ── */
+.ms-menubar {
+    display: flex;
+    align-items: center;
+    background-color: #c0c0c0;
+    border-bottom: 1px solid #808080;
+    padding: 1px 2px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 20;
+}
+
+.ms-menu-item-wrap {
+    position: relative;
+}
+
+.ms-menu-btn {
+    padding: 2px 8px;
+    height: 20px;
+    background: transparent;
+    border: 1px solid transparent;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    display: flex;
+    align-items: center;
+}
+
+.ms-menu-btn:hover,
+.ms-menu-btn--active {
+    background-color: #000080;
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.ms-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 140px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 2px 2px 0 #000000;
+    z-index: 100;
+    padding: 2px 0;
+}
+
+.ms-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 3px 20px 3px 8px;
+    background: transparent;
+    border: none;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    color: #000000;
+    cursor: default;
+    white-space: nowrap;
+}
+
+.ms-dropdown button:hover,
+.ms-dropdown button:focus {
+    background-color: #000080;
+    color: #ffffff;
+    outline: none;
+}
+
+.ms-dropdown-checked {
+    font-weight: normal;
+}
+
+.ms-dropdown-sep {
+    height: 1px;
+    background-color: #808080;
+    margin: 2px 4px;
+    box-shadow: 0 1px 0 #ffffff;
+}
+
+/* ── Header ── */
+.ms-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background-color: #c0c0c0;
+    border-bottom: 2px inset #808080;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.ms-lcd {
+    background-color: #000000;
+    color: #ff0000;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 2px 4px;
+    min-width: 46px;
+    text-align: center;
+    border: 2px inset #808080;
+    letter-spacing: 2px;
+}
+
+.ms-face-btn {
+    width: 32px;
+    height: 28px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+    cursor: default;
+    padding: 0;
+}
+
+.ms-face-btn:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding-top: 2px;
+    padding-left: 2px;
+}
+
+/* ── Board ── */
+.ms-board-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: #c0c0c0;
+    border: 2px inset #808080;
+    margin: 4px;
+}
+
+.ms-board {
+    display: grid;
+    gap: 0;
+    border: 2px inset #808080;
+    width: fit-content;
+}
+
+/* ── Cell states ── */
+.ms-cell {
+    width: 26px;
+    min-width: 26px;
+    max-width: 26px;
+    height: 26px;
+    min-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: default;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.ms-cell--unrevealed {
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+}
+
+.ms-cell--unrevealed:hover {
+    background-color: #d0d0d0;
+}
+
+.ms-cell--unrevealed:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    background-color: #c0c0c0;
+}
+
+.ms-cell--revealed {
+    background-color: #c0c0c0;
+    border: 1px solid #808080;
+}
+
+.ms-cell--mine {
+    background-color: #c0c0c0;
+    border: 1px solid #808080;
+}
+
+.ms-cell--exploded {
+    background-color: #ff0000;
+    border: 1px solid #808080;
+}
+
+/* ── Overlay ── */
+.ms-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(192, 192, 192, 0.85);
+    z-index: 50;
+}
+
+.ms-overlay-box {
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: 2px 2px 0 #000000;
+    padding: 16px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ms-overlay-box p {
+    color: #000000;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.ms-overlay-time {
+    font-size: 11px !important;
+    font-weight: normal !important;
+}
+
+.ms-overlay-box button {
+    margin-top: 4px;
+    padding: 4px 16px;
+    background-color: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    box-shadow: inset 1px 1px 0 #dfdfdf;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    cursor: default;
+}
+
+.ms-overlay-box button:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding-top: 5px;
+    padding-left: 17px;
+}
