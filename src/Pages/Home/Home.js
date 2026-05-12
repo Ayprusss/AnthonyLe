@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Home.css';
-import '../../Components/GrainOverlay.css';
 import Navbar from '../../Components/Navbar';
 import Hero from '../../Components/Hero';
 import Skills from '../../Components/Skills';
@@ -102,15 +101,6 @@ const Home = () => {
             {/* Background stack */}
             <div className="base-bg" aria-hidden="true" />
             <SpaceBackground />
-
-            {/* Grain filter */}
-            <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
-                <filter id="grainFilter">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-                    <feColorMatrix type="saturate" values="0" />
-                </filter>
-            </svg>
-            <div className="grain-overlay" aria-hidden="true" />
 
             <Navbar mode={mode} onToggleMode={() => setMode(m => m === 'dark' ? 'light' : 'dark')} />
 
