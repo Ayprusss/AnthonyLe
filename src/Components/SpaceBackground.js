@@ -521,8 +521,13 @@ const SpaceBackground = () => {
       // Spawn / draw shooting stars
       if (Date.now() >= nextShootAt) spawnShooter();
 
-      shooters = shooters.filter(s => s.life < s.duration);
-      for (const s of shooters) {
+      for (let i = shooters.length - 1; i >= 0; i--) {
+        const s = shooters[i];
+        if (s.life >= s.duration) {
+          shooters.splice(i, 1);
+          continue;
+        }
+
         s.life += dt;
         const prog = s.life / s.duration;
         const alpha = s.maxOpacity * Math.sin(prog * Math.PI);
