@@ -26,7 +26,6 @@ export function TextScramble({
     text
       .split('')
       .map(c => (c === ' ' ? ' ' : CHARS[Math.floor(Math.random() * CHARS.length)]))
-      .join('')
   );
   const [isScrambling, setIsScrambling] = useState(false);
   const intervalRef = useRef(null);
@@ -56,14 +55,13 @@ export function TextScramble({
           if (char === ' ') return ' ';
           if (i < revealedLength) return text[i];
           return CHARS[Math.floor(Math.random() * CHARS.length)];
-        })
-        .join('');
+        });
 
       setDisplayText(next);
 
       if (frameRef.current >= framesTotal) {
         clearInterval(intervalRef.current);
-        setDisplayText(text);
+        setDisplayText(text.split(''));
         setIsScrambling(false);
       }
     }, 50);
@@ -98,7 +96,7 @@ export function TextScramble({
 
   return (
     <Tag ref={rootRef} className={`ts-root ${className}`}>
-      {displayText.split('').map((char, i) => (
+      {displayText.map((char, i) => (
         <span
           key={i}
           className={`ts-char${
