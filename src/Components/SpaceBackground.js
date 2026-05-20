@@ -584,9 +584,13 @@ const SpaceBackground = () => {
       if (smokeParticles.length > 240) smokeParticles = smokeParticles.slice(-180);
 
       // Update + draw smoke (behind rockets)
-      smokeParticles = smokeParticles.filter(p => p.life < p.maxLife);
-      for (const p of smokeParticles) {
+      const nextSmokeParticles = [];
+      for (let i = 0; i < smokeParticles.length; i++) {
+        const p = smokeParticles[i];
         p.life += dt;
+        if (p.life >= p.maxLife) continue;
+
+        nextSmokeParticles.push(p);
         p.x += p.vx * dt;
         p.y += p.vy * dt;
         p.vx *= 0.984;
@@ -605,6 +609,7 @@ const SpaceBackground = () => {
         ctx.fillStyle = sg;
         ctx.fill();
       }
+      smokeParticles = nextSmokeParticles;
 
       // Update + draw rockets (in front of smoke)
       rockets = rockets.filter(r =>
