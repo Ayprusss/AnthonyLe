@@ -33,6 +33,12 @@ const projects = [
         description: 'A full-stack web application that serves as a comprehensive climbing map platform, allowing users to discover, share, and manage climbing locations worldwide.',
         tech: ['Next.js', 'Tailwind CSS', 'MapLibre GL', 'Supabase', 'PostGIS', 'TypeScript', 'HTML'],
         github: 'https://github.com/Ayprusss/crux',
+    },
+    {
+        title: 'Nine Vicious Detector',
+        description: 'A real-time computer vision app detecting two of underground rapper Nine Vicious\'s famous hand signs from a live webcam feed using a custom-trained YOLOv7n model, opening up a corresponding youtube music video per sign.',
+        tech: ['Python', 'yaml', 'OpenCV', 'Ultralytics - YOLOv8n', 'Roboflow', 'Pytorch-ROCm 7.2.1', 'OpenCV', 'MediaPipe', 'Rstdlib webbrowser'],
+        github: 'https://github.com/Ayprusss/9-vicious-detector',
     }
 ];
 
