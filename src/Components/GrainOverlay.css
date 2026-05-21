@@ -16,8 +16,3 @@
     filter: url(#grainFilter);
     background: transparent;
 }
-
-[data-mode="light"] .grain-overlay::after {
-    opacity: 0.04;
-    mix-blend-mode: multiply;
-}
