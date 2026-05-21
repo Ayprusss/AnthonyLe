@@ -5,16 +5,28 @@ import './Volunteering.css';
 // TODO: replace placeholder descriptions with real copy (user-supplied).
 const activities = [
     {
-        role: "Hackathon Organizer",
-        organization: "uOttaHack",
-        period: "2024 - Present",
-        description: "Placeholder — describe your role helping run uOttaHack: what you organized, the scale of the event, and what you contributed to the community."
+        role: "Advisor",
+        organization: "uOttaHack VII + beyond",
+        period: "February 2025 - Present",
+        description: "Advisor position for uOttaHack VII and all future organizer teams."
     },
     {
-        role: "Member",
-        organization: "SESA (Software Engineering Student Association)",
-        period: "2023 - Present",
-        description: "Placeholder — describe your involvement with SESA: events, initiatives, and the impact you had on fellow students."
+        role: "Director of Logistics",
+        organization: "uOttaHack VII",
+        period: "March 2024 - January 2025",
+        description: "Director position overseeing the management of the Logistics team, fulfilling and managing all tasks to serve over 900+ hackers."
+    },
+    {
+        role: "Community Coordinator",
+        organization: "uOttaHack VI",
+        period: "October 2023 - March 2024",
+        description: "Coordinator part of the Community team, focused on creating and managing community events for over 800+ hackers."
+    },
+    {
+        role: "Partnerships Coordinator",
+        organization: "Software Engineering Student Association (uOttawa SESA)",
+        period: "January 2025 - April 2025",
+        description: "Coordinator part of the Partnerships team responsible for acquiring and negotating new and previous sponsors for events and funding."
     },
 ];
 
