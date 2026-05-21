@@ -20,6 +20,123 @@
     margin: 0;
 }
 
+.about-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+}
+
+/* ---- Portrait ---- */
+.about-portrait {
+    margin: 0;
+}
+
+.about-portrait-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background:
+        linear-gradient(135deg, rgba(var(--accent-rgb), 0.07), transparent 55%),
+        #0d0d12;
+    transition: border-color 0.3s ease;
+}
+
+.about-portrait-frame:hover { border-color: rgba(var(--accent-rgb), 0.55); }
+
+/* amber cinematic corner ticks */
+.about-portrait-frame::before,
+.about-portrait-frame::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 3;
+}
+.about-portrait-frame::before {
+    top: 8px;
+    left: 8px;
+    border-top: 1px solid var(--accent);
+    border-left: 1px solid var(--accent);
+}
+.about-portrait-frame::after {
+    bottom: 8px;
+    right: 8px;
+    border-bottom: 1px solid var(--accent);
+    border-right: 1px solid var(--accent);
+}
+
+.about-portrait-img {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(1) contrast(1.05);
+    transition: filter 0.55s ease, transform 0.6s ease;
+}
+
+.about-portrait-frame:hover .about-portrait-img {
+    filter: grayscale(0) contrast(1);
+    transform: scale(1.035);
+}
+
+/* "NO SIGNAL" placeholder — sits behind the img; shown when no photo exists */
+.about-portrait-placeholder {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image:
+        repeating-linear-gradient(0deg, rgba(var(--text-rgb), 0.03) 0 1px, transparent 1px 4px);
+}
+
+.about-portrait-ph-label {
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--border);
+}
+
+/* faint scanline sweep over the whole frame */
+.about-portrait-scan {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, rgba(var(--accent-rgb), 0.05) 50%, transparent 100%);
+    background-size: 100% 220%;
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.about-portrait-frame:hover .about-portrait-scan { opacity: 1; }
+
+.about-portrait-caption {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.85rem;
+    font-family: var(--font-body);
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+}
+
+.about-portrait-tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
 .about-facts {
     display: flex;
     flex-direction: column;
@@ -55,5 +172,8 @@
     .about-content {
         grid-template-columns: 1fr;
         gap: 2.5rem;
+    }
+    .about-rail {
+        max-width: 320px;
     }
 }
