@@ -1,41 +1,108 @@
-import { motion } from 'framer-motion';
+import { useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TextScramble } from './ui/TextScramble';
 import './Hobbies.css';
 
-// TODO: replace placeholder hobbies + descriptions with real copy (user-supplied).
+// TODO: swap blurbs/links for real copy + real URLs (user-supplied).
+// Each card is a "channel" in the transmission deck — tune through them.
 const hobbies = [
     {
         name: "Rock Climbing",
-        description: "Placeholder — what you love about climbing, indoor vs outdoor, favourite spots or grades.",
+        tag: "VERTICAL",
+        blurb: "Placeholder — bouldering and lead, indoors through winter and on real rock when it's warm. The puzzle of a problem is the draw.",
+        meta: { label: "Discipline", value: "Bouldering" },
+        href: "#",
+        linkLabel: "View sends",
     },
     {
-        name: "Photography",
-        description: "Placeholder — the kind of photography you shoot and what draws you to it.",
+        name: "Hiking",
+        tag: "TRAILS",
+        blurb: "Placeholder — long days on the trail, the further from cell service the better. Where I go to reset.",
+        meta: { label: "", value: "" },
+        href: "#",
+        linkLabel: "See the routes",
     },
     {
-        name: "Travel",
-        description: "Placeholder — places you've been or want to go, and what travel means to you.",
+        name: "Exercising",
+        tag: "STRENGTH",
+        blurb: "Placeholder — consistent training as the one non-negotiable in the week. Progressive overload, repeat.",
+        meta: { label: "Focus", value: "U/L split" },
+        href: "#",
+        linkLabel: "Open the split",
+    },
+    {
+        name: "Fashion",
+        tag: "STYLE",
+        blurb: "Placeholder — building a wardrobe with intent, leaning workwear and archive pieces. Fit over hype.",
+        meta: { label: "Leaning", value: "Archive · Gorpcore · Japanese + Korean designers" },
+        href: "#",
+        linkLabel: "Browse fits",
+    },
+    {
+        name: "Music",
+        tag: "AUDIO",
+        blurb: "Placeholder — always digging for the next record, mostly underground rap and anything with a strange pulse.",
+        meta: { label: "On repeat", value: "Underground rap" },
+        href: "https://open.spotify.com/user/22qrv4t4f3u3nxmxtgiybk6ui?si=6f49106d14154a20",
+        linkLabel: "Open playlist",
     },
     {
         name: "Gaming",
-        description: "Placeholder — genres or titles you enjoy and why.",
+        tag: "PLAY",
+        blurb: "Placeholder — competitive ladders and the occasional 80-hour RPG. A good way to think about systems.",
+        meta: { label: "Genre", value: "Competitive · RPG" },
+        href: "https://steamcommunity.com/id/Ayprusss/",
+        linkLabel: "View library",
     },
 ];
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { staggerChildren: 0.1 }
-    }
+const cardVariants = {
+    enter: (dir) => ({
+        opacity: 0,
+        x: dir > 0 ? 90 : -90,
+        rotateY: dir > 0 ? 14 : -14,
+        scale: 0.9,
+    }),
+    center: { opacity: 1, x: 0, rotateY: 0, scale: 1 },
+    exit: (dir) => ({
+        opacity: 0,
+        x: dir > 0 ? -90 : 90,
+        rotateY: dir > 0 ? -14 : 14,
+        scale: 0.9,
+    }),
 };
 
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-};
+const pad = (n) => String(n).padStart(2, '0');
+
+const Chevron = ({ dir }) => (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"
+        fill="none" stroke="currentColor" strokeWidth="1.5"
+        strokeLinecap="round" strokeLinejoin="round">
+        <path d={dir === 'prev' ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
+    </svg>
+);
 
 const Hobbies = () => {
+    const [[index, direction], setState] = useState([0, 0]);
+    const total = hobbies.length;
+    const dragging = useRef(false);
+
+    const paginate = useCallback((dir) => {
+        setState(([i]) => [(i + dir + total) % total, dir]);
+    }, [total]);
+
+    const goTo = useCallback((target) => {
+        setState(([i]) => [target, target > i ? 1 : -1]);
+    }, []);
+
+    const onKeyDown = (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); paginate(1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); paginate(-1); }
+    };
+
+    const hobby = hobbies[index];
+    const isExternal = /^https?:\/\//.test(hobby.href);
+
     return (
         <section className="section-container">
             <motion.div
@@ -47,24 +114,120 @@ const Hobbies = () => {
                 <TextScramble text="Hobbies." as="h2" className="section-title" inView />
                 <div className="section-divider"></div>
                 <p className="section-subtitle">
-                    What I get up to when I'm away from the keyboard.
+                    What I get up to when I'm away from the keyboard — tune through the channels.
                 </p>
             </motion.div>
 
             <motion.div
-                className="hobbies-grid"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
+                className="hobby-deck"
+                role="group"
+                aria-roledescription="carousel"
+                aria-label="Hobbies"
+                tabIndex={0}
+                onKeyDown={onKeyDown}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.5, delay: 0.15 }}
             >
-                {hobbies.map((hobby, idx) => (
-                    <motion.div className="hobby-card" key={idx} variants={itemVariants}>
-                        <h3 className="hobby-name">{hobby.name}</h3>
-                        <p className="hobby-description">{hobby.description}</p>
-                    </motion.div>
-                ))}
+                <button
+                    type="button"
+                    className="hobby-arrow hobby-arrow-prev"
+                    onClick={() => paginate(-1)}
+                    aria-label="Previous hobby"
+                >
+                    <Chevron dir="prev" />
+                </button>
+
+                <div className="hobby-stage" aria-live="polite">
+                    <span className="hobby-ghost hobby-ghost-2" aria-hidden="true"></span>
+                    <span className="hobby-ghost hobby-ghost-1" aria-hidden="true"></span>
+
+                    <AnimatePresence mode="wait" custom={direction} initial={false}>
+                        <motion.article
+                            key={index}
+                            className="hobby-card-rot"
+                            custom={direction}
+                            variants={cardVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={0.18}
+                            dragMomentum={false}
+                            onDragStart={() => { dragging.current = true; }}
+                            onDragEnd={(e, info) => {
+                                const swipe = info.offset.x;
+                                if (swipe < -70 || info.velocity.x < -400) paginate(1);
+                                else if (swipe > 70 || info.velocity.x > 400) paginate(-1);
+                                // reset on next tick so the explore link click isn't swallowed
+                                setTimeout(() => { dragging.current = false; }, 0);
+                            }}
+                        >
+                            <span className="hobby-corner hobby-corner-tl" aria-hidden="true"></span>
+                            <span className="hobby-corner hobby-corner-br" aria-hidden="true"></span>
+
+                            <div className="hobby-card-top">
+                                <span className="hobby-ch">
+                                    <span className="hobby-ch-num">CH.{pad(index + 1)}</span>
+                                    <span className="hobby-ch-total"> / {pad(total)}</span>
+                                </span>
+                                <span className="hobby-tag">{hobby.tag}</span>
+                            </div>
+
+                            <h3 className="hobby-name">{hobby.name}</h3>
+                            <p className="hobby-blurb">{hobby.blurb}</p>
+
+                            <div className="hobby-meta">
+                                <span className="hobby-meta-label">{hobby.meta.label}</span>
+                                <span className="hobby-meta-value">{hobby.meta.value}</span>
+                            </div>
+
+                            <a
+                                className="btn-secondary hobby-explore"
+                                href={hobby.href}
+                                target={isExternal ? "_blank" : undefined}
+                                rel={isExternal ? "noopener noreferrer" : undefined}
+                                onClick={(e) => {
+                                    if (dragging.current || hobby.href === '#') e.preventDefault();
+                                }}
+                            >
+                                {hobby.linkLabel}
+                                <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
+                                    fill="none" stroke="currentColor" strokeWidth="1.6"
+                                    strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h13M12 6l6 6-6 6" />
+                                </svg>
+                            </a>
+                        </motion.article>
+                    </AnimatePresence>
+                </div>
+
+                <button
+                    type="button"
+                    className="hobby-arrow hobby-arrow-next"
+                    onClick={() => paginate(1)}
+                    aria-label="Next hobby"
+                >
+                    <Chevron dir="next" />
+                </button>
             </motion.div>
+
+            <div className="hobby-dots" role="tablist" aria-label="Select a hobby">
+                {hobbies.map((h, i) => (
+                    <button
+                        type="button"
+                        key={h.name}
+                        className={`hobby-dot${i === index ? ' is-active' : ''}`}
+                        onClick={() => goTo(i)}
+                        role="tab"
+                        aria-selected={i === index}
+                        aria-label={h.name}
+                    />
+                ))}
+            </div>
         </section>
     );
 };
