@@ -22,30 +22,41 @@ Cinematic dark-first editorial aesthetic.
 - **Display font**: `Bebas Neue` (condensed — section titles, hero name, project/role headings)
 - **Body font**: `IBM Plex Mono` (all body text, labels, nav links, form inputs)
 - **Accent color**: `#ff6b2b` (electric amber-orange) — used sparingly for labels, active states, hover accents
-- **Base**: near-black `#09090b` dark / warm cream `#f5f4ef` light — binary toggle, no section-by-section transitions
+- **Base**: near-black `#09090b` — single dark palette. The Navbar toggle switches **Professional ↔ Personal** (content + background), NOT colors. (A cream light mode was removed; both themes share the dark palette.)
 - **Ghost section numbers**: CSS counters on `main > div` render auto-numbered `::before` on `.section-container` at low opacity
 
 ### Rendering & Animation Stack
 
-- **Canvas starfield** (`SpaceBackground.js`) — 225 procedural stars across 3 depth layers with mouse parallax, scroll drift, twinkling, and shooting stars. Also animates spacecraft (Saturn V, Space Shuttle, Falcon 9) flying across the screen on curved arcs with engine flame and smoke particle trails. Reads `--text-rgb` to auto-invert in light mode.
+- **Canvas starfield** (`SpaceBackground.js`) — 225 procedural stars across 3 depth layers with mouse parallax, scroll drift, twinkling, and shooting stars. In **Professional** theme it animates spacecraft (Saturn V, Space Shuttle, Falcon 9) flying across the screen on curved arcs with engine flame and smoke particle trails. It watches `data-theme`: in **Personal** theme it suppresses rockets, fades out the supernova bloom, and crossfades (`personalT`) to a procedural Earth scene. `drawEarthScene` renders a day/night globe whose continents are **vector silhouettes** (`LAND_SHAPES` lon/lat polygons, densified + orthographically projected onto the rotating sphere, far-side vertices clamped to the limb), shaded by a single sub-solar terminator overlay, with amber night-side city lights (`CITIES`), an orbiting Moon (near-edge-on orbit, passes in front of/behind Earth), and a corner Sun. Earth spin + Moon orbit are driven by both `now` and `pageScrollY`.
 - **Custom cursor** (`Home.js`) — lagged ring (lerp `t=0.13`) + instant dot, both `requestAnimationFrame`-driven. Ring expands on hover over links/buttons. Hidden on touch devices.
 - **Framer Motion** — hero entrance animations (staggered slide-in) and section scroll reveals
 - **React Scroll** — smooth anchor navigation between sections
 - `GrainOverlay.css` — film grain texture via SVG `feTurbulence`, fixed at z-index 10
 
 ### Layout Flow
-`App.js` → `Home.js` (global `mode` state, IntersectionObserver section tracking, cursor rAF loop) → renders: `Navbar`, `Hero`, `Skills`, `Projects`, `Experience`, `Resume`, `Contact`
+`App.js` → `Home.js` (global `theme` state, IntersectionObserver section tracking, cursor rAF loop) → renders `Navbar`, then `Hero` + a theme-dependent section set + `Contact`.
+
+The section set is the `SECTIONS` config in `Home.js`. `Hero` and `Contact` bookend both themes; the middle slots swap by theme (slots stay position-aligned so ghost numbers 01–06 never shift):
+
+| Slot | Professional | Personal       |
+|------|--------------|----------------|
+| 1    | `Skills`     | `About`        |
+| 2    | `Projects`   | `Volunteering` |
+| 3    | `Experience` | `Experience` (shared) |
+| 4    | `Resume`     | `Hobbies`      |
+
+`Home.js` renders `SECTIONS[theme]` into `<div id={s.id}>` wrappers and passes the same list to `Navbar` as `links` (which appends a static `contact` link). The IntersectionObserver effect depends on `theme` so it re-observes after a swap.
 
 Background z-index stack: `base-bg` (−3, solid color) → `SpaceBackground` canvas (−2) → content → `grain-overlay` (10).
 
-### Theming
-`src/theme.css` defines two states: default (dark) and `[data-mode="light"]`. Key variables:
+### Theming (Professional / Personal)
+Both themes share **one dark palette** — the toggle swaps content + background, not colors. `src/theme.css` defines the dark `:root` tokens only (the old `[data-mode="light"]` block was removed; an empty `[data-theme="personal"]` block is reserved for any future accent tweaks). Key variables:
 - `--bg`, `--text`, `--text-dim`, `--border`, `--accent` — primary tokens
 - `--bg-rgb`, `--text-rgb`, `--accent-rgb` — RGB triplets for `rgba()` usage
 - `--font-display`, `--font-body` — font stack references
 - Legacy aliases (`--bg-color`, `--text-main`, etc.) kept for backward compat
 
-`data-mode` is set on `document.documentElement` by `Home.js`; persisted to `localStorage`.
+`Home.js` holds the `theme` state (`'professional'` | `'personal'`, default professional), sets `data-theme` on `document.documentElement`, and persists it to `localStorage('site-theme')`. `SpaceBackground.js` reads `data-theme` via a `MutationObserver` to drive the rocket/Earth swap.
 
 ### SpaceBackground — Spacecraft System
 
@@ -83,7 +94,8 @@ global.IntersectionObserver = jest.fn().mockReturnValue({
 `SpaceBackground` uses Canvas 2D APIs unavailable in jsdom — mock it as `() => <canvas />` in any test that renders `Home`.
 
 ### Key Files
-- `src/Pages/Home/Home.js` — global `mode` state, IntersectionObserver section tracking, custom cursor rAF loop
+- `src/Pages/Home/Home.js` — global `theme` state, `SECTIONS` config (Professional/Personal swap), IntersectionObserver section tracking, custom cursor rAF loop
+- `src/Components/About.js` / `Volunteering.js` / `Hobbies.js` — Personal-theme sections (swap in for Skills / Projects / Resume). Volunteering models the `Experience.js` timeline.
 - `src/Components/SpaceBackground.js` — canvas starfield + spacecraft animation system (CRAFT registry, curved paths, smoke particles)
 - `src/Components/Hero.js` — split-name hero (`ANTHONY` solid / `LE` outline stroke)
 - `src/theme.css` — all design tokens
