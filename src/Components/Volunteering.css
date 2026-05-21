@@ -1,0 +1,60 @@
+.volunteering-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.vol-item {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 0;
+    position: relative;
+    transition: border-top-color 0.25s ease;
+}
+
+.vol-item:hover { border-top-color: var(--accent); }
+
+.vol-content { padding-bottom: 0; }
+
+.vol-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    margin-bottom: 0.4rem;
+}
+
+/* Period above role title via order */
+.vol-period {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    order: -1;
+}
+
+.vol-role {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+    letter-spacing: 0.03em;
+    color: var(--text);
+    line-height: 1;
+    margin: 0;
+    order: 0;
+}
+
+.vol-org {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    font-weight: 400;
+    margin: 0.5rem 0 1rem;
+}
+
+.vol-description {
+    font-family: var(--font-body);
+    font-size: 0.83rem;
+    color: var(--text-dim);
+    line-height: 1.75;
+    max-width: 600px;
+    margin: 0;
+}
