@@ -37,7 +37,7 @@ const projects = [
     {
         title: 'Nine Vicious Detector',
         description: 'A real-time computer vision app detecting two of underground rapper Nine Vicious\'s famous hand signs from a live webcam feed using a custom-trained YOLOv7n model, opening up a corresponding youtube music video per sign.',
-        tech: ['Python', 'yaml', 'OpenCV', 'Ultralytics - YOLOv8n', 'Roboflow', 'Pytorch-ROCm 7.2.1', 'OpenCV', 'MediaPipe', 'Rstdlib webbrowser'],
+        tech: ['Python', 'yaml', 'OpenCV', 'Ultralytics - YOLOv8n', 'Roboflow', 'Pytorch-ROCm 7.2.1', 'OpenCV', 'MediaPipe', 'stdlib webbrowser'],
         github: 'https://github.com/Ayprusss/9-vicious-detector',
     }
 ];
