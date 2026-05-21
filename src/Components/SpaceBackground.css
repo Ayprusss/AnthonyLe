@@ -7,8 +7,3 @@
     z-index: -2;
     pointer-events: none;
 }
-
-/* Dim the field significantly in light mode — stars on cream is subtle texture, not the main show */
-[data-mode="light"] .space-bg-canvas {
-    opacity: 0.35;
-}
