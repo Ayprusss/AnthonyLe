@@ -1,16 +1,19 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import Home from './Home';
 
-// Mock child components
-jest.mock('../../Components/Navbar', () => ({ mode, onToggleMode }) => (
-  <div data-testid="Navbar" data-mode={mode} onClick={onToggleMode} />
+// Mock child components. Navbar exposes the theme + toggle so we can drive it.
+jest.mock('../../Components/Navbar', () => ({ theme, onToggleTheme }) => (
+  <div data-testid="Navbar" data-theme={theme} onClick={onToggleTheme} />
 ));
 jest.mock('../../Components/Hero', () => () => <div data-testid="Hero" />);
 jest.mock('../../Components/Skills', () => () => <div data-testid="Skills" />);
 jest.mock('../../Components/Projects', () => () => <div data-testid="Projects" />);
 jest.mock('../../Components/Experience', () => () => <div data-testid="Experience" />);
 jest.mock('../../Components/Resume', () => () => <div data-testid="Resume" />);
+jest.mock('../../Components/About', () => () => <div data-testid="About" />);
+jest.mock('../../Components/Volunteering', () => () => <div data-testid="Volunteering" />);
+jest.mock('../../Components/Hobbies', () => () => <div data-testid="Hobbies" />);
 jest.mock('../../Components/Contact', () => () => <div data-testid="Contact" />);
 jest.mock('../../Components/SpaceBackground', () => () => <canvas data-testid="SpaceBackground" />);
 
@@ -18,7 +21,6 @@ describe('Home Component', () => {
   let originalIntersectionObserver;
 
   beforeEach(() => {
-    // Mock IntersectionObserver
     originalIntersectionObserver = global.IntersectionObserver;
     const mockIntersectionObserver = jest.fn();
     mockIntersectionObserver.mockReturnValue({
@@ -28,61 +30,81 @@ describe('Home Component', () => {
     });
     global.IntersectionObserver = mockIntersectionObserver;
 
-    // Clear localStorage and document attributes before each test
     localStorage.clear();
-    document.documentElement.removeAttribute('data-mode');
+    document.documentElement.removeAttribute('data-theme');
     document.documentElement.removeAttribute('data-section');
   });
 
   afterEach(() => {
-    // Restore IntersectionObserver and mocks
     global.IntersectionObserver = originalIntersectionObserver;
     jest.restoreAllMocks();
   });
 
-  it('sets mode to dark if localStorage.getItem throws an error', () => {
-    // Spy on getItem to throw an error
+  it('defaults to professional when localStorage.getItem throws', () => {
     const getItemSpy = jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('Access denied');
     });
 
     render(<Home />);
 
-    expect(getItemSpy).toHaveBeenCalledWith('site-mode');
-    expect(document.documentElement.getAttribute('data-mode')).toBe('dark');
+    expect(getItemSpy).toHaveBeenCalledWith('site-theme');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('professional');
   });
 
   it('ignores errors when localStorage.setItem throws', () => {
-    // Return light mode so it initializes with light
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('light');
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('personal');
 
-    // Spy on setItem to throw an error
     const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('Quota exceeded');
     });
 
-    // Should not throw and crash the render
     expect(() => {
       render(<Home />);
     }).not.toThrow();
 
-    expect(setItemSpy).toHaveBeenCalledWith('site-mode', 'light');
-    expect(document.documentElement.getAttribute('data-mode')).toBe('light');
+    expect(setItemSpy).toHaveBeenCalledWith('site-theme', 'personal');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('personal');
   });
 
-  it('initializes with light mode if localStorage has site-mode=light', () => {
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('light');
+  it('initializes with personal theme if localStorage has site-theme=personal', () => {
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('personal');
 
     render(<Home />);
 
-    expect(document.documentElement.getAttribute('data-mode')).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('personal');
   });
 
-  it('initializes with dark mode if localStorage has no site-mode', () => {
+  it('defaults to professional theme if localStorage has no site-theme', () => {
     jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
 
     render(<Home />);
 
-    expect(document.documentElement.getAttribute('data-mode')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('professional');
+  });
+
+  it('renders professional sections by default and swaps to personal sections on toggle', () => {
+    render(<Home />);
+
+    // Professional set
+    expect(screen.getByTestId('Skills')).toBeInTheDocument();
+    expect(screen.getByTestId('Projects')).toBeInTheDocument();
+    expect(screen.getByTestId('Resume')).toBeInTheDocument();
+    expect(screen.queryByTestId('About')).not.toBeInTheDocument();
+
+    // Toggle via the Navbar mock
+    fireEvent.click(screen.getByTestId('Navbar'));
+
+    // Personal set
+    expect(screen.getByTestId('About')).toBeInTheDocument();
+    expect(screen.getByTestId('Volunteering')).toBeInTheDocument();
+    expect(screen.getByTestId('Hobbies')).toBeInTheDocument();
+    expect(screen.queryByTestId('Skills')).not.toBeInTheDocument();
+
+    // Shared sections persist across both themes
+    expect(screen.getByTestId('Hero')).toBeInTheDocument();
+    expect(screen.getByTestId('Experience')).toBeInTheDocument();
+    expect(screen.getByTestId('Contact')).toBeInTheDocument();
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('personal');
   });
 });
