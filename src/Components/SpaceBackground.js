@@ -64,6 +64,11 @@ const SpaceBackground = () => {
     let lastTime = performance.now();
     let starRgb = '255, 255, 255';
 
+    // Personal theme: suppress rockets and (eventually) reveal the Earth scene.
+    // 0 = full space/Professional, 1 = full Personal. Eased every frame for a crossfade.
+    let isPersonal = false;
+    let personalT = 0;
+
     // ── Shooting stars ──────────────────────────────────────────────
     let shooters = [];
     let nextShootAt = Date.now() + rand(3500, 8000);
@@ -467,6 +472,10 @@ const SpaceBackground = () => {
       if (v) starRgb = v;
     };
 
+    const updateTheme = () => {
+      isPersonal = document.documentElement.getAttribute('data-theme') === 'personal';
+    };
+
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = window.innerWidth;
@@ -477,6 +486,372 @@ const SpaceBackground = () => {
       stars = buildStars();
     };
 
+    // ── Earth scene (Personal theme) ─────────────────────────────────
+    // Floating Earth (focus) + orbiting Moon + corner Sun, rendered procedurally
+    // to stay true to the wireframe/stippled "DEEP SIGNAL" aesthetic. The whole
+    // scene fades + scales in with `t` (eased Professional->Personal progress).
+    // Earth spin and Moon orbit are driven by BOTH time and scroll position, so
+    // scrolling the Personal page advances the little orbital-mechanics diagram.
+    const TAU = Math.PI * 2;
+    const smoothstep = (a, b, x) => {
+      const u = clamp((x - a) / (b - a), 0, 1);
+      return u * u * (3 - 2 * u);
+    };
+
+    // Simplified continent outlines as [lon, lat] polygons (degrees). Coarse but
+    // recognizable — densified + orthographically projected onto the rotating
+    // sphere each frame, then filled as silhouettes.
+    const LAND_SHAPES = [
+      // North America (+ Central America tail)
+      [[-158,71],[-128,70],[-100,69],[-84,70],[-82,73],[-74,68],[-64,60],[-56,52],
+       [-66,47],[-70,43],[-74,40],[-76,35],[-81,31],[-81,25],[-90,30],[-97,26],
+       [-97,20],[-92,18],[-87,16],[-83,9],[-77,8],[-83,14],[-95,16],[-105,20],
+       [-112,24],[-117,32],[-123,38],[-124,46],[-130,52],[-141,60],[-152,59],[-165,60]],
+      // Greenland
+      [[-45,60],[-30,61],[-20,70],[-22,76],[-32,82],[-46,83],[-58,79],[-54,72],[-50,64]],
+      // South America
+      [[-77,8],[-70,12],[-61,10],[-50,0],[-44,-2],[-35,-6],[-39,-14],[-48,-25],
+       [-56,-34],[-64,-41],[-69,-52],[-66,-55],[-74,-50],[-73,-41],[-71,-30],
+       [-72,-18],[-78,-8],[-81,-4],[-80,2],[-78,6]],
+      // Africa
+      [[-16,15],[-12,25],[-5,32],[2,36],[10,37],[18,32],[25,32],[33,31],[35,24],
+       [38,16],[43,11],[51,12],[49,4],[42,-1],[40,-11],[35,-22],[26,-34],[19,-35],
+       [14,-22],[9,-1],[5,5],[-4,5],[-10,6]],
+      // Madagascar
+      [[44,-16],[50,-15],[50,-25],[45,-25]],
+      // Europe
+      [[-9,37],[-9,44],[-2,49],[2,51],[8,54],[5,58],[10,63],[18,69],[28,71],[30,66],
+       [26,60],[22,56],[16,54],[14,46],[19,42],[24,41],[14,38],[3,42]],
+      // United Kingdom
+      [[-5,50],[-3,53],[-2,57],[-6,58],[-8,55],[-6,51]],
+      // Asia (India + SE Asia mainland included in the outline)
+      [[40,68],[55,71],[70,73],[95,77],[110,76],[128,73],[142,72],[160,70],[172,67],
+       [178,65],[170,60],[160,61],[150,53],[142,46],[135,44],[127,40],[122,40],
+       [122,30],[110,21],[106,11],[100,6],[96,16],[90,22],[88,21],[80,8],[77,9],
+       [73,18],[66,25],[57,26],[50,30],[44,38],[40,44],[48,52],[55,56],[46,62]],
+      // Japan
+      [[131,33],[136,35],[140,38],[142,41],[139,42],[135,35],[132,32]],
+      // SE Asia / Borneo
+      [[109,-3],[117,-2],[119,2],[114,5],[109,2],[107,0]],
+      // Australia
+      [[114,-22],[122,-18],[130,-12],[137,-12],[143,-11],[146,-18],[151,-25],
+       [150,-38],[143,-39],[136,-35],[129,-32],[122,-34],[115,-34]],
+      // New Zealand
+      [[167,-46],[171,-44],[175,-41],[178,-38],[173,-42],[168,-45]],
+    ];
+
+    const TO_RAD = Math.PI / 180;
+    const densify = (poly) => {
+      const out = [];
+      for (let i = 0; i < poly.length; i++) {
+        const a = poly[i], b = poly[(i + 1) % poly.length];
+        const steps = Math.max(1, Math.ceil(
+          Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1])) / 2.5));
+        for (let s = 0; s < steps; s++) {
+          const f = s / steps;
+          const lat = (a[1] + (b[1] - a[1]) * f) * TO_RAD;
+          out.push({
+            lon: (a[0] + (b[0] - a[0]) * f) * TO_RAD,
+            sinLat: Math.sin(lat),
+            cosLat: Math.cos(lat),
+          });
+        }
+      }
+      return out;
+    };
+    const LAND = LAND_SHAPES.map(densify);
+
+    // Major metros for the night-side "city lights" glimmer.
+    const CITIES = [
+      [-74,40],[-118,34],[-99,19],[-74,4],[-46,-23],[-58,-34],[0,51],[2,48],[-3,40],
+      [3,6],[31,30],[28,-26],[36,-1],[37,55],[29,41],[55,25],[72,19],[77,28],[116,40],
+      [121,31],[139,35],[127,37],[103,1],[106,-6],[151,-33],[100,13],
+    ].map(([lo, la]) => ({
+      lon: lo * TO_RAD,
+      sinLat: Math.sin(la * TO_RAD),
+      cosLat: Math.cos(la * TO_RAD),
+      flick: rand(0.6, 1.7),
+      phase: Math.random() * TAU,
+    }));
+
+    const EARTH_TILT = -0.24; // axial tilt — leans the globe for a 3D read
+    const cTilt = Math.cos(EARTH_TILT), sTilt = Math.sin(EARTH_TILT);
+
+    const MOON_CRATERS = [
+      [-0.34, -0.10, 0.16], [0.10, -0.34, 0.12], [0.30, 0.20, 0.18],
+      [-0.16, 0.36, 0.13], [0.42, -0.14, 0.09],
+    ];
+
+    const drawSun = (now, sx, sy, ease) => {
+      const pulse = 0.5 + 0.5 * Math.sin(now * 0.0006);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+
+      const corona = ctx.createRadialGradient(sx, sy, 0, sx, sy, Math.min(W, H) * 0.6);
+      corona.addColorStop(0,    `rgba(255,224,160,${(0.30 * ease).toFixed(3)})`);
+      corona.addColorStop(0.16, `rgba(255,150,60,${(0.15 * ease).toFixed(3)})`);
+      corona.addColorStop(0.45, `rgba(255,107,43,${(0.05 * ease).toFixed(3)})`);
+      corona.addColorStop(1,    'rgba(255,107,43,0)');
+      ctx.fillStyle = corona;
+      ctx.fillRect(0, 0, W, H);
+
+      const coreR = Math.min(W, H) * 0.052 * (1 + 0.05 * pulse);
+      const core = ctx.createRadialGradient(sx, sy, 0, sx, sy, coreR * 1.7);
+      core.addColorStop(0,    `rgba(255,250,236,${(0.96 * ease).toFixed(3)})`);
+      core.addColorStop(0.5,  `rgba(255,214,150,${(0.82 * ease).toFixed(3)})`);
+      core.addColorStop(0.85, `rgba(255,150,60,${(0.18 * ease).toFixed(3)})`);
+      core.addColorStop(1,    'rgba(255,150,60,0)');
+      ctx.fillStyle = core;
+      ctx.beginPath(); ctx.arc(sx, sy, coreR * 1.7, 0, TAU); ctx.fill();
+      ctx.restore();
+    };
+
+    const drawOrbitRing = (cx, cy, rx, ry, ease) => {
+      ctx.save();
+      ctx.strokeStyle = `rgba(${starRgb},${(0.07 * ease).toFixed(3)})`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 7]);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, TAU);
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    const drawMoon = (mx, my, mr, Lx, Ly, Lz, ease, dim) => {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const glow = ctx.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 2);
+      glow.addColorStop(0, `rgba(200,212,228,${(0.14 * ease * dim).toFixed(3)})`);
+      glow.addColorStop(1, 'rgba(200,212,228,0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(mx, my, mr * 2, 0, TAU); ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.clip();
+      const fx = mx + mr * 0.55 * Lx, fy = my + mr * 0.55 * Ly;
+      const body = ctx.createRadialGradient(fx, fy, mr * 0.1, mx, my, mr * 1.3);
+      body.addColorStop(0,    `rgba(200,202,210,${(ease * dim).toFixed(3)})`);
+      body.addColorStop(0.5,  `rgba(116,120,131,${(ease * dim).toFixed(3)})`);
+      body.addColorStop(0.82, `rgba(38,41,50,${(ease * dim).toFixed(3)})`);
+      body.addColorStop(1,    `rgba(7,8,13,${(ease * dim).toFixed(3)})`);
+      ctx.fillStyle = body;
+      ctx.fillRect(mx - mr, my - mr, mr * 2, mr * 2);
+
+      for (const c of MOON_CRATERS) {
+        const lit = clamp(c[0] * Lx + c[1] * Ly + 0.6 * Lz, 0, 1);
+        if (lit < 0.12) continue; // craters only catch the lit face
+        const cxp = mx + c[0] * mr, cyp = my + c[1] * mr, cr = c[2] * mr;
+        const cg = ctx.createRadialGradient(cxp, cyp, 0, cxp, cyp, cr);
+        cg.addColorStop(0, `rgba(58,61,70,${(0.38 * lit * ease * dim).toFixed(3)})`);
+        cg.addColorStop(1, 'rgba(58,61,70,0)');
+        ctx.fillStyle = cg;
+        ctx.beginPath(); ctx.arc(cxp, cyp, cr, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+    };
+
+    const drawEarth = (now, cx, cy, R, rot, Lx, Ly, Lz, ease) => {
+      // Atmospheric halo
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const halo = ctx.createRadialGradient(cx, cy, R * 0.86, cx, cy, R * 1.2);
+      halo.addColorStop(0,    'rgba(96,176,224,0)');
+      halo.addColorStop(0.45, `rgba(120,194,236,${(0.20 * ease).toFixed(3)})`);
+      halo.addColorStop(1,    'rgba(96,176,224,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(cx, cy, R * 1.2, 0, TAU); ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.clip();
+
+      // Ocean — base sphere with gentle limb darkening (day/night added below)
+      const ocean = ctx.createRadialGradient(cx, cy, R * 0.05, cx, cy, R * 1.12);
+      ocean.addColorStop(0,    `rgba(38,104,142,${ease.toFixed(3)})`);
+      ocean.addColorStop(0.72, `rgba(28,86,120,${ease.toFixed(3)})`);
+      ocean.addColorStop(1,    `rgba(15,52,76,${ease.toFixed(3)})`);
+      ctx.fillStyle = ocean;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      // Continents — vector silhouettes projected onto the rotating sphere.
+      // Each landmass is clipped to the visible hemisphere; a span that dips behind
+      // the globe is closed along the limb ARC (the planet's edge), never a chord
+      // across the disc — so a continent can't spuriously fill the whole face as it
+      // rotates past the limb.
+      ctx.fillStyle = `rgba(86,134,92,${ease.toFixed(3)})`;
+      const norm = (a) => { a %= TAU; return a < 0 ? a + TAU : a; };
+      // Great-circle crossing (z = 0) of an edge, snapped to the limb circle.
+      const crossing = (A, B) => {
+        const t = A.z / (A.z - B.z);
+        const x = A.x + (B.x - A.x) * t;
+        const y = A.y + (B.y - A.y) * t;
+        const d = Math.hypot(x, y) || 1e-6;
+        return { x: x / d, y: y / d, ang: Math.atan2(y, x) };
+      };
+      for (const poly of LAND) {
+        const n = poly.length;
+        // Rotate + tilt every vertex onto the unit sphere; note visibility.
+        const P = new Array(n);
+        let anyVis = false, anyHid = false;
+        for (let i = 0; i < n; i++) {
+          const p = poly[i];
+          const lon = p.lon + rot;
+          const x = p.cosLat * Math.sin(lon);
+          const y0 = -p.sinLat;
+          const z0 = p.cosLat * Math.cos(lon);
+          const y = y0 * cTilt - z0 * sTilt;   // axial tilt about screen x-axis
+          const z = y0 * sTilt + z0 * cTilt;
+          P[i] = { x, y, z };
+          if (z >= 0) anyVis = true; else anyHid = true;
+        }
+        if (!anyVis) continue;                  // entirely on the far side
+
+        ctx.beginPath();
+        if (!anyHid) {                          // entirely on the near side
+          for (let i = 0; i < n; i++) {
+            const q = P[i];
+            if (i === 0) ctx.moveTo(cx + R * q.x, cy + R * q.y);
+            else         ctx.lineTo(cx + R * q.x, cy + R * q.y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          continue;
+        }
+
+        // Mixed: start the walk on a visible vertex so every exit precedes its enter.
+        let s = 0;
+        while (P[s].z < 0) s++;
+
+        let started = false;
+        let exitAng = 0;
+        const emit = (sx, sy) => {
+          if (!started) { ctx.moveTo(sx, sy); started = true; }
+          else ctx.lineTo(sx, sy);
+        };
+
+        for (let k = 0; k < n; k++) {
+          const A = P[(s + k) % n];
+          const B = P[(s + k + 1) % n];
+          const aVis = A.z >= 0, bVis = B.z >= 0;
+
+          if (aVis) emit(cx + R * A.x, cy + R * A.y);
+
+          if (aVis && !bVis) {                  // leaving the near side
+            const c = crossing(A, B);
+            emit(cx + R * c.x, cy + R * c.y);
+            exitAng = c.ang;
+          } else if (!aVis && bVis) {           // returning to the near side
+            const c = crossing(A, B);
+            // A single landmass never dips behind across more than half the limb,
+            // so the hidden span is always the MINOR arc between the two crossings.
+            // (The winding direction of the boundary near a crossing is unreliable —
+            // the first hidden vertex can sit right on the exit angle — so picking the
+            // shorter arc is what keeps a continent from ever filling the whole disc.)
+            const spanCCW = norm(c.ang - exitAng);
+            const total = spanCCW <= Math.PI ? spanCCW : -(TAU - spanCCW);
+            const steps = Math.max(1, Math.ceil(Math.abs(total) / 0.12));
+            for (let t = 1; t < steps; t++) {  // sample the limb arc as segments
+              const a = exitAng + total * (t / steps);
+              emit(cx + R * Math.cos(a), cy + R * Math.sin(a));
+            }
+            emit(cx + R * c.x, cy + R * c.y);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Day/night terminator — one overlay shades land + ocean together, darkening
+      // the hemisphere facing away from the sun (centered on the sub-solar point).
+      const sox = cx + R * Lx, soy = cy + R * Ly;
+      const term = ctx.createRadialGradient(sox, soy, 0, sox, soy, R * 2.15);
+      term.addColorStop(0,    'rgba(2,7,14,0)');
+      term.addColorStop(0.42, 'rgba(2,7,14,0)');
+      term.addColorStop(0.6,  `rgba(2,7,14,${(0.45 * ease).toFixed(3)})`);
+      term.addColorStop(0.8,  `rgba(2,7,14,${(0.86 * ease).toFixed(3)})`);
+      term.addColorStop(1,    `rgba(2,7,14,${(0.97 * ease).toFixed(3)})`);
+      ctx.fillStyle = term;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      // City lights — amber glimmer on the night side only
+      ctx.globalCompositeOperation = 'lighter';
+      for (const c of CITIES) {
+        const lon = c.lon + rot;
+        const x = c.cosLat * Math.sin(lon);
+        const y0 = -c.sinLat;
+        const z0 = c.cosLat * Math.cos(lon);
+        const y = y0 * cTilt - z0 * sTilt;
+        const z = y0 * sTilt + z0 * cTilt;
+        if (z <= 0.05) continue;                 // far side
+        const lit = x * Lx + y * Ly + z * Lz;
+        if (lit > 0.05) continue;                // day side — skip
+        const flick = 0.6 + 0.4 * Math.sin(now * 0.004 * c.flick + c.phase);
+        const a = clamp(-lit * 3.5, 0.2, 1) * flick * smoothstep(0.05, 0.25, z) * ease;
+        ctx.fillStyle = `rgba(255,170,88,${(0.55 * a).toFixed(3)})`;
+        ctx.fillRect(cx + R * x, cy + R * y, R * 0.018, R * 0.018);
+      }
+
+      // Specular sun glint + bright atmospheric limb on the day side
+      ctx.globalCompositeOperation = 'lighter';
+      const gx = cx + R * 0.78 * Lx, gy = cy + R * 0.78 * Ly;
+      const glint = ctx.createRadialGradient(gx, gy, 0, gx, gy, R * 0.26);
+      glint.addColorStop(0, `rgba(196,230,255,${(0.18 * ease).toFixed(3)})`);
+      glint.addColorStop(1, 'rgba(196,230,255,0)');
+      ctx.fillStyle = glint;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      const rimx = cx + R * Lx, rimy = cy + R * Ly;
+      const rim = ctx.createRadialGradient(rimx, rimy, 0, rimx, rimy, R * 0.5);
+      rim.addColorStop(0,   `rgba(150,206,242,${(0.26 * ease).toFixed(3)})`);
+      rim.addColorStop(0.55, 'rgba(150,206,242,0)');
+      ctx.fillStyle = rim;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+      ctx.restore();
+    };
+
+    const drawEarthScene = (now, t) => {
+      if (t < 0.01) return;
+      const ease = t * t * (3 - 2 * t);
+
+      // Earthrise composition: large + low, so the dark night side sits under the
+      // body copy and the lit limb crests into mid-screen. Subtle mouse parallax.
+      const R = Math.min(W, H) * 0.30 * lerp(0.9, 1, ease);
+      const cx = W * 0.5 + (smoothNX - 0.5) * -34;
+      const cy = H * 0.72 + (smoothNY - 0.5) * -22;
+      const sunX = W * 0.85, sunY = H * 0.17;
+
+      // 3D sun-light direction = on-screen direction to the sun + a forward bias
+      let ldx = sunX - cx, ldy = sunY - cy;
+      const ll = Math.hypot(ldx, ldy) || 1;
+      ldx /= ll; ldy /= ll;
+      const Ln = Math.hypot(ldx, ldy, 0.55);
+      const Lx = ldx / Ln, Ly = ldy / Ln, Lz = 0.55 / Ln;
+
+      drawSun(now, sunX, sunY, ease);
+
+      // time + scroll drive the spin (Earth) and the orbit (Moon)
+      const rot = now * 0.00002 + pageScrollY * 0.0016;
+      const moonA = now * 0.00009 + pageScrollY * 0.0024;
+
+      // Near-edge-on orbit so the Moon sweeps in front of and behind the planet
+      const orbitR = R * 1.9;
+      const ORBIT_TILT = 1.3;
+      const oc = Math.cos(ORBIT_TILT), os = Math.sin(ORBIT_TILT);
+      const planeY = Math.sin(moonA) * orbitR;
+      const moonX = cx + Math.cos(moonA) * orbitR;
+      const moonY = cy + planeY * oc;
+      const moonDepth = planeY * os;          // > 0 → toward viewer (in front)
+      const moonFront = moonDepth > 0;
+      const moonR = R * 0.24 * (1 + 0.14 * (moonDepth / orbitR));
+
+      drawOrbitRing(cx, cy, orbitR, orbitR * oc, ease);
+      if (!moonFront) drawMoon(moonX, moonY, moonR, Lx, Ly, Lz, ease, 0.72);
+      drawEarth(now, cx, cy, R, rot, Lx, Ly, Lz, ease);
+      if (moonFront) drawMoon(moonX, moonY, moonR, Lx, Ly, Lz, ease, 1);
+    };
+
     // ── Main render loop ─────────────────────────────────────────────
     const draw = (now) => {
       if (!isRunning) return;
@@ -485,6 +860,9 @@ const SpaceBackground = () => {
 
       smoothNX = lerp(smoothNX, mouseNX, 0.05);
       smoothNY = lerp(smoothNY, mouseNY, 0.05);
+
+      // Ease the Professional <-> Personal crossfade (0..1).
+      personalT = lerp(personalT, isPersonal ? 1 : 0, 0.06);
 
       ctx.clearRect(0, 0, W, H);
 
@@ -511,10 +889,13 @@ const SpaceBackground = () => {
       }
       ctx.globalAlpha = 1.0;
 
+      // Earth scene fades in over the starfield in Personal theme
+      drawEarthScene(now, personalT);
+
       // Supernova — scroll-aware bloom that rises behind the footer
       const scrollMax = document.documentElement.scrollHeight - H;
       const rawScrollRatio = scrollMax > 10 ? clamp(pageScrollY / scrollMax, 0, 1) : 1;
-      const targetSupernovaAlpha = clamp((rawScrollRatio - 0.62) / 0.38, 0, 1);
+      const targetSupernovaAlpha = isPersonal ? 0 : clamp((rawScrollRatio - 0.62) / 0.38, 0, 1);
       smoothSupernovaAlpha = lerp(smoothSupernovaAlpha, targetSupernovaAlpha, 0.04);
       drawSupernova(now, dt, smoothSupernovaAlpha);
 
@@ -550,8 +931,13 @@ const SpaceBackground = () => {
 
       // ── Rocket + smoke ────────────────────────────────────────────
 
-      // Spawn new rocket when timer fires
-      if (Date.now() >= nextRocketAt) spawnRocket();
+      // Spawn new rocket when timer fires — Professional theme only.
+      // In Personal mode hold the timer in the future so no rockets queue up.
+      if (isPersonal) {
+        nextRocketAt = Date.now() + rand(22000, 50000);
+      } else if (Date.now() >= nextRocketAt) {
+        spawnRocket();
+      }
 
       // Accumulate smoke — only for engine-driven craft
       for (const r of rockets) {
@@ -643,12 +1029,16 @@ const SpaceBackground = () => {
     let themeRafId = null;
     const themeObserver = new MutationObserver(() => {
       if (themeRafId) cancelAnimationFrame(themeRafId);
-      themeRafId = requestAnimationFrame(updateStarColor);
+      themeRafId = requestAnimationFrame(() => {
+        updateStarColor();
+        updateTheme();
+      });
     });
 
     resize();
     buildSupernovaSprites();
     updateStarColor();
+    updateTheme();
     rafId = requestAnimationFrame(draw);
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });
@@ -657,7 +1047,7 @@ const SpaceBackground = () => {
     document.addEventListener('visibilitychange', onVisibility);
     themeObserver.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['data-mode'],
+      attributeFilter: ['data-theme'],
     });
 
     return () => {
