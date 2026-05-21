@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-scroll';
 import './Navbar.css';
 
-const NAV_LINKS = ['skills', 'projects', 'experience', 'resume', 'contact'];
-
-const Navbar = ({ mode, onToggleMode }) => {
+const Navbar = ({ theme, links = [], onToggleTheme }) => {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -30,14 +28,14 @@ const Navbar = ({ mode, onToggleMode }) => {
                 </Link>
 
                 <ul className="nav-links">
-                    {NAV_LINKS.map(s => (
-                        <li key={s}>
+                    {[...links, { id: 'contact', label: 'contact' }].map(({ id, label }) => (
+                        <li key={id}>
                             <Link
-                                to={s}
+                                to={id}
                                 spy smooth offset={0} duration={500}
                                 activeClass="active"
                             >
-                                {s}
+                                {label}
                             </Link>
                         </li>
                     ))}
@@ -45,10 +43,10 @@ const Navbar = ({ mode, onToggleMode }) => {
 
                 <button
                     className="nav-mode-btn"
-                    onClick={onToggleMode}
-                    aria-label={`Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`}
+                    onClick={onToggleTheme}
+                    aria-label={`Switch to ${theme === 'professional' ? 'personal' : 'professional'} view`}
                 >
-                    {mode === 'dark' ? 'LIGHT' : 'DARK'}
+                    {theme === 'professional' ? 'PERSONAL' : 'PROFESSIONAL'}
                 </button>
             </div>
         </nav>
