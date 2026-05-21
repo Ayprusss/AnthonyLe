@@ -22,21 +22,7 @@
     --ripple-rgb:  244, 244, 245;
 }
 
-[data-mode="light"] {
-    --bg:          #f5f4ef;
-    --bg-rgb:      245, 244, 239;
-    --surface:     #eceae4;
-    --text:        #0d0d0d;
-    --text-rgb:    13, 13, 13;
-    --text-dim:    rgba(13, 13, 13, 0.45);
-    --border:      rgba(13, 13, 13, 0.1);
-    --accent:      #e85a1a;
-    --accent-rgb:  232, 90, 26;
-
-    --bg-color:    var(--bg);
-    --text-main:   var(--text);
-    --text-muted:  var(--text-dim);
-    --border-color: var(--border);
-    --svg-filter:  invert(0);
-    --ripple-rgb:  13, 13, 13;
-}
+/* Both Professional and Personal share the dark palette. The toggle swaps the
+   background scene + section content, not the colors. Reserve this block for any
+   Personal-mode accent tweaks the /frontend-design pass may introduce. */
+/* [data-theme="personal"] { } */
