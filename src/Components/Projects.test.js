@@ -14,6 +14,11 @@ jest.mock('framer-motion', () => ({
   },
 }));
 
+// Mock TextScramble
+jest.mock('./ui/TextScramble', () => ({
+  TextScramble: ({ text, as: Tag = 'span', className }) => <Tag className={className}>{text}</Tag>,
+}));
+
 describe('Projects Component', () => {
   beforeEach(() => {
     // Mock IntersectionObserver which is used by TextScramble

@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 // Mock framer-motion to bypass animation requirements during tests
 jest.mock('framer-motion', () => ({
   motion: {
-    div: React.forwardRef(({ children, ...props }, ref) => {
+    div: require('react').forwardRef(({ children, ...props }, ref) => {
       const { initial, whileInView, viewport, transition, ...validProps } = props;
       return <div ref={ref} {...validProps}>{children}</div>;
     }),
