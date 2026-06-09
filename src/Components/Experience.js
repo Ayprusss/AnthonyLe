@@ -4,6 +4,12 @@ import './Experience.css';
 
 const experiences = [
     {
+        role: "Data Analyst Intern",
+        company: "Canada Revenue Agency",
+        period: "June 2026 - Present",
+        description: ""
+    },
+    {
         role: "Software Developer Intern",
         company: "Magnet Forensics",
         period: "September 2025 - April 2026",
