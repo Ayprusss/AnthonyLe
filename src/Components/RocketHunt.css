@@ -1,0 +1,279 @@
+/* ── ROCKET HUNT — Galactica duck-hunt mini-game ── */
+
+/* ── Picture-in-play launcher panel ── */
+.rockethunt-pip {
+    position: fixed;
+    right: 1.75rem;
+    bottom: 1.75rem;
+    width: 224px;
+    padding: 1.3rem 1.4rem 1.5rem;
+    border: 1px solid var(--border);
+    background:
+        radial-gradient(120% 90% at 100% 0%, rgba(var(--accent-rgb), 0.1), transparent 50%),
+        linear-gradient(180deg, var(--surface), #0c0c0f);
+    z-index: 60;
+    overflow: hidden;
+    cursor: grab;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.rockethunt-pip:active { cursor: grabbing; }
+
+/* faint scanline texture */
+.rockethunt-pip::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+        0deg, rgba(var(--text-rgb), 0.022) 0 1px, transparent 1px 4px);
+    opacity: 0.6;
+}
+
+.rockethunt-corner {
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    z-index: 2;
+    pointer-events: none;
+}
+.rockethunt-corner-tl {
+    top: 10px; left: 10px;
+    border-top: 1px solid var(--accent);
+    border-left: 1px solid var(--accent);
+}
+.rockethunt-corner-br {
+    bottom: 10px; right: 10px;
+    border-bottom: 1px solid var(--accent);
+    border-right: 1px solid var(--accent);
+}
+
+.rockethunt-pip-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0.9rem;
+}
+.rockethunt-pip-tag {
+    font-family: var(--font-body);
+    font-size: 0.56rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.rockethunt-pip-hi {
+    font-family: var(--font-body);
+    font-size: 0.56rem;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+}
+.rockethunt-pip-title {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    line-height: 0.86;
+    letter-spacing: 0.03em;
+    color: var(--text);
+    margin: 0 0 0.6rem;
+    position: relative;
+    z-index: 1;
+}
+.rockethunt-pip-sub {
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin: 0 0 1.2rem;
+    position: relative;
+    z-index: 1;
+}
+.rockethunt-expand {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    justify-content: center;
+    font-size: 0.66rem;
+}
+
+/* ── Fullscreen game overlay ── */
+.rockethunt-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: #04040a;
+    overflow: hidden;
+    touch-action: none;
+}
+.rockethunt-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: none;
+    touch-action: none;
+}
+
+.rockethunt-close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.4rem;
+    z-index: 3;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    background: rgba(9, 9, 11, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+.rockethunt-close:hover {
+    color: var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.55);
+}
+
+/* ── HUD ── */
+.rockethunt-hud {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.4rem;
+    right: 5.5rem;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    gap: 2.4rem;
+    pointer-events: none;
+}
+.rockethunt-hud-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.rockethunt-hud-label {
+    font-family: var(--font-body);
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.rockethunt-hud-value {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    color: var(--text);
+}
+.rockethunt-hud-score .rockethunt-hud-value { color: var(--accent); }
+
+.rockethunt-shells {
+    display: flex;
+    gap: 4px;
+    height: 1.9rem;
+    align-items: center;
+}
+.rockethunt-shell {
+    width: 7px;
+    height: 14px;
+    border-radius: 1px;
+    background: transparent;
+    border: 1px solid var(--border);
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.rockethunt-shell.is-loaded {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.6);
+}
+
+/* ── Title / status cards ── */
+.rockethunt-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    width: min(540px, 86vw);
+    padding: 2.6rem 2.8rem;
+    text-align: center;
+    border: 1px solid var(--border);
+    background:
+        radial-gradient(120% 90% at 50% 0%, rgba(var(--accent-rgb), 0.08), transparent 55%),
+        rgba(9, 9, 11, 0.86);
+    backdrop-filter: blur(2px);
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.55);
+}
+.rockethunt-card-flash {
+    background: rgba(9, 9, 11, 0.4);
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+.rockethunt-card-tag {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+.rockethunt-card-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    color: var(--text);
+    margin: 0;
+}
+.rockethunt-card-text {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--text-dim);
+    max-width: 420px;
+    margin: 1.2rem auto 1.6rem;
+}
+.rockethunt-card-text b { color: var(--text); }
+.rockethunt-card-final {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    line-height: 1;
+    color: var(--accent);
+    margin: 0.4rem 0;
+}
+.rockethunt-card-hi {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    margin: 0.6rem 0 1.6rem;
+}
+.rockethunt-card-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .rockethunt-pip {
+        right: 1rem;
+        bottom: 1rem;
+        width: 180px;
+        padding: 1.1rem 1.1rem 1.2rem;
+    }
+    .rockethunt-pip-title { font-size: 2.1rem; }
+    .rockethunt-hud {
+        left: 1rem;
+        right: 4.5rem;
+        gap: 1.2rem;
+    }
+    .rockethunt-hud-value { font-size: 1.4rem; }
+    .rockethunt-card { padding: 2rem 1.4rem; }
+    .rockethunt-card-actions { flex-direction: column; }
+}
