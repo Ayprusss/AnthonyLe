@@ -12,6 +12,7 @@ import Volunteering from '../../Components/Volunteering';
 import Hobbies from '../../Components/Hobbies';
 import Contact from '../../Components/Contact';
 import SpaceBackground from '../../Components/SpaceBackground';
+import RocketHunt from '../../Components/RocketHunt';
 
 // Section sets per theme. Hero and Contact bookend both sets (rendered separately).
 // Slots stay position-aligned so ghost section numbers (01–06) never shift.
@@ -146,6 +147,9 @@ const Home = () => {
                 ))}
                 <div id="contact"><Contact /></div>
             </main>
+
+            {/* Personal-mode arcade easter-egg (PiP launcher → fullscreen game) */}
+            {theme === 'personal' && <RocketHunt />}
         </div>
     );
 };

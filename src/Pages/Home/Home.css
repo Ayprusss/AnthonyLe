@@ -82,6 +82,13 @@ main > div#hero {
     }
 }
 
+/* Hide the custom cursor while the RocketHunt game is in full-screen play
+   (the game draws its own crosshair on the canvas instead) */
+body.rockethunt-active .cursor-dot,
+body.rockethunt-active .cursor-ring {
+    display: none;
+}
+
 @media (max-width: 768px) {
     main > div {
         padding: 7rem 1.5rem 4rem;
