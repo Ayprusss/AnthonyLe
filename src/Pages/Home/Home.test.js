@@ -16,6 +16,7 @@ jest.mock('../../Components/Volunteering', () => () => <div data-testid="Volunte
 jest.mock('../../Components/Hobbies', () => () => <div data-testid="Hobbies" />);
 jest.mock('../../Components/Contact', () => () => <div data-testid="Contact" />);
 jest.mock('../../Components/SpaceBackground', () => () => <canvas data-testid="SpaceBackground" />);
+jest.mock('../../Components/RocketHunt', () => () => <div data-testid="RocketHunt" />);
 
 describe('Home Component', () => {
   let originalIntersectionObserver;
@@ -90,6 +91,8 @@ describe('Home Component', () => {
     expect(screen.getByTestId('Projects')).toBeInTheDocument();
     expect(screen.getByTestId('Resume')).toBeInTheDocument();
     expect(screen.queryByTestId('About')).not.toBeInTheDocument();
+    // RocketHunt arcade is personal-mode only
+    expect(screen.queryByTestId('RocketHunt')).not.toBeInTheDocument();
 
     // Toggle via the Navbar mock
     fireEvent.click(screen.getByTestId('Navbar'));
@@ -99,6 +102,7 @@ describe('Home Component', () => {
     expect(screen.getByTestId('Volunteering')).toBeInTheDocument();
     expect(screen.getByTestId('Hobbies')).toBeInTheDocument();
     expect(screen.queryByTestId('Skills')).not.toBeInTheDocument();
+    expect(screen.getByTestId('RocketHunt')).toBeInTheDocument();
 
     // Shared sections persist across both themes
     expect(screen.getByTestId('Hero')).toBeInTheDocument();
