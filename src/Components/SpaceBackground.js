@@ -653,6 +653,141 @@ const SpaceBackground = () => {
       ctx.restore();
     };
 
+    // ── Mini solar system (Professional theme, top-right corner) ─────
+    // A tiny 3D orrery pinned to the SAME screen anchor as the Personal
+    // Sun (W*0.85, H*0.17). The whole disk shares the supernova's spin
+    // clock under a fixed tilt, so it turns in lockstep with the burst;
+    // each planet additionally revolves on its own Kepler-ish period.
+    // Orbit rings are depth-shaded and planets sort in front of / behind
+    // the Sun, giving the flat ecliptic a real 3D read.
+    const SS_TILT = -0.52;           // leans the ecliptic toward the viewer
+    const SOLAR_PLANETS = [
+      { orbit: 0.16,  size: 1.3, speed: 0.330, color: [176, 170, 160] }, // Mercury
+      { orbit: 0.235, size: 1.7, speed: 0.255, color: [214, 188, 140] }, // Venus
+      { orbit: 0.32,  size: 1.8, speed: 0.205, color: [90, 150, 210]  }, // Earth
+      { orbit: 0.41,  size: 1.5, speed: 0.168, color: [205, 110, 70]  }, // Mars
+      { orbit: 0.58,  size: 3.1, speed: 0.092, color: [206, 170, 132] }, // Jupiter
+      { orbit: 0.73,  size: 2.7, speed: 0.070, color: [222, 196, 140], ring: true }, // Saturn
+      { orbit: 0.87,  size: 2.1, speed: 0.050, color: [150, 214, 222] }, // Uranus
+      { orbit: 1.00,  size: 2.0, speed: 0.038, color: [90, 130, 224]  }, // Neptune
+    ].map((p) => ({ ...p, phase: Math.random() * Math.PI * 2 }));
+
+    // eslint-disable-next-line no-unused-vars
+    const drawMiniSolarSystem = (now, alpha) => {
+      if (alpha < 0.005) return;
+      const cx = W * 0.85 + (smoothNX - 0.5) * -20;
+      const cy = H * 0.17 + (smoothNY - 0.5) * -14;
+      const maxOrbit = Math.min(W, H) * 0.12;
+
+      // Shared 3D frame — identical spin to the supernova, fixed tilt, so
+      // the orrery and the explosion turn as one rigid system.
+      const spin = now * 0.00003 + pageScrollY * 0.0014;
+      const cS = Math.cos(spin), sS = Math.sin(spin);
+      const cT = Math.cos(SS_TILT), sT = Math.sin(SS_TILT);
+      const rot3 = (ux, uy, uz) => {
+        const xr = ux * cS + uz * sS;       // spin about Y
+        const zr0 = -ux * sS + uz * cS;
+        const yr = uy * cT - zr0 * sT;       // tilt about X
+        const zr = uy * sT + zr0 * cT;       // zr > 0 → toward the viewer
+        return { x: xr, y: yr, z: zr };
+      };
+
+      // ── Orbit rings — sampled + depth-shaded so the far arc dims ────
+      ctx.save();
+      ctx.lineCap = 'round';
+      const RINGSEG = 64;
+      for (const pl of SOLAR_PLANETS) {
+        const R = pl.orbit * maxOrbit;
+        let prev = null;
+        for (let i = 0; i <= RINGSEG; i++) {
+          const a = (i / RINGSEG) * TAU;
+          const p = rot3(Math.cos(a) * R, 0, Math.sin(a) * R);
+          const cur = { x: cx + p.x, y: cy + p.y, d: (p.z / R + 1) / 2 };
+          if (prev) {
+            const dd = (prev.d + cur.d) / 2;   // 0 back .. 1 front
+            ctx.globalAlpha = clamp(lerp(0.04, 0.22, dd) * alpha, 0, 1);
+            ctx.strokeStyle = `rgb(${starRgb})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(cur.x, cur.y);
+            ctx.stroke();
+          }
+          prev = cur;
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // ── Planets — project, then split front/back around the Sun ─────
+      const placed = SOLAR_PLANETS.map((pl) => {
+        const R = pl.orbit * maxOrbit;
+        const a = pl.phase + now * 0.001 * pl.speed + pageScrollY * 0.0011 * pl.speed;
+        const p = rot3(Math.cos(a) * R, 0, Math.sin(a) * R);
+        return { pl, sx: cx + p.x, sy: cy + p.y, depth: p.z, R };
+      });
+
+      const drawPlanet = (it) => {
+        const pl = it.pl;
+        const d = (it.depth / it.R + 1) / 2;        // 0 back .. 1 front
+        const sz = pl.size * lerp(0.78, 1.18, d);
+        const [r, g, b] = pl.color;
+        const a = clamp(lerp(0.4, 1, d) * alpha, 0, 1);
+
+        // Saturn's ring — a tiny tilted ellipse in amber
+        if (pl.ring) {
+          ctx.save();
+          ctx.globalAlpha = a * 0.85;
+          ctx.strokeStyle = 'rgba(255,184,112,0.95)';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.ellipse(it.sx, it.sy, sz * 2.3, sz * 0.82, spin * 0.5 - 0.4, 0, TAU);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.shadowBlur = sz * 3.2;
+        ctx.shadowColor = `rgba(${r},${g},${b},0.9)`;
+        const grad = ctx.createRadialGradient(
+          it.sx - sz * 0.32, it.sy - sz * 0.32, 0, it.sx, it.sy, sz);
+        grad.addColorStop(0,
+          `rgb(${Math.min(255, r + 64)},${Math.min(255, g + 64)},${Math.min(255, b + 64)})`);
+        grad.addColorStop(1, `rgb(${r},${g},${b})`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(it.sx, it.sy, sz, 0, TAU);
+        ctx.fill();
+        ctx.restore();
+      };
+
+      // Back hemisphere (behind the Sun)
+      for (const it of placed) if (it.depth < 0) drawPlanet(it);
+
+      // ── Sun ─────────────────────────────────────────────────────────
+      const sunPulse = 0.5 + 0.5 * Math.sin(now * 0.0012);
+      const sunR = maxOrbit * 0.09 * (1 + 0.08 * sunPulse);
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunR * 6.5);
+      halo.addColorStop(0,   `rgba(255,206,96,${(0.5 * alpha).toFixed(3)})`);
+      halo.addColorStop(0.4, `rgba(255,140,50,${(0.12 * alpha).toFixed(3)})`);
+      halo.addColorStop(1,   'rgba(255,120,40,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(cx, cy, sunR * 6.5, 0, TAU); ctx.fill();
+      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunR);
+      core.addColorStop(0,    `rgba(255,252,238,${alpha.toFixed(3)})`);
+      core.addColorStop(0.55, `rgba(255,206,120,${alpha.toFixed(3)})`);
+      core.addColorStop(1,    'rgba(255,140,50,0)');
+      ctx.fillStyle = core;
+      ctx.beginPath(); ctx.arc(cx, cy, sunR, 0, TAU); ctx.fill();
+      ctx.restore();
+
+      // Front hemisphere (in front of the Sun)
+      for (const it of placed) if (it.depth >= 0) drawPlanet(it);
+    };
+
     // ── Helpers ──────────────────────────────────────────────────────
     const updateStarColor = () => {
       const v = window.getComputedStyle(document.documentElement)
@@ -770,27 +905,137 @@ const SpaceBackground = () => {
       [-0.16, 0.36, 0.13], [0.42, -0.14, 0.09],
     ];
 
-    const drawSun = (now, sx, sy, ease) => {
-      const pulse = 0.5 + 0.5 * Math.sin(now * 0.0006);
+    // Geocentric ecliptic — the Sun + planets revolve around the Earth as the
+    // page scrolls (a "view from Earth"). All bodies ride one tilted plane so
+    // their orbits read as 3D ellipses and they pass in front of / behind the
+    // globe. `orbit` = radius as a fraction of min(W,H); `speed` scales the
+    // scroll+time revolution (inner bodies faster, Kepler-ish). The Sun is one
+    // of the bodies, and its live position drives the Earth's day/night light.
+    const SCENE_TILT = -0.42;
+    const GEO_BODIES = [
+      { orbit: 0.275, size: 2.0, speed: 2.05, color: [176, 170, 160] }, // Mercury
+      { orbit: 0.325, size: 2.6, speed: 1.55, color: [214, 188, 140] }, // Venus
+      { orbit: 0.380, size: 0,   speed: 1.15, color: [255, 210, 120], sun: true }, // Sun
+      { orbit: 0.430, size: 2.2, speed: 0.92, color: [205, 110, 70]  }, // Mars
+      { orbit: 0.475, size: 4.2, speed: 0.50, color: [206, 170, 132] }, // Jupiter
+      { orbit: 0.520, size: 3.6, speed: 0.37, color: [222, 196, 140], ring: true }, // Saturn
+      { orbit: 0.560, size: 3.0, speed: 0.27, color: [150, 214, 222] }, // Uranus
+      { orbit: 0.600, size: 2.9, speed: 0.21, color: [90, 130, 224]  }, // Neptune
+    ].map((b) => ({ ...b, phase: Math.random() * TAU }));
+
+    // Sun surface features ride a spinning, tilted sphere so the Sun visibly
+    // ROTATES on its axis (not just orbits): each spot/facula sweeps across the
+    // face and disappears around the limb. [lon, lat] in radians; `hot` = bright
+    // facula, otherwise a dark sunspot.
+    const SUN_TILT = -0.30;
+    const SUN_SPOTS = [
+      { lon: -0.6, lat:  0.28, r: 0.20, hot: false },
+      { lon:  0.25, lat: -0.36, r: 0.15, hot: false },
+      { lon:  1.0,  lat:  0.06, r: 0.12, hot: false },
+      { lon: -1.7, lat: -0.12, r: 0.16, hot: false },
+      { lon:  2.5,  lat:  0.30, r: 0.10, hot: true  },
+      { lon:  3.4,  lat: -0.22, r: 0.13, hot: true  },
+      { lon:  4.6,  lat:  0.14, r: 0.11, hot: false },
+    ].map((s) => ({ ...s, sinLat: Math.sin(s.lat), cosLat: Math.cos(s.lat) }));
+
+    // A compact orbiting Sun (used in the geocentric scene). Beyond riding its
+    // orbit, it SPINS on its axis: sunspots + faculae on a rotating sphere (time
+    // + scroll) sweep across the disc and around the limb, and the corona rays
+    // turn with it. `minWH`-scaled; depth ordering vs. the Earth handles eclipses.
+    const drawGeoSun = (now, sx, sy, minWH, ease) => {
+      const pulse = 0.5 + 0.5 * Math.sin(now * 0.0011);
+      const coreR = minWH * 0.028 * (1 + 0.06 * pulse);
+      const spin = now * 0.0006 + pageScrollY * 0.004;   // axial rotation
+      const cT = Math.cos(SUN_TILT), sT = Math.sin(SUN_TILT);
+
+      // ── Corona + rotating flare rays (additive glow) ─────────────────
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-
-      const corona = ctx.createRadialGradient(sx, sy, 0, sx, sy, Math.min(W, H) * 0.6);
-      corona.addColorStop(0,    `rgba(255,224,160,${(0.30 * ease).toFixed(3)})`);
-      corona.addColorStop(0.16, `rgba(255,150,60,${(0.15 * ease).toFixed(3)})`);
-      corona.addColorStop(0.45, `rgba(255,107,43,${(0.05 * ease).toFixed(3)})`);
+      const corona = ctx.createRadialGradient(sx, sy, 0, sx, sy, coreR * 7);
+      corona.addColorStop(0,    `rgba(255,228,158,${(0.55 * ease).toFixed(3)})`);
+      corona.addColorStop(0.32, `rgba(255,150,60,${(0.18 * ease).toFixed(3)})`);
+      corona.addColorStop(0.6,  `rgba(255,107,43,${(0.06 * ease).toFixed(3)})`);
       corona.addColorStop(1,    'rgba(255,107,43,0)');
       ctx.fillStyle = corona;
-      ctx.fillRect(0, 0, W, H);
+      ctx.beginPath(); ctx.arc(sx, sy, coreR * 7, 0, TAU); ctx.fill();
 
-      const coreR = Math.min(W, H) * 0.052 * (1 + 0.05 * pulse);
-      const core = ctx.createRadialGradient(sx, sy, 0, sx, sy, coreR * 1.7);
-      core.addColorStop(0,    `rgba(255,250,236,${(0.96 * ease).toFixed(3)})`);
-      core.addColorStop(0.5,  `rgba(255,214,150,${(0.82 * ease).toFixed(3)})`);
-      core.addColorStop(0.85, `rgba(255,150,60,${(0.18 * ease).toFixed(3)})`);
-      core.addColorStop(1,    'rgba(255,150,60,0)');
-      ctx.fillStyle = core;
-      ctx.beginPath(); ctx.arc(sx, sy, coreR * 1.7, 0, TAU); ctx.fill();
+      ctx.lineCap = 'round';
+      const RAYS = 12;
+      for (let i = 0; i < RAYS; i++) {
+        const a = spin * 0.7 + (i / RAYS) * TAU;
+        const flick = 0.6 + 0.4 * Math.sin(now * 0.0018 + i * 1.7);
+        const len = coreR * (1.5 + 1.4 * flick);
+        const rg = ctx.createLinearGradient(sx, sy, sx + Math.cos(a) * len, sy + Math.sin(a) * len);
+        rg.addColorStop(0, `rgba(255,200,110,${(0.16 * ease * flick).toFixed(3)})`);
+        rg.addColorStop(1, 'rgba(255,140,50,0)');
+        ctx.strokeStyle = rg;
+        ctx.lineWidth = coreR * 0.16;
+        ctx.beginPath();
+        ctx.moveTo(sx + Math.cos(a) * coreR * 0.9, sy + Math.sin(a) * coreR * 0.9);
+        ctx.lineTo(sx + Math.cos(a) * len, sy + Math.sin(a) * len);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // ── Body disc (soft-edged sphere) + rotating surface ─────────────
+      ctx.save();
+      const body = ctx.createRadialGradient(
+        sx - coreR * 0.25, sy - coreR * 0.28, 0, sx, sy, coreR);
+      body.addColorStop(0,    `rgba(255,250,232,${ease.toFixed(3)})`);
+      body.addColorStop(0.5,  `rgba(255,208,112,${ease.toFixed(3)})`);
+      body.addColorStop(0.85, `rgba(242,150,56,${ease.toFixed(3)})`);
+      body.addColorStop(1,    'rgba(220,120,40,0)');
+      ctx.fillStyle = body;
+      ctx.beginPath(); ctx.arc(sx, sy, coreR, 0, TAU); ctx.fill();
+
+      ctx.beginPath(); ctx.arc(sx, sy, coreR * 0.99, 0, TAU); ctx.clip();
+      for (const sp of SUN_SPOTS) {
+        const lon = sp.lon + spin;
+        const x = sp.cosLat * Math.sin(lon);
+        const z0 = sp.cosLat * Math.cos(lon);
+        const y0 = -sp.sinLat;
+        const y = y0 * cT - z0 * sT;
+        const z = y0 * sT + z0 * cT;
+        if (z <= 0.05) continue;                      // far side of the Sun
+        const px = sx + x * coreR, py = sy + y * coreR;
+        const r = sp.r * coreR * lerp(0.55, 1, z);    // foreshorten near the limb
+        const edge = smoothstep(0.05, 0.4, z);        // fade onto / off the limb
+        if (sp.hot) {                                 // bright facula
+          const fg = ctx.createRadialGradient(px, py, 0, px, py, r * 1.4);
+          fg.addColorStop(0, `rgba(255,255,236,${(0.5 * ease * edge).toFixed(3)})`);
+          fg.addColorStop(1, 'rgba(255,236,170,0)');
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.fillStyle = fg;
+          ctx.beginPath(); ctx.arc(px, py, r * 1.4, 0, TAU); ctx.fill();
+        } else {                                      // dark sunspot
+          const dg = ctx.createRadialGradient(px, py, 0, px, py, r);
+          dg.addColorStop(0,    `rgba(120,42,8,${(0.62 * ease * edge).toFixed(3)})`);
+          dg.addColorStop(0.55, `rgba(196,92,30,${(0.34 * ease * edge).toFixed(3)})`);
+          dg.addColorStop(1,    'rgba(196,92,30,0)');
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.fillStyle = dg;
+          ctx.beginPath(); ctx.arc(px, py, r, 0, TAU); ctx.fill();
+        }
+      }
+      // Limb darkening — sells the spherical, rotating read
+      ctx.globalCompositeOperation = 'source-over';
+      const limb = ctx.createRadialGradient(sx, sy, coreR * 0.55, sx, sy, coreR);
+      limb.addColorStop(0,    'rgba(120,52,18,0)');
+      limb.addColorStop(0.8,  'rgba(120,52,18,0)');
+      limb.addColorStop(1,    `rgba(120,52,18,${(0.45 * ease).toFixed(3)})`);
+      ctx.fillStyle = limb;
+      ctx.beginPath(); ctx.arc(sx, sy, coreR, 0, TAU); ctx.fill();
+      ctx.restore();
+
+      // ── Hot rim highlight (additive) ─────────────────────────────────
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const rim = ctx.createRadialGradient(sx, sy, coreR * 0.2, sx, sy, coreR * 1.05);
+      rim.addColorStop(0,   'rgba(255,240,200,0)');
+      rim.addColorStop(0.8, 'rgba(255,240,200,0)');
+      rim.addColorStop(1,   `rgba(255,226,150,${(0.4 * ease).toFixed(3)})`);
+      ctx.fillStyle = rim;
+      ctx.beginPath(); ctx.arc(sx, sy, coreR * 1.05, 0, TAU); ctx.fill();
       ctx.restore();
     };
 
@@ -1003,28 +1248,102 @@ const SpaceBackground = () => {
       if (t < 0.01) return;
       const ease = t * t * (3 - 2 * t);
 
-      // Earthrise composition: large + low, so the dark night side sits under the
-      // body copy and the lit limb crests into mid-screen. Subtle mouse parallax.
-      const R = Math.min(W, H) * 0.30 * lerp(0.9, 1, ease);
+      // Earth sits low + centered (so the dark night side tucks under the body
+      // copy); it's shrunk from the old solo globe to leave room for the
+      // planetary system wheeling around it. Subtle mouse parallax.
+      const minWH = Math.min(W, H);
+      const R = minWH * 0.13 * lerp(0.92, 1, ease);
       const cx = W * 0.5 + (smoothNX - 0.5) * -34;
       const cy = H * 0.72 + (smoothNY - 0.5) * -22;
-      const sunX = W * 0.85, sunY = H * 0.17;
+      const ps = minWH / 900;                 // body-dot size scale
 
-      // 3D sun-light direction = on-screen direction to the sun + a forward bias
-      let ldx = sunX - cx, ldy = sunY - cy;
-      const ll = Math.hypot(ldx, ldy) || 1;
-      ldx /= ll; ldy /= ll;
-      const Ln = Math.hypot(ldx, ldy, 0.55);
-      const Lx = ldx / Ln, Ly = ldy / Ln, Lz = 0.55 / Ln;
+      // Shared geocentric ecliptic: a single plane tilted about screen-x, so a
+      // body's flat orbit (cos a, 0, sin a) projects to a 3D ellipse and gains
+      // a depth (z>0 → in front of the globe). Revolution is driven by scroll
+      // (primary) + a slow time drift, so scrolling sweeps the whole system.
+      const cT = Math.cos(SCENE_TILT), sT = Math.sin(SCENE_TILT);
+      const place = (b) => {
+        const Rb = b.orbit * minWH;
+        const a = b.phase + pageScrollY * 0.0016 * b.speed + now * 0.00002 * b.speed;
+        const ux = Math.cos(a) * Rb, uz = Math.sin(a) * Rb;
+        return { b, sx: cx + ux, sy: cy - uz * sT, depth: uz * cT, Rb };
+      };
+      const placed = GEO_BODIES.map(place);
 
-      drawSun(now, sunX, sunY, ease);
+      // Sun's live 3D offset from Earth IS the day/night light direction, so the
+      // lit hemisphere (and the city lights / Moon shading) tracks it as it
+      // wheels around — the whole reason this reads as a "view from Earth".
+      const sun = placed.find((p) => p.b.sun);
+      const svx = sun.sx - cx, svy = sun.sy - cy, svz = sun.depth;
+      const sl = Math.hypot(svx, svy, svz) || 1;
+      const Lx = svx / sl, Ly = svy / sl, Lz = svz / sl;
 
-      // time + scroll drive the spin (Earth) and the orbit (Moon)
-      const rot = now * 0.00002 + pageScrollY * 0.0016;
+      // ── Orbit rings — sampled + depth-shaded (far arc dims) ──────────
+      ctx.save();
+      ctx.lineCap = 'round';
+      const RSEG = 72;
+      for (const b of GEO_BODIES) {
+        const Rb = b.orbit * minWH;
+        let prev = null;
+        for (let i = 0; i <= RSEG; i++) {
+          const a = (i / RSEG) * TAU;
+          const uz = Math.sin(a) * Rb;
+          const cur = { x: cx + Math.cos(a) * Rb, y: cy - uz * sT, d: (Math.sin(a) * cT + 1) / 2 };
+          if (prev) {
+            const dd = (prev.d + cur.d) / 2;
+            ctx.globalAlpha = clamp(lerp(0.035, 0.16, dd) * ease, 0, 1);
+            ctx.strokeStyle = `rgb(${starRgb})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(cur.x, cur.y);
+            ctx.stroke();
+          }
+          prev = cur;
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // ── Body painters ────────────────────────────────────────────────
+      const drawPlanetDot = (it) => {
+        const b = it.b;
+        const d = (it.depth / it.Rb + 1) / 2;     // 0 far .. 1 near
+        const sz = b.size * ps * lerp(0.8, 1.18, d);
+        const [r, g, bl] = b.color;
+        const a = clamp(lerp(0.45, 1, d) * ease, 0, 1);
+        // Saturn's ring — a tiny tilted ellipse in amber, leaning with the plane
+        if (b.ring) {
+          ctx.save();
+          ctx.globalAlpha = a * 0.85;
+          ctx.strokeStyle = 'rgba(255,196,128,0.95)';
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.ellipse(it.sx, it.sy, sz * 2.2, sz * 0.7, -0.4, 0, TAU);
+          ctx.stroke();
+          ctx.restore();
+        }
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.shadowBlur = sz * 3.2;
+        ctx.shadowColor = `rgba(${r},${g},${bl},0.9)`;
+        const grad = ctx.createRadialGradient(
+          it.sx - sz * 0.32, it.sy - sz * 0.32, 0, it.sx, it.sy, sz);
+        grad.addColorStop(0,
+          `rgb(${Math.min(255, r + 64)},${Math.min(255, g + 64)},${Math.min(255, bl + 64)})`);
+        grad.addColorStop(1, `rgb(${r},${g},${bl})`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(it.sx, it.sy, sz, 0, TAU);
+        ctx.fill();
+        ctx.restore();
+      };
+      const drawBody = (it) =>
+        it.b.sun ? drawGeoSun(now, it.sx, it.sy, minWH, ease) : drawPlanetDot(it);
+
+      // ── Moon — its own near-edge-on orbit close to the Earth ─────────
       const moonA = now * 0.00009 + pageScrollY * 0.0024;
-
-      // Near-edge-on orbit so the Moon sweeps in front of and behind the planet
-      const orbitR = R * 1.9;
+      const orbitR = R * 1.95;
       const ORBIT_TILT = 1.3;
       const oc = Math.cos(ORBIT_TILT), os = Math.sin(ORBIT_TILT);
       const planeY = Math.sin(moonA) * orbitR;
@@ -1032,12 +1351,19 @@ const SpaceBackground = () => {
       const moonY = cy + planeY * oc;
       const moonDepth = planeY * os;          // > 0 → toward viewer (in front)
       const moonFront = moonDepth > 0;
-      const moonR = R * 0.24 * (1 + 0.14 * (moonDepth / orbitR));
+      const moonR = R * 0.27 * (1 + 0.14 * (moonDepth / orbitR));
+
+      // ── Composite back→front: far bodies, globe + moon, near bodies ──
+      const rot = now * 0.00002 + pageScrollY * 0.0016;   // Earth's own spin
+
+      for (const it of placed) if (it.depth < 0) drawBody(it);
 
       drawOrbitRing(cx, cy, orbitR, orbitR * oc, ease);
       if (!moonFront) drawMoon(moonX, moonY, moonR, Lx, Ly, Lz, ease, 0.72);
       drawEarth(now, cx, cy, R, rot, Lx, Ly, Lz, ease);
       if (moonFront) drawMoon(moonX, moonY, moonR, Lx, Ly, Lz, ease, 1);
+
+      for (const it of placed) if (it.depth >= 0) drawBody(it);
     };
 
     // ── Main render loop ─────────────────────────────────────────────
@@ -1093,6 +1419,12 @@ const SpaceBackground = () => {
       const aLerp = targetSupernovaAlpha > smoothSupernovaAlpha ? 0.14 : 0.05;
       smoothSupernovaAlpha = lerp(smoothSupernovaAlpha, targetSupernovaAlpha, aLerp);
       drawSupernova(now, dt, smoothSupernovaAlpha, burstT);
+
+      // Mini solar-system orrery in the top-right — Professional only.
+      // It shares the supernova's alpha so it crossfades away in Personal
+      // (where the corner is occupied by the Earth scene's Sun).
+      // Disabled for now (stashed):
+      // drawMiniSolarSystem(now, smoothSupernovaAlpha);
 
       // Spawn / draw shooting stars
       if (Date.now() >= nextShootAt) spawnShooter();
