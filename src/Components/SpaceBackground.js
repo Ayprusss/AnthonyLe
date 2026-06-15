@@ -19,6 +19,17 @@ const SUPERNOVA_COLORS = [
   [0, 255, 225],   // cyan
 ];
 
+// Leans the ejecta sphere + shockwave ring for a 3D read (matches Earth's tilt).
+const SUPERNOVA_TILT = -0.34;
+
+// Uniform random direction on the unit sphere — seeds the 3D ejecta shell.
+const randUnit = () => {
+  const z = rand(-1, 1);
+  const th = rand(0, Math.PI * 2);
+  const rr = Math.sqrt(1 - z * z);
+  return [rr * Math.cos(th), z, rr * Math.sin(th)];
+};
+
 const rand = (a, b) => a + Math.random() * (b - a);
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -209,8 +220,14 @@ const SpaceBackground = () => {
     let nextRocketAt = Date.now() + rand(6000, 14000);
 
     // ── Supernova (footer ambient bloom) ─────────────────────────────
-    let supernovaSprites = [];
+    // A 3D exploding star: an expanding ejecta shell + a tilted shockwave
+    // ring, projected with the same rotation/tilt language as the Earth so
+    // both scenes share a depth read. Driven by time + scroll.
+    let supernovaSprites = [];   // ejecta particles riding unit directions
+    let supernovaRing = [];      // shockwave bead-ring (SN 1987A-style)
+    let supernovaRays = [];      // volumetric corona rays (3D directions)
     let smoothSupernovaAlpha = 0;
+    let burstT = 0;              // detonation clock 0→1 (0 = collapsed flash)
 
     const spawnRocket = () => {
       const modelIdx = Math.floor(Math.random() * CRAFT.length);
@@ -300,20 +317,26 @@ const SpaceBackground = () => {
     };
 
     const buildSupernovaSprites = () => {
+      const pickColor = () =>
+        SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
+
+      // ── Ejecta shell ──────────────────────────────────────────────
+      // Each particle rides a fixed unit direction (ux,uy,uz); `dist` is its
+      // radial throw in screen px and breathes between min/max. At draw time
+      // the direction is spun + tilted, so the cloud reads as a real sphere
+      // — near-side (z>0) bright & large, far-side (z<0) dim & small.
       supernovaSprites = [];
-      // Dense inner ring — vibrant cluster near core
-      for (let i = 0; i < 38; i++) {
-        const [r, g, b] = SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
-        const minD = rand(27, 83);
-        const maxD = rand(132, 240);
+      // Dense inner shell — vibrant cluster near the core
+      for (let i = 0; i < 46; i++) {
+        const [r, g, b] = pickColor();
+        const [ux, uy, uz] = randUnit();
+        const minD = rand(28, 86);
+        const maxD = rand(140, 250);
         supernovaSprites.push({
-          angle: Math.random() * Math.PI * 2,
-          dist: rand(minD, maxD),
-          minDist: minD,
-          maxDist: maxD,
-          vAngle: rand(0.06, 0.24) * (Math.random() < 0.5 ? 1 : -1),
-          vDist: rand(4, 18) * (Math.random() < 0.5 ? 1 : -1),
-          size: rand(1.4, 4.1),
+          ux, uy, uz,
+          dist: rand(minD, maxD), minDist: minD, maxDist: maxD,
+          vDist: rand(5, 20) * (Math.random() < 0.5 ? 1 : -1),
+          size: rand(1.4, 4.2),
           baseOpacity: rand(0.55, 0.95),
           twinkleSpeed: rand(1.2, 3.5),
           twinklePhase: Math.random() * Math.PI * 2,
@@ -321,33 +344,61 @@ const SpaceBackground = () => {
         });
       }
       // Sparse outer spray — wider, dimmer
-      for (let i = 0; i < 22; i++) {
-        const [r, g, b] = SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
-        const minD = rand(195, 278);
-        const maxD = rand(338, 473);
+      for (let i = 0; i < 26; i++) {
+        const [r, g, b] = pickColor();
+        const [ux, uy, uz] = randUnit();
+        const minD = rand(200, 290);
+        const maxD = rand(350, 500);
         supernovaSprites.push({
-          angle: Math.random() * Math.PI * 2,
-          dist: rand(minD, maxD),
-          minDist: minD,
-          maxDist: maxD,
-          vAngle: rand(0.02, 0.09) * (Math.random() < 0.5 ? 1 : -1),
-          vDist: rand(2, 10) * (Math.random() < 0.5 ? 1 : -1),
-          size: rand(0.75, 2.6),
-          baseOpacity: rand(0.28, 0.65),
+          ux, uy, uz,
+          dist: rand(minD, maxD), minDist: minD, maxDist: maxD,
+          vDist: rand(3, 12) * (Math.random() < 0.5 ? 1 : -1),
+          size: rand(0.8, 2.6),
+          baseOpacity: rand(0.28, 0.66),
           twinkleSpeed: rand(0.7, 2.1),
           twinklePhase: Math.random() * Math.PI * 2,
           r, g, b,
         });
       }
+
+      // ── Shockwave ring ────────────────────────────────────────────
+      // Beads spaced around an equatorial circle. The same spin+tilt that
+      // turns the shell leans this ring into an ellipse; its back arc draws
+      // behind the core and the front arc in front — exactly like the Moon.
+      supernovaRing = [];
+      const beads = 56;
+      for (let i = 0; i < beads; i++) {
+        supernovaRing.push({
+          a: (i / beads) * Math.PI * 2,
+          knot: Math.random() < 0.16 ? rand(1.7, 2.7) : 1, // bright hotspots
+          phase: Math.random() * Math.PI * 2,
+          flick: rand(0.8, 2.2),
+        });
+      }
+
+      // ── Volumetric corona rays ────────────────────────────────────
+      // 3D ray directions that rotate with the shell; foreshorten + dim on
+      // the far side, so the burst looks like it radiates through space.
+      supernovaRays = [];
+      for (let i = 0; i < 16; i++) {
+        const [ux, uy, uz] = randUnit();
+        supernovaRays.push({
+          ux, uy, uz,
+          len: rand(150, 360),
+          phase: Math.random() * Math.PI * 2,
+          w: rand(0.7, 1.7),
+        });
+      }
     };
 
-    const drawSupernova = (now, dt, alpha) => {
-      const cx = W / 2;
-      const cy = H * 0.9;
+    const drawSupernova = (now, dt, alpha, burst) => {
+      // Centered hero placement — same anchor + mouse parallax as the
+      // Personal Earth scene, so the two themes share a focal point.
+      const cx = W * 0.5 + (smoothNX - 0.5) * -34;
+      const cy = H * 0.72 + (smoothNY - 0.5) * -22;
 
-      // Always advance sprite positions so they're animated when revealed
+      // Always advance the ejecta breathing so the shell is alive when revealed
       for (const sp of supernovaSprites) {
-        sp.angle += sp.vAngle * dt;
         sp.dist += sp.vDist * dt;
         if (sp.dist <= sp.minDist || sp.dist >= sp.maxDist) {
           sp.vDist *= -1;
@@ -357,7 +408,31 @@ const SpaceBackground = () => {
 
       if (alpha < 0.005) return;
 
-      // Outer diffuse nebula — wide cool halo
+      // ── 3D frame ──────────────────────────────────────────────────
+      // Spin about the vertical axis (time + scroll, like the Earth) then a
+      // fixed tilt, so the whole explosion turns as a single solid object.
+      const spin = now * 0.00003 + pageScrollY * 0.0014;
+      const cS = Math.cos(spin), sS = Math.sin(spin);
+      const cT = Math.cos(SUPERNOVA_TILT), sT = Math.sin(SUPERNOVA_TILT);
+      const rot3 = (ux, uy, uz) => {
+        const xr = ux * cS + uz * sS;       // spin about Y
+        const zr0 = -ux * sS + uz * cS;
+        const yr = uy * cT - zr0 * sT;       // tilt about X
+        const zr = uy * sT + zr0 * cT;       // zr > 0 → toward the viewer
+        return { x: xr, y: yr, z: zr };
+      };
+      const breathe = 0.5 + 0.5 * Math.sin(now * 0.00046);
+
+      // Detonation envelope. `expand` throws the ejecta / ring / rays out
+      // from a collapsed point (0) to the settled remnant (1) with a small
+      // overshoot; `flash` is the blinding first-light that decays as the
+      // shell flies apart.
+      const expand = burst >= 1
+        ? 1
+        : (1 - Math.pow(1 - burst, 2.6)) + Math.sin(burst * Math.PI) * 0.1;
+      const flash = Math.pow(1 - burst, 2.2);
+
+      // ── Ambient glow (cool halo → warm corona) ────────────────────
       const outerR = Math.min(W * 1.02, H * 1.17);
       const g0 = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR);
       g0.addColorStop(0.00, `rgba(176,68,255,${(0.13 * alpha).toFixed(3)})`);
@@ -365,11 +440,10 @@ const SpaceBackground = () => {
       g0.addColorStop(0.58, `rgba(0,220,255,${(0.06 * alpha).toFixed(3)})`);
       g0.addColorStop(1.00, 'rgba(0,0,0,0)');
       ctx.beginPath();
-      ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+      ctx.arc(cx, cy, outerR, 0, TAU);
       ctx.fillStyle = g0;
       ctx.fill();
 
-      // Mid warm corona
       const midR = Math.min(W * 0.60, H * 0.75);
       const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, midR);
       g1.addColorStop(0.00, `rgba(255,220,80,${(0.28 * alpha).toFixed(3)})`);
@@ -377,14 +451,94 @@ const SpaceBackground = () => {
       g1.addColorStop(0.48, `rgba(255,56,145,${(0.13 * alpha).toFixed(3)})`);
       g1.addColorStop(1.00, 'rgba(0,0,0,0)');
       ctx.beginPath();
-      ctx.arc(cx, cy, midR, 0, Math.PI * 2);
+      ctx.arc(cx, cy, midR, 0, TAU);
       ctx.fillStyle = g1;
       ctx.fill();
 
-      // Hot pulsing core
+      // ── Project the shockwave ring + ejecta once, sort into depth halves
+      const ringBase = Math.min(W * 0.42, H * 0.52);
+      const ringR = ringBase * (0.9 + 0.13 * breathe) * expand;
+      const ringPts = supernovaRing.map((bd) => {
+        const p = rot3(Math.cos(bd.a), 0, Math.sin(bd.a)); // equatorial circle
+        return { sx: cx + p.x * ringR, sy: cy + p.y * ringR, depth: p.z, bd };
+      });
+      const parts = supernovaSprites.map((sp) => {
+        const p = rot3(sp.ux, sp.uy, sp.uz);
+        const d = sp.dist * expand;
+        return { sp, sx: cx + p.x * d, sy: cy + p.y * d, depth: p.z };
+      });
+
+      // ── Paint helpers ─────────────────────────────────────────────
+      const drawBead = (rp) => {
+        const d = (rp.depth + 1) / 2;                 // 0 back .. 1 front
+        const flick = 0.6 + 0.4 * Math.sin(now * 0.001 * rp.bd.flick + rp.bd.phase);
+        const a = clamp((0.16 + 0.5 * d) * flick * rp.bd.knot * alpha, 0, 1);
+        if (a < 0.02 || rp.sy > H + 6) return;
+        const size = (0.85 + 1.7 * d) * rp.bd.knot;
+        ctx.globalAlpha = a;
+        ctx.shadowBlur = size * 4;
+        ctx.shadowColor = 'rgba(255,150,70,0.9)';
+        ctx.fillStyle = 'rgba(255,214,150,1)';
+        ctx.beginPath();
+        ctx.arc(rp.sx, rp.sy, size, 0, TAU);
+        ctx.fill();
+      };
+      const drawParticle = (pt) => {
+        if (pt.sy > H + 6) return;
+        const sp = pt.sp;
+        const d = (pt.depth + 1) / 2;                 // 0 far .. 1 near
+        const tPhase = now * 0.001 * sp.twinkleSpeed + sp.twinklePhase;
+        const flicker = 0.42 + 0.58 * Math.abs(Math.sin(tPhase));
+        const opacity = sp.baseOpacity * flicker * lerp(0.3, 1, d) * alpha;
+        if (opacity < 0.025) return;
+        const size = sp.size * lerp(0.65, 1.3, d);
+        ctx.globalAlpha = clamp(opacity, 0, 1);
+        ctx.shadowBlur = size * 5.5 * lerp(0.6, 1.15, d);
+        ctx.shadowColor = `rgb(${sp.r},${sp.g},${sp.b})`;
+        ctx.fillStyle = `rgb(${sp.r},${sp.g},${sp.b})`;
+        ctx.beginPath();
+        ctx.arc(pt.sx, pt.sy, size, 0, TAU);
+        ctx.fill();
+      };
+
+      // ── Back hemisphere (behind the core) ─────────────────────────
+      ctx.save();
+      for (const pt of parts) if (pt.depth < 0) drawParticle(pt);
+      for (const rp of ringPts) if (rp.depth < 0) drawBead(rp);
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      ctx.restore();
+
+      // ── Volumetric corona rays (radiate from the core through the shell)
+      ctx.save();
+      ctx.lineCap = 'round';
+      for (const ray of supernovaRays) {
+        const p = rot3(ray.ux, ray.uy, ray.uz);
+        const d = (p.z + 1) / 2;
+        const pulse = 0.6 + 0.4 * Math.abs(Math.sin(now * 0.0007 + ray.phase));
+        const len = ray.len * (0.7 + 0.5 * breathe) * pulse * expand;
+        const ex = cx + p.x * len, ey = cy + p.y * len;
+        if (ey > H + 20 && cy > H + 20) continue;
+        const rA = (0.04 + 0.22 * d) * pulse * alpha;
+        if (rA < 0.015) continue;
+        const rGrad = ctx.createLinearGradient(cx, cy, ex, ey);
+        rGrad.addColorStop(0.0, `rgba(255,230,120,${rA.toFixed(3)})`);
+        rGrad.addColorStop(0.5, `rgba(255,150,60,${(rA * 0.44).toFixed(3)})`);
+        rGrad.addColorStop(1.0, 'rgba(200,80,30,0)');
+        ctx.lineWidth = ray.w * lerp(0.7, 1.5, d);
+        ctx.strokeStyle = rGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // ── Hot core — sphere with an offset highlight for a volumetric read
       const pulse = 1 + 0.13 * Math.sin(now * 0.00092);
       const coreR = 120 * pulse;
-      const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
+      const hx = cx - coreR * 0.16, hy = cy - coreR * 0.2; // highlight bias
+      const g2 = ctx.createRadialGradient(hx, hy, 0, cx, cy, coreR);
       g2.addColorStop(0.00, `rgba(255,255,235,${(0.96 * alpha).toFixed(3)})`);
       g2.addColorStop(0.13, `rgba(255,245,160,${(0.86 * alpha).toFixed(3)})`);
       g2.addColorStop(0.34, `rgba(255,200,80,${(0.60 * alpha).toFixed(3)})`);
@@ -394,57 +548,50 @@ const SpaceBackground = () => {
       ctx.shadowBlur = 112;
       ctx.shadowColor = `rgba(255,200,60,${(0.52 * alpha).toFixed(3)})`;
       ctx.beginPath();
-      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+      ctx.arc(cx, cy, coreR, 0, TAU);
       ctx.fillStyle = g2;
       ctx.fill();
       ctx.restore();
 
-      // Corona rays — 12 slow-rotating radial streaks
-      ctx.save();
-      ctx.lineCap = 'round';
-      const rotPhase = now * 0.00022;
-      for (let i = 0; i < 12; i++) {
-        const a = (i / 12) * Math.PI * 2 + rotPhase;
-        const len = 202 + 158 * Math.abs(Math.sin(now * 0.00068 + i * 0.79));
-        const rA = (0.22 + 0.11 * Math.sin(now * 0.00098 + i * 1.37)) * alpha;
-        const rx2 = cx + Math.cos(a) * len;
-        const ry2 = cy + Math.sin(a) * len;
-        if (ry2 > H + 20) continue; // skip rays purely below viewport
-        const rGrad = ctx.createLinearGradient(cx, cy, rx2, ry2);
-        rGrad.addColorStop(0.0, `rgba(255,230,120,${rA.toFixed(3)})`);
-        rGrad.addColorStop(0.5, `rgba(255,150,60,${(rA * 0.44).toFixed(3)})`);
-        rGrad.addColorStop(1.0, 'rgba(200,80,30,0)');
-        ctx.lineWidth = 0.8 + 0.8 * Math.abs(Math.sin(i * 2.1 + now * 0.00072));
+      // ── First-light flash — the blinding initial blast; grows as it dims
+      if (flash > 0.01) {
+        const fR = coreR + Math.min(W, H) * 0.5 * burst;
+        const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, fR);
+        fg.addColorStop(0.00, `rgba(255,255,250,${(0.85 * flash * alpha).toFixed(3)})`);
+        fg.addColorStop(0.35, `rgba(255,242,205,${(0.45 * flash * alpha).toFixed(3)})`);
+        fg.addColorStop(1.00, 'rgba(255,200,120,0)');
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = fg;
         ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(rx2, ry2);
-        ctx.strokeStyle = rGrad;
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // Light sprites — orbiting colored particles with glow
-      ctx.save();
-      ctx.shadowBlur = 0; // set per-particle below
-      for (const sp of supernovaSprites) {
-        const sx = cx + Math.cos(sp.angle) * sp.dist;
-        const sy = cy + Math.sin(sp.angle) * sp.dist;
-        if (sy > H + 5) continue; // clip below viewport
-        const tPhase = now * 0.001 * sp.twinkleSpeed + sp.twinklePhase;
-        const flicker = 0.42 + 0.58 * Math.abs(Math.sin(tPhase));
-        const opacity = sp.baseOpacity * flicker * alpha;
-        if (opacity < 0.025) continue;
-        ctx.globalAlpha = opacity;
-        ctx.shadowBlur = sp.size * 5.5;
-        ctx.shadowColor = `rgb(${sp.r},${sp.g},${sp.b})`;
-        ctx.fillStyle = `rgb(${sp.r},${sp.g},${sp.b})`;
-        ctx.beginPath();
-        ctx.arc(sx, sy, sp.size, 0, Math.PI * 2);
+        ctx.arc(cx, cy, fR, 0, TAU);
         ctx.fill();
+        ctx.restore();
       }
+
+      // ── Front hemisphere (in front of the core) ───────────────────
+      ctx.save();
+      for (const rp of ringPts) if (rp.depth >= 0) drawBead(rp);
+      for (const pt of parts) if (pt.depth >= 0) drawParticle(pt);
       ctx.globalAlpha = 1;
       ctx.shadowBlur = 0;
       ctx.restore();
+
+      // ── Expanding shockwave — a bright shell racing out on detonation
+      if (burst < 0.999) {
+        const shockR = burst * Math.min(W, H) * 0.72;
+        const shockA = Math.pow(1 - burst, 1.6) * 0.5 * alpha;
+        if (shockA > 0.012 && shockR > 4) {
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.strokeStyle = `rgba(255,226,184,${shockA.toFixed(3)})`;
+          ctx.lineWidth = 2 + 7 * (1 - burst);
+          ctx.beginPath();
+          ctx.arc(cx, cy, shockR, 0, TAU);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
 
       // Central lens flare cross
       const fA = (0.58 + 0.18 * Math.sin(now * 0.00128)) * alpha;
@@ -892,12 +1039,19 @@ const SpaceBackground = () => {
       // Earth scene fades in over the starfield in Personal theme
       drawEarthScene(now, personalT);
 
-      // Supernova — scroll-aware bloom that rises behind the footer
-      const scrollMax = document.documentElement.scrollHeight - H;
-      const rawScrollRatio = scrollMax > 10 ? clamp(pageScrollY / scrollMax, 0, 1) : 1;
-      const targetSupernovaAlpha = isPersonal ? 0 : clamp((rawScrollRatio - 0.62) / 0.38, 0, 1);
-      smoothSupernovaAlpha = lerp(smoothSupernovaAlpha, targetSupernovaAlpha, 0.04);
-      drawSupernova(now, dt, smoothSupernovaAlpha);
+      // Supernova — the Professional-theme hero centerpiece (mirrors the
+      // Personal Earth's placement). It detonates on load and re-detonates
+      // each time you return to Professional; `burstT` advances on active
+      // frame-time so a backgrounded tab doesn't skip the blast.
+      if (isPersonal) {
+        burstT = 0;                                 // hold pre-detonation
+      } else {
+        burstT = Math.min(1, burstT + dt / 2.6);    // ~2.6s explosion
+      }
+      const targetSupernovaAlpha = isPersonal ? 0 : 1;
+      const aLerp = targetSupernovaAlpha > smoothSupernovaAlpha ? 0.14 : 0.05;
+      smoothSupernovaAlpha = lerp(smoothSupernovaAlpha, targetSupernovaAlpha, aLerp);
+      drawSupernova(now, dt, smoothSupernovaAlpha, burstT);
 
       // Spawn / draw shooting stars
       if (Date.now() >= nextShootAt) spawnShooter();
@@ -1039,6 +1193,9 @@ const SpaceBackground = () => {
     buildSupernovaSprites();
     updateStarColor();
     updateTheme();
+    // Show the supernova immediately in Professional so the load-time blast
+    // plays from its first frame rather than fading up.
+    smoothSupernovaAlpha = isPersonal ? 0 : 1;
     rafId = requestAnimationFrame(draw);
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });
