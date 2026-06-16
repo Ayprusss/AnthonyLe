@@ -9,7 +9,7 @@ const hobbies = [
     {
         name: "Rock Climbing",
         tag: "VERTICAL",
-        blurb: "Placeholder — bouldering and lead, indoors through winter and on real rock when it's warm. The puzzle of a problem is the draw.",
+        blurb: "Currently a V5 Climber. I don't want to say that I have plateau'd, but every climbing session is one step closer to me admitting it....",
         meta: { label: "Discipline", value: "Bouldering" },
         href: "#",
         linkLabel: "View sends",
@@ -17,7 +17,7 @@ const hobbies = [
     {
         name: "Hiking",
         tag: "TRAILS",
-        blurb: "Placeholder — long days on the trail, the further from cell service the better. Where I go to reset.",
+        blurb: "Haven't been on a hike in a long while, but I'm looking to do many hiking trips in the future before my back is blown.",
         meta: { label: "", value: "" },
         href: "#",
         linkLabel: "See the routes",
@@ -25,7 +25,7 @@ const hobbies = [
     {
         name: "Exercising",
         tag: "STRENGTH",
-        blurb: "Placeholder — consistent training as the one non-negotiable in the week. Progressive overload, repeat.",
+        blurb: "I currently rock climb more than I do traditional exercises, but they really are the same thing...",
         meta: { label: "Focus", value: "U/L split" },
         href: "#",
         linkLabel: "Open the split",
@@ -33,7 +33,7 @@ const hobbies = [
     {
         name: "Fashion",
         tag: "STYLE",
-        blurb: "Placeholder — building a wardrobe with intent, leaning workwear and archive pieces. Fit over hype.",
+        blurb: "Brought into the fashion scene during the HYPEBEAST era, my style has definitely changed, with some of my outfits being questionable...",
         meta: { label: "Leaning", value: "Archive · Gorpcore · Japanese + Korean designers" },
         href: "#",
         linkLabel: "Browse fits",
@@ -41,7 +41,7 @@ const hobbies = [
     {
         name: "Music",
         tag: "AUDIO",
-        blurb: "Placeholder — always digging for the next record, mostly underground rap and anything with a strange pulse.",
+        blurb: "I love music for the genres I really enjoy and I try to be invested in the music that I don't really enjoy.",
         meta: { label: "On repeat", value: "Underground rap" },
         href: "https://open.spotify.com/user/22qrv4t4f3u3nxmxtgiybk6ui?si=6f49106d14154a20",
         linkLabel: "Open playlist",
@@ -49,7 +49,7 @@ const hobbies = [
     {
         name: "Gaming",
         tag: "PLAY",
-        blurb: "Placeholder — competitive ladders and the occasional 80-hour RPG. A good way to think about systems.",
+        blurb: "I have spent way too much time on my first playthrough of Elden Ring and have sinked too many hours into League of Legends and Valorant.",
         meta: { label: "Genre", value: "Competitive · RPG" },
         href: "https://steamcommunity.com/id/Ayprusss/",
         linkLabel: "View library",
