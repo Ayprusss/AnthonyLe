@@ -22,6 +22,18 @@ body {
     overflow-x: hidden;
 }
 
+/* ── Text selection — amber accent highlighter on near-black ── */
+::selection {
+    background-color: var(--accent);
+    color: var(--bg);
+    text-shadow: none;
+}
+::-moz-selection {
+    background-color: var(--accent);
+    color: var(--bg);
+    text-shadow: none;
+}
+
 /* Hide default cursor on pointer devices — custom cursor takes over */
 @media (pointer: fine) {
     * { cursor: none !important; }
