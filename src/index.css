@@ -24,13 +24,11 @@ body {
 
 /* ── Text selection — amber accent highlighter on near-black ── */
 ::selection {
-    background-color: var(--accent);
-    color: var(--bg);
+    background-color: rgba(var(--accent-rgb), 0.3);
     text-shadow: none;
 }
 ::-moz-selection {
-    background-color: var(--accent);
-    color: var(--bg);
+    background-color: rgba(var(--accent-rgb), 0.3);
     text-shadow: none;
 }
 
