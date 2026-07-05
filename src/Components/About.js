@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
+import { SectionHeader } from './ui/SectionHeader';
 
 import './About.css';
 
@@ -16,6 +16,7 @@ const facts = [
     { label: "Off the clock", value: "Climbing, Fashion, Gaming, Exercising, Hiking, Music" },
 ];
 
+// General-notes sheet: numbered notes, a figure, and a spec table.
 const About = () => {
     return (
         <section className="section-container">
@@ -25,28 +26,35 @@ const About = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="About." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
-                <p className="section-subtitle">
-                    Computer Science Student at the University of Ottawa.
-                </p>
+                <SectionHeader
+                    title="About."
+                    meta="general notes · read before proceeding"
+                    subtitle="Computer Science Student at the University of Ottawa."
+                />
             </motion.div>
 
             <div className="about-content">
                 <motion.div
-                    className="about-bio"
+                    className="about-notes"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                 >
-                    {paragraphs.map((text, idx) => (
-                        <p className="about-paragraph" key={idx}>{text}</p>
-                    ))}
+                    <p className="about-notes-caption">GENERAL NOTES:</p>
+                    <ol className="about-notes-list">
+                        {paragraphs.map((text, idx) => (
+                            <li className="about-note" key={idx}>
+                                <span className="about-note-no">{idx + 1}.</span>
+                                <p className="about-note-text">{text}</p>
+                            </li>
+                        ))}
+                    </ol>
                 </motion.div>
 
                 <div className="about-rail">
-                    {/* TODO: drop a real portrait at public/about-portrait.jpg (4:5 crop). Until then the NO SIGNAL placeholder shows. */}
+                    {/* TODO: drop a real portrait at public/about-portrait.jpg (4:5 crop).
+                        Until then the hatched NO-PHOTO region prints. */}
                     <motion.figure
                         className="about-portrait"
                         initial={{ opacity: 0, y: 20 }}
@@ -62,12 +70,11 @@ const About = () => {
                                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
                             <div className="about-portrait-placeholder" aria-hidden="true">
-                                <span className="about-portrait-ph-label">NO SIGNAL</span>
+                                <span className="about-portrait-ph-label">NO PHOTO ON FILE</span>
                             </div>
-                            <span className="about-portrait-scan" aria-hidden="true"></span>
                         </div>
                         <figcaption className="about-portrait-caption">
-                            <span className="about-portrait-tag">FIG.01</span>
+                            <span className="about-portrait-tag">FIG. A-1</span>
                             <span>Anthony Le — Ottawa</span>
                         </figcaption>
                     </motion.figure>
@@ -79,6 +86,7 @@ const About = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
+                        <p className="about-facts-caption">SPECIFICATIONS</p>
                         <dl className="about-facts">
                             {facts.map((fact, idx) => (
                                 <div className="about-fact" key={idx}>

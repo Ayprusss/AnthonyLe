@@ -25,7 +25,8 @@ describe('About Component', () => {
 
   test('renders the at-a-glance facts', () => {
     render(<About />);
-    expect(screen.getByText(/Based in/i)).toBeInTheDocument();
-    expect(screen.getByText(/Ottawa, Canada/i)).toBeInTheDocument();
+    // "based in" also appears inside the bio copy, so match all occurrences
+    expect(screen.getAllByText(/Based in/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Ottawa, Canada')).toBeInTheDocument();
   });
 });
