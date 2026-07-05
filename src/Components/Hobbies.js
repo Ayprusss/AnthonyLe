@@ -1,10 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
+import { SectionHeader } from './ui/SectionHeader';
 import './Hobbies.css';
 
 // TODO: swap blurbs/links for real copy + real URLs (user-supplied).
-// Each card is a "channel" in the transmission deck — tune through them.
+// Each hobby is a numbered figure sheet in the appendix — flip through them.
 const hobbies = [
     {
         name: "Rock Climbing",
@@ -56,26 +56,24 @@ const hobbies = [
     },
 ];
 
-const cardVariants = {
+const sheetVariants = {
     enter: (dir) => ({
         opacity: 0,
-        x: dir > 0 ? 90 : -90,
-        rotateY: dir > 0 ? 14 : -14,
-        scale: 0.9,
+        x: dir > 0 ? 70 : -70,
+        rotate: dir > 0 ? 1.6 : -1.6,
     }),
-    center: { opacity: 1, x: 0, rotateY: 0, scale: 1 },
+    center: { opacity: 1, x: 0, rotate: 0 },
     exit: (dir) => ({
         opacity: 0,
-        x: dir > 0 ? -90 : 90,
-        rotateY: dir > 0 ? -14 : 14,
-        scale: 0.9,
+        x: dir > 0 ? -70 : 70,
+        rotate: dir > 0 ? -1.6 : 1.6,
     }),
 };
 
 const pad = (n) => String(n).padStart(2, '0');
 
 const Chevron = ({ dir }) => (
-    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
         fill="none" stroke="currentColor" strokeWidth="1.5"
         strokeLinecap="round" strokeLinejoin="round">
         <path d={dir === 'prev' ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
@@ -111,15 +109,15 @@ const Hobbies = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Hobbies." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
-                <p className="section-subtitle">
-                    What I get up to when I'm away from the keyboard — tune through the channels.
-                </p>
+                <SectionHeader
+                    title="Hobbies."
+                    meta={`appendix figures · ${total} sheets`}
+                    subtitle="What I get up to when I'm away from the keyboard — flip through the figure sheets."
+                />
             </motion.div>
 
             <motion.div
-                className="hobby-deck"
+                className="fig-deck"
                 role="group"
                 aria-roledescription="carousel"
                 aria-label="Hobbies"
@@ -132,27 +130,28 @@ const Hobbies = () => {
             >
                 <button
                     type="button"
-                    className="hobby-arrow hobby-arrow-prev"
+                    className="fig-arrow fig-arrow-prev"
                     onClick={() => paginate(-1)}
                     aria-label="Previous hobby"
                 >
                     <Chevron dir="prev" />
                 </button>
 
-                <div className="hobby-stage" aria-live="polite">
-                    <span className="hobby-ghost hobby-ghost-2" aria-hidden="true"></span>
-                    <span className="hobby-ghost hobby-ghost-1" aria-hidden="true"></span>
+                <div className="fig-stage" aria-live="polite">
+                    {/* the sheets underneath the top one */}
+                    <span className="fig-under fig-under-2" aria-hidden="true"></span>
+                    <span className="fig-under fig-under-1" aria-hidden="true"></span>
 
                     <AnimatePresence mode="wait" custom={direction} initial={false}>
                         <motion.article
                             key={index}
-                            className="hobby-card-rot"
+                            className="fig-sheet"
                             custom={direction}
-                            variants={cardVariants}
+                            variants={sheetVariants}
                             initial="enter"
                             animate="center"
                             exit="exit"
-                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
                             drag="x"
                             dragConstraints={{ left: 0, right: 0 }}
                             dragElastic={0.18}
@@ -162,31 +161,31 @@ const Hobbies = () => {
                                 const swipe = info.offset.x;
                                 if (swipe < -70 || info.velocity.x < -400) paginate(1);
                                 else if (swipe > 70 || info.velocity.x > 400) paginate(-1);
-                                // reset on next tick so the explore link click isn't swallowed
+                                // reset on next tick so the link click isn't swallowed
                                 setTimeout(() => { dragging.current = false; }, 0);
                             }}
                         >
-                            <span className="hobby-corner hobby-corner-tl" aria-hidden="true"></span>
-                            <span className="hobby-corner hobby-corner-br" aria-hidden="true"></span>
-
-                            <div className="hobby-card-top">
-                                <span className="hobby-ch">
-                                    <span className="hobby-ch-num">CH.{pad(index + 1)}</span>
-                                    <span className="hobby-ch-total"> / {pad(total)}</span>
-                                </span>
-                                <span className="hobby-tag">{hobby.tag}</span>
+                            <div className="fig-sheet-band">
+                                <span className="fig-no">FIG. H-{pad(index + 1)}</span>
+                                <span className="fig-of">/ {pad(total)}</span>
+                                <span className="fig-band-fill" />
+                                <span className="fig-tag">{hobby.tag}</span>
                             </div>
 
-                            <h3 className="hobby-name">{hobby.name}</h3>
-                            <p className="hobby-blurb">{hobby.blurb}</p>
+                            <h3 className="fig-name">{hobby.name}</h3>
+                            <p className="fig-blurb">{hobby.blurb}</p>
 
-                            <div className="hobby-meta">
-                                <span className="hobby-meta-label">{hobby.meta.label}</span>
-                                <span className="hobby-meta-value">{hobby.meta.value}</span>
+                            <div className="fig-spec">
+                                {hobby.meta.label && (
+                                    <>
+                                        <span className="fig-spec-label">{hobby.meta.label}</span>
+                                        <span className="fig-spec-value">{hobby.meta.value}</span>
+                                    </>
+                                )}
                             </div>
 
                             <a
-                                className="btn-secondary hobby-explore"
+                                className="btn-secondary fig-link"
                                 href={hobby.href}
                                 target={isExternal ? "_blank" : undefined}
                                 rel={isExternal ? "noopener noreferrer" : undefined}
@@ -195,7 +194,7 @@ const Hobbies = () => {
                                 }}
                             >
                                 {hobby.linkLabel}
-                                <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
+                                <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"
                                     fill="none" stroke="currentColor" strokeWidth="1.6"
                                     strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M5 12h13M12 6l6 6-6 6" />
@@ -207,7 +206,7 @@ const Hobbies = () => {
 
                 <button
                     type="button"
-                    className="hobby-arrow hobby-arrow-next"
+                    className="fig-arrow fig-arrow-next"
                     onClick={() => paginate(1)}
                     aria-label="Next hobby"
                 >
@@ -215,17 +214,20 @@ const Hobbies = () => {
                 </button>
             </motion.div>
 
-            <div className="hobby-dots" role="tablist" aria-label="Select a hobby">
+            {/* Sheet tabs */}
+            <div className="fig-tabs" role="tablist" aria-label="Select a hobby">
                 {hobbies.map((h, i) => (
                     <button
                         type="button"
                         key={h.name}
-                        className={`hobby-dot${i === index ? ' is-active' : ''}`}
+                        className={`fig-tab${i === index ? ' is-active' : ''}`}
                         onClick={() => goTo(i)}
                         role="tab"
                         aria-selected={i === index}
                         aria-label={h.name}
-                    />
+                    >
+                        {pad(i + 1)}
+                    </button>
                 ))}
             </div>
         </section>

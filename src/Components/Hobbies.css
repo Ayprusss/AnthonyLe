@@ -1,221 +1,196 @@
-/* ── Transmission deck: a tunable hobby carousel ── */
-.hobby-deck {
+/* ── Appendix figure sheets — flip through the stack ── */
+.fig-deck {
     display: flex;
     align-items: stretch;
-    gap: 1.5rem;
+    gap: 1.4rem;
     outline: none;
 }
 
-.hobby-deck:focus-visible {
-    outline: 1px solid rgba(var(--accent-rgb), 0.5);
+.fig-deck:focus-visible {
+    outline: 1px solid rgba(var(--red-rgb), 0.6);
     outline-offset: 0.9rem;
 }
 
-/* ── Stage (perspective + ghost stack behind the active card) ── */
-.hobby-stage {
+.fig-stage {
     position: relative;
     flex: 1 1 auto;
     min-width: 0;
-    perspective: 1300px;
     display: flex;
 }
 
-/* faux stacked cards behind, for deck depth */
-.hobby-ghost {
+/* sheets underneath — slightly skewed like a loose paper stack */
+.fig-under {
     position: absolute;
     inset: 0;
     border: 1px solid var(--border);
-    background: rgba(var(--text-rgb), 0.012);
+    background: rgba(var(--paper-rgb), 0.6);
     pointer-events: none;
 }
-.hobby-ghost-1 { transform: translate(10px, 12px); opacity: 0.6; }
-.hobby-ghost-2 { transform: translate(20px, 24px); opacity: 0.3; }
+.fig-under-1 { transform: translate(8px, 9px) rotate(0.5deg); opacity: 0.7; }
+.fig-under-2 { transform: translate(16px, 18px) rotate(-0.4deg); opacity: 0.35; }
 
-/* ── The active card ── */
-.hobby-card-rot {
+/* ── The top sheet ── */
+.fig-sheet {
     position: relative;
     z-index: 1;
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     min-height: 320px;
-    padding: 2.4rem 2.6rem;
-    border: 1px solid var(--border);
-    background:
-        radial-gradient(120% 90% at 100% 0%, rgba(var(--accent-rgb), 0.07), transparent 45%),
-        linear-gradient(180deg, var(--surface), #0c0c0f);
-    transform-style: preserve-3d;
-    overflow: hidden;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    transition: background 0.6s ease, border-color 0.6s ease;
     cursor: grab;
 }
-.hobby-card-rot:active { cursor: grabbing; }
+.fig-sheet:active { cursor: grabbing; }
 
-/* faint scanline texture */
-.hobby-card-rot::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-        0deg, rgba(var(--text-rgb), 0.022) 0 1px, transparent 1px 4px);
-    opacity: 0.6;
-}
-
-/* amber corner ticks (echoes the About portrait frame) */
-.hobby-corner {
-    position: absolute;
-    width: 15px;
-    height: 15px;
-    z-index: 2;
-    pointer-events: none;
-}
-.hobby-corner-tl {
-    top: 12px; left: 12px;
-    border-top: 1px solid var(--accent);
-    border-left: 1px solid var(--accent);
-}
-.hobby-corner-br {
-    bottom: 12px; right: 12px;
-    border-bottom: 1px solid var(--accent);
-    border-right: 1px solid var(--accent);
-}
-
-.hobby-card-top {
+.fig-sheet-band {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.6rem;
-    position: relative;
-    z-index: 1;
+    gap: 0.5rem;
+    padding: 0.8rem 1.6rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
 }
 
-.hobby-ch {
-    font-family: var(--font-body);
-    font-size: 0.7rem;
+.fig-no {
+    font-weight: 700;
+    font-size: 0.66rem;
     letter-spacing: 0.16em;
+    color: var(--red);
 }
-.hobby-ch-num { color: var(--accent); }
-.hobby-ch-total { color: var(--text-dim); }
 
-.hobby-tag {
-    font-family: var(--font-body);
-    font-size: 0.58rem;
+.fig-of {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+}
+
+.fig-band-fill { flex: 1; }
+
+.fig-tag {
+    font-size: 0.54rem;
     letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: var(--text-dim);
-    padding: 0.32rem 0.6rem;
+    color: var(--ink-dim);
+    padding: 0.3rem 0.6rem;
     border: 1px solid var(--border);
 }
 
-.hobby-name {
+.fig-name {
     font-family: var(--font-display);
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    letter-spacing: 0.03em;
-    color: var(--text);
-    line-height: 0.95;
-    margin: 0 0 1.1rem;
-    position: relative;
-    z-index: 1;
+    font-weight: 400;
+    font-size: clamp(2.3rem, 5.5vw, 3.8rem);
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+    color: var(--ink-strong);
+    line-height: 0.98;
+    margin: 0;
+    padding: 1.6rem 1.6rem 1rem;
 }
 
-.hobby-blurb {
-    font-family: var(--font-body);
-    font-size: 0.84rem;
-    color: var(--text-dim);
-    line-height: 1.8;
-    max-width: 520px;
+.fig-blurb {
+    font-family: var(--font-prose);
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    line-height: 1.75;
+    max-width: 540px;
     margin: 0 0 auto;
-    position: relative;
-    z-index: 1;
+    padding: 0 1.6rem 1.4rem;
 }
 
-.hobby-meta {
+.fig-spec {
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
-    margin: 1.8rem 0 1.4rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--border);
-    position: relative;
-    z-index: 1;
+    min-height: 2.4rem;
+    margin: 0 1.6rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--border);
 }
-.hobby-meta-label {
-    font-family: var(--font-body);
-    font-size: 0.58rem;
-    letter-spacing: 0.2em;
+
+.fig-spec-label {
+    font-family: var(--font-mono);
+    font-size: 0.54rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--accent);
-}
-.hobby-meta-value {
-    font-family: var(--font-body);
-    font-size: 0.82rem;
-    color: var(--text);
+    color: var(--red);
+    font-weight: 700;
 }
 
-.hobby-explore {
+.fig-spec-value {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--ink);
+}
+
+.fig-link {
     align-self: flex-start;
-    position: relative;
-    z-index: 1;
+    margin: 0.4rem 1.6rem 1.5rem;
 }
-.hobby-explore svg { transition: transform 0.25s ease; }
-.hobby-explore:hover svg { transform: translateX(4px); }
+.fig-link svg { transition: transform 0.25s ease; }
+.fig-link:hover svg { transform: translateX(4px); }
 
-/* ── Arrow controls ── */
-.hobby-arrow {
+/* ── Flip arrows ── */
+.fig-arrow {
     flex: 0 0 auto;
     align-self: center;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     background: transparent;
-    color: var(--text-dim);
+    color: var(--ink-dim);
     border: 1px solid var(--border);
-    border-radius: 2px;
+    border-radius: 1px;
     transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
-.hobby-arrow:hover {
-    color: var(--accent);
-    border-color: rgba(var(--accent-rgb), 0.55);
-    background: rgba(var(--accent-rgb), 0.06);
+.fig-arrow:hover {
+    color: var(--red);
+    border-color: var(--red);
+    background: rgba(var(--red-rgb), 0.06);
 }
-.hobby-arrow:active { transform: scale(0.92); }
-.hobby-arrow:focus-visible {
-    outline: 1px solid rgba(var(--accent-rgb), 0.6);
-    outline-offset: 2px;
-}
+.fig-arrow:active { transform: scale(0.92); }
 
-/* ── Position dots ── */
-.hobby-dots {
+/* ── Sheet tabs ── */
+.fig-tabs {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    margin-top: 1.8rem;
-    padding-left: calc(56px + 1.5rem); /* line up under the stage, past the arrow */
+    gap: 0.45rem;
+    margin-top: 1.6rem;
+    padding-left: calc(52px + 1.4rem);
 }
-.hobby-dot {
-    width: 22px;
-    height: 3px;
-    padding: 0;
-    background: var(--border);
-    border: none;
-    border-radius: 0;
-    transition: background 0.25s ease, width 0.25s ease;
+
+.fig-tab {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    padding: 0.4rem 0.62rem;
+    background: transparent;
+    color: var(--ink-dim);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
-.hobby-dot:hover { background: var(--text-dim); }
-.hobby-dot.is-active {
-    width: 40px;
-    background: var(--accent);
+
+.fig-tab:hover { color: var(--ink); border-color: var(--ink); }
+
+.fig-tab.is-active {
+    color: var(--paper);
+    background: var(--red);
+    border-color: var(--red);
+    font-weight: 700;
 }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-    .hobby-deck { gap: 0.6rem; }
-    .hobby-arrow { width: 42px; height: 42px; }
-    .hobby-card-rot { padding: 1.9rem 1.5rem; min-height: 360px; }
-    .hobby-name { margin-bottom: 0.9rem; }
-    .hobby-dots {
+    .fig-deck { gap: 0.6rem; }
+    .fig-arrow { width: 42px; height: 42px; }
+    .fig-sheet { min-height: 380px; }
+    .fig-name, .fig-blurb, .fig-sheet-band { padding-left: 1.1rem; padding-right: 1.1rem; }
+    .fig-spec, .fig-link { margin-left: 1.1rem; margin-right: 1.1rem; }
+    .fig-tabs {
         justify-content: center;
         padding-left: 0;
     }
