@@ -1,8 +1,7 @@
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
+import { SectionHeader } from './ui/SectionHeader';
 import './Volunteering.css';
 
-// TODO: replace placeholder descriptions with real copy (user-supplied).
 const activities = [
     {
         role: "Advisor",
@@ -30,6 +29,7 @@ const activities = [
     },
 ];
 
+// Field log: volunteer roles recorded like site visits in a field book.
 const Volunteering = () => {
     return (
         <section className="section-container">
@@ -39,28 +39,33 @@ const Volunteering = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Volunteering." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
-                <p className="section-subtitle">
-                    Communities and causes I give my time to.
-                </p>
+                <SectionHeader
+                    title="Volunteering."
+                    meta={`field log · ${activities.length} entries`}
+                    subtitle="Communities and causes I give my time to."
+                />
             </motion.div>
 
-            <div className="volunteering-timeline">
+            <div className="rule-table vol-table">
+                <div className="rule-table-head vol-head">
+                    <span>Entry</span>
+                    <span>Date</span>
+                    <span>Record</span>
+                </div>
+
                 {activities.map((item, idx) => (
                     <motion.div
-                        className="vol-item"
+                        className="vol-row"
                         key={idx}
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: idx * 0.15 }}
+                        viewport={{ once: true, margin: "-80px" }}
+                        transition={{ duration: 0.5, delay: idx * 0.1 }}
                     >
-                        <div className="vol-content">
-                            <div className="vol-header">
-                                <h3 className="vol-role">{item.role}</h3>
-                                <span className="vol-period">{item.period}</span>
-                            </div>
+                        <span className="vol-no">F{idx + 1}</span>
+                        <span className="vol-period">{item.period}</span>
+                        <div className="vol-body">
+                            <h3 className="vol-role">{item.role}</h3>
                             <h4 className="vol-org">{item.organization}</h4>
                             <p className="vol-description">{item.description}</p>
                         </div>

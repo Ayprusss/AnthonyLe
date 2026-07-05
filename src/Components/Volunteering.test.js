@@ -25,7 +25,8 @@ describe('Volunteering Component', () => {
 
   test('renders the seeded organizations', () => {
     render(<Volunteering />);
-    expect(screen.getByRole('heading', { name: /uOttaHack/i, level: 4 })).toBeInTheDocument();
+    // Three uOttaHack roles are seeded (VI, VII, VII + beyond)
+    expect(screen.getAllByRole('heading', { name: /uOttaHack/i, level: 4 }).length).toBe(3);
     expect(screen.getByRole('heading', { name: /SESA/i, level: 4 })).toBeInTheDocument();
   });
 });
