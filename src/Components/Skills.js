@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
+import { SectionHeader } from './ui/SectionHeader';
 import './Skills.css';
 
 const skillCategories = [
@@ -29,22 +29,10 @@ const skillCategories = [
     }
 ];
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1
-        }
-    }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-};
-
+// Bill of materials: each category is an assembly, each skill a line item.
 const Skills = () => {
+    const totalItems = skillCategories.reduce((n, c) => n + c.skills.length, 0);
+
     return (
         <section className="section-container">
             <motion.div
@@ -53,37 +41,39 @@ const Skills = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Skills." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
-                <p className="section-subtitle">
-                    Technologies and tools I work with to build digital products.
-                </p>
+                <SectionHeader
+                    title="Skills."
+                    meta={`bill of materials · ${totalItems} items`}
+                    subtitle="Technologies and tools I work with to build digital products."
+                />
             </motion.div>
 
-            <div className="skills-categories-container">
+            <div className="rule-table bom-table">
+                <div className="rule-table-head bom-head">
+                    <span>Assy</span>
+                    <span>Description</span>
+                    <span>Qty</span>
+                </div>
+
                 {skillCategories.map((category, catIndex) => (
                     <motion.div
                         key={catIndex}
-                        className="skill-category"
-                        initial={{ opacity: 0, y: 20 }}
+                        className="bom-row"
+                        initial={{ opacity: 0, y: 16 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: catIndex * 0.1 }}
+                        viewport={{ once: true, margin: "-80px" }}
+                        transition={{ duration: 0.45, delay: catIndex * 0.08 }}
                     >
-                        <h3 className="skill-category-title">{category.title}</h3>
-                        <motion.div
-                            className="skills-grid"
-                            variants={containerVariants}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: "-100px" }}
-                        >
+                        <div className="bom-assy">
+                            <span className="bom-assy-no">A{catIndex + 1}</span>
+                            <h3 className="bom-assy-title">{category.title}</h3>
+                        </div>
+                        <div className="bom-items">
                             {category.skills.map((skill, index) => (
-                                <motion.div key={index} className="skill-pill" variants={itemVariants}>
-                                    {skill}
-                                </motion.div>
+                                <span className="bom-item" key={index}>{skill}</span>
                             ))}
-                        </motion.div>
+                        </div>
+                        <span className="bom-qty">{String(category.skills.length).padStart(2, '0')}</span>
                     </motion.div>
                 ))}
             </div>
