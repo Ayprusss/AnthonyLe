@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { MotionConfig } from 'framer-motion';
 import './Home.css';
 import '../../Components/GrainOverlay.css';
 import Navbar from '../../Components/Navbar';
@@ -13,8 +14,9 @@ import Hobbies from '../../Components/Hobbies';
 import Contact from '../../Components/Contact';
 import SpaceBackground from '../../Components/SpaceBackground';
 
-// Section sets per theme. Hero and Contact bookend both sets (rendered separately).
-// Slots stay position-aligned so ghost section numbers (01–06) never shift.
+// Section sets per print. Hero (cover sheet) and Contact (transmittal)
+// bookend both sets; slots stay position-aligned so sheet numbers 01–06
+// never shift between prints.
 const SECTIONS = {
     professional: [
         { id: 'skills',       label: 'skills',       Component: Skills },
@@ -39,15 +41,16 @@ const Home = () => {
         }
     });
 
-    const cursorDotRef  = useRef(null);
-    const cursorRingRef = useRef(null);
+    const crossHRef = useRef(null);
+    const crossVRef = useRef(null);
+    const bubbleRef = useRef(null);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         try { localStorage.setItem('site-theme', theme); } catch (_) {}
     }, [theme]);
 
-    // Re-observe sections whenever the theme swaps the rendered set.
+    // Re-observe sections whenever the print swaps the rendered set.
     useEffect(() => {
         document.documentElement.setAttribute('data-section', 'hero');
         const observer = new IntersectionObserver((entries) => {
@@ -61,36 +64,38 @@ const Home = () => {
         return () => observer.disconnect();
     }, [theme]);
 
-    // Lagged cursor ring + instant dot
+    // Drafting crosshair: hairlines track instantly, the detail bubble lags.
     useEffect(() => {
-        const dot  = cursorDotRef.current;
-        const ring = cursorRingRef.current;
-        if (!dot || !ring) return;
+        const h = crossHRef.current;
+        const v = crossVRef.current;
+        const bubble = bubbleRef.current;
+        if (!h || !v || !bubble) return;
 
         let mouseX = 0, mouseY = 0;
-        let ringX  = 0, ringY  = 0;
-        let rafId  = null;
+        let bubX = 0, bubY = 0;
+        let rafId = null;
 
         const onMove = (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
-            dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+            h.style.transform = `translateY(${mouseY}px)`;
+            v.style.transform = `translateX(${mouseX}px)`;
         };
 
         const lerp = (a, b, t) => a + (b - a) * t;
 
         const tick = () => {
-            ringX = lerp(ringX, mouseX, 0.13);
-            ringY = lerp(ringY, mouseY, 0.13);
-            ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+            bubX = lerp(bubX, mouseX, 0.2);
+            bubY = lerp(bubY, mouseY, 0.2);
+            bubble.style.transform = `translate(${bubX}px, ${bubY}px)`;
             rafId = requestAnimationFrame(tick);
         };
 
         document.addEventListener('mousemove', onMove);
         rafId = requestAnimationFrame(tick);
 
-        const onEnter = () => ring.classList.add('hover');
-        const onLeave = () => ring.classList.remove('hover');
+        const onEnter = () => bubble.classList.add('hover');
+        const onLeave = () => bubble.classList.remove('hover');
 
         const attach = () => {
             document.querySelectorAll('a, button').forEach(el => {
@@ -113,18 +118,20 @@ const Home = () => {
     }, []);
 
     return (
+        <MotionConfig reducedMotion="user">
         <div className="home-container">
-            {/* Custom cursor */}
-            <div className="cursor-dot"  ref={cursorDotRef}  aria-hidden="true" />
-            <div className="cursor-ring" ref={cursorRingRef} aria-hidden="true">
-                <div className="cursor-ring-inner" />
+            {/* Drafting crosshair cursor */}
+            <div className="crosshair-h" ref={crossHRef} aria-hidden="true" />
+            <div className="crosshair-v" ref={crossVRef} aria-hidden="true" />
+            <div className="cursor-bubble" ref={bubbleRef} aria-hidden="true">
+                <div className="cursor-bubble-inner" />
             </div>
 
             {/* Background stack */}
             <div className="base-bg" aria-hidden="true" />
             <SpaceBackground />
 
-            {/* Grain filter */}
+            {/* Paper-tooth filter */}
             <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
                 <filter id="grainFilter">
                     <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
@@ -133,6 +140,12 @@ const Home = () => {
             </svg>
             <div className="grain-overlay" aria-hidden="true" />
 
+            {/* Fixed drawing-sheet frame */}
+            <div className="sheet-frame" aria-hidden="true">
+                <span className="sheet-frame-tick top" />
+                <span className="sheet-frame-tick bottom" />
+            </div>
+
             <Navbar
                 theme={theme}
                 links={SECTIONS[theme]}
@@ -140,13 +153,14 @@ const Home = () => {
             />
 
             <main>
-                <div id="hero"><Hero /></div>
+                <div id="hero"><Hero sections={SECTIONS[theme]} /></div>
                 {SECTIONS[theme].map(({ id, Component }) => (
                     <div id={id} key={id}><Component /></div>
                 ))}
                 <div id="contact"><Contact /></div>
             </main>
         </div>
+        </MotionConfig>
     );
 };
 
