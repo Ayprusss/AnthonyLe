@@ -3,6 +3,11 @@ import './TextScramble.css';
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*";
 
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /**
  * Entrance text-scramble effect.
  *
@@ -23,9 +28,11 @@ export function TextScramble({
   noColorChange = false,
 }) {
   const [displayText, setDisplayText] = useState(() =>
-    text
-      .split('')
-      .map(c => (c === ' ' ? ' ' : CHARS[Math.floor(Math.random() * CHARS.length)]))
+    prefersReducedMotion()
+      ? text.split('')
+      : text
+          .split('')
+          .map(c => (c === ' ' ? ' ' : CHARS[Math.floor(Math.random() * CHARS.length)]))
   );
   const [isScrambling, setIsScrambling] = useState(false);
   const intervalRef = useRef(null);
@@ -36,6 +43,11 @@ export function TextScramble({
   const scramble = useCallback(() => {
     if (hasRun.current) return;
     hasRun.current = true;
+    if (prefersReducedMotion()) {
+      setDisplayText(text.split(''));
+      setIsScrambling(false);
+      return;
+    }
     setIsScrambling(true);
     frameRef.current = 0;
 
