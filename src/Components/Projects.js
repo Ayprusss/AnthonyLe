@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
+import { SectionHeader } from './ui/SectionHeader';
 import { Github, ExternalLink } from 'lucide-react';
 import './Projects.css';
 
@@ -42,6 +42,9 @@ const projects = [
     }
 ];
 
+const DETAIL_LETTERS = 'ABCDEFGHIJ';
+
+// Each project is a detail drawing: callout bubble, notes, materials strip.
 const Projects = () => {
     return (
         <section className="section-container">
@@ -51,41 +54,54 @@ const Projects = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Projects." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
+                <SectionHeader
+                    title="Projects."
+                    meta={`${projects.length} details · ${projects.filter(p => p.live).length} as built`}
+                />
             </motion.div>
 
-            <div className="projects-grid">
+            <div className="detail-grid">
                 {projects.map((project, idx) => (
                     <motion.div
-                        className="project-card"
+                        className="detail-panel"
                         key={idx}
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: idx * 0.1 }}
+                        viewport={{ once: true, margin: "-80px" }}
+                        transition={{ duration: 0.5, delay: (idx % 2) * 0.12 }}
                     >
-                        <div className="project-header">
-                            <h3 className="project-title">{project.title}</h3>
-                            <div className="project-links">
+                        <header className="detail-top">
+                            <span className="detail-bubble" aria-hidden="true">
+                                {DETAIL_LETTERS[idx]}
+                            </span>
+                            <span className="detail-caption">DETAIL {DETAIL_LETTERS[idx]}</span>
+                            {project.live && <span className="detail-asbuilt">AS BUILT</span>}
+                            <span className="detail-top-fill" />
+                            <div className="detail-links">
                                 {project.github && (
-                                    <a href={project.github} target="_blank" rel="noopener noreferrer">
-                                        <Github size={20} />
+                                    <a href={project.github} target="_blank" rel="noopener noreferrer" aria-label={`${project.title} source on GitHub`}>
+                                        <Github size={16} />
                                     </a>
                                 )}
                                 {project.live && (
-                                    <a href={project.live} target="_blank" rel="noopener noreferrer">
-                                        <ExternalLink size={20} />
+                                    <a href={project.live} target="_blank" rel="noopener noreferrer" aria-label={`${project.title} live site`}>
+                                        <ExternalLink size={16} />
                                     </a>
                                 )}
                             </div>
-                        </div>
-                        <p className="project-description">{project.description}</p>
-                        <div className="project-tech">
-                            {project.tech.map((t, i) => (
-                                <span key={i}>{t}</span>
-                            ))}
-                        </div>
+                        </header>
+
+                        <h3 className="detail-title">{project.title}</h3>
+                        <p className="detail-description">{project.description}</p>
+
+                        <footer className="detail-matl">
+                            <span className="detail-matl-label">MATL</span>
+                            <span className="detail-matl-list">
+                                {project.tech.map((t, i) => (
+                                    <span key={i}>{t}</span>
+                                ))}
+                            </span>
+                        </footer>
                     </motion.div>
                 ))}
             </div>

@@ -66,8 +66,8 @@ describe('Projects Component', () => {
     render(<Projects />);
     const links = screen.getAllByRole('link');
 
-    // Total links expected: 4 github + 2 live = 6 links
-    expect(links.length).toBe(6);
+    // Total links expected: 5 github + 2 live = 7 links
+    expect(links.length).toBe(7);
 
     const expectedUrls = [
         'https://github.com/Ayprusss/Gladius',
@@ -75,7 +75,8 @@ describe('Projects Component', () => {
         'https://dejavustudio.xyz/',
         'https://github.com/Ayprusss/PPPTAILORINGCOURIER',
         'https://ppptailoringcourier.vercel.app/',
-        'https://github.com/Ayprusss/crux'
+        'https://github.com/Ayprusss/crux',
+        'https://github.com/Ayprusss/9-vicious-detector'
     ];
 
     expectedUrls.forEach(url => {
