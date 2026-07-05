@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
-import { FileText, Download, ExternalLink } from 'lucide-react';
+import { SectionHeader } from './ui/SectionHeader';
+import { Download, ExternalLink, Paperclip } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -10,6 +10,7 @@ import './Resume.css';
 // Set up the worker for react-pdf
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
+// Attached reproduction: the résumé pinned to the drawing set.
 const Resume = () => {
     const [width, setWidth] = useState(800);
     const containerRef = useRef(null);
@@ -20,9 +21,7 @@ const Resume = () => {
             if (!ticking) {
                 window.requestAnimationFrame(() => {
                     if (containerRef.current) {
-                        // Determine responsive width depending on screen size
                         const containerWidth = containerRef.current.offsetWidth;
-                        // Add some padding deduction
                         setWidth(Math.min(containerWidth - 40, 800));
                     }
                     ticking = false;
@@ -30,8 +29,7 @@ const Resume = () => {
                 ticking = true;
             }
         };
-        
-        // Initial setup without ticking
+
         if (containerRef.current) {
             const containerWidth = containerRef.current.offsetWidth;
             setWidth(Math.min(containerWidth - 40, 800));
@@ -51,8 +49,7 @@ const Resume = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Resume." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
+                <SectionHeader title="Resume." meta="attachment 1 · full-size print" />
             </motion.div>
 
             <motion.div
@@ -64,45 +61,44 @@ const Resume = () => {
             >
                 <div className="resume-card" ref={containerRef}>
                     <div className="resume-header">
-                        <FileText size={32} className="resume-icon" />
+                        <Paperclip size={22} className="resume-icon" aria-hidden="true" />
                         <div>
-                            <h3 className="resume-title">Anthony Le - Resume</h3>
-                            <p className="resume-subtitle">Software Developer Intern</p>
+                            <h3 className="resume-title">Anthony Le — Resume</h3>
+                            <p className="resume-subtitle">ATTACHED REPRODUCTION · REDUCED PRINT · NOT TO SCALE</p>
                         </div>
                     </div>
-                    
+
                     <div className="resume-actions">
-                        <a 
-                            href="/Resume_Anthony_Le.pdf" 
-                            target="_blank" 
+                        <a
+                            href="/Resume_Anthony_Le.pdf"
+                            target="_blank"
                             rel="noopener noreferrer"
-                            className="resume-btn primary-btn"
+                            className="btn-primary"
                         >
-                            <ExternalLink size={18} />
+                            <ExternalLink size={15} />
                             <span>Open in Tab</span>
                         </a>
-                        <a 
-                            href="/Resume_Anthony_Le.pdf" 
+                        <a
+                            href="/Resume_Anthony_Le.pdf"
                             download="Resume_Anthony_Le.pdf"
                             rel="noopener noreferrer"
-                            className="resume-btn secondary-btn"
+                            className="btn-secondary"
                         >
-                            <Download size={18} />
+                            <Download size={15} />
                             <span>Download PDF</span>
                         </a>
                     </div>
-                    
-                    {/* The Library Viewer */}
+
                     <div className="pdf-viewer-container">
                         <Document
                             file="/Resume_Anthony_Le.pdf"
                             onLoadSuccess={onDocumentLoadSuccess}
                             className="pdf-document"
-                            loading={<div className="pdf-loading">Loading PDF...</div>}
+                            loading={<div className="pdf-loading">DEVELOPING PRINT…</div>}
                         >
-                            <Page 
-                                pageNumber={1} 
-                                width={width} 
+                            <Page
+                                pageNumber={1}
+                                width={width}
                                 renderTextLayer={true}
                                 renderAnnotationLayer={true}
                                 className="pdf-page"
