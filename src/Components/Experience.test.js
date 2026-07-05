@@ -36,8 +36,8 @@ describe('Experience Component', () => {
     // Check for University of Ottawa
     expect(screen.getByText(/University of Ottawa/i)).toBeInTheDocument();
 
-    // Check for Canada Revenue Agency
-    expect(screen.getByText(/Canada Revenue Agency/i)).toBeInTheDocument();
+    // Check for Canada Revenue Agency — two postings (data analyst + software eng)
+    expect(screen.getAllByText(/Canada Revenue Agency/i).length).toBe(2);
 
     // Check for roles
     const sdiRoles = screen.getAllByText(/Software Developer Intern/i);
