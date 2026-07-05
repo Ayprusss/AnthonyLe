@@ -1,28 +1,68 @@
+/* ══════════════════════════════════════════════════════════════════
+   WORKING PRINT — a drawing set drafted on the void
+   Both views print on black (we are in space). The re-print toggle
+   shifts the ink, not the sky:
+     · Professional  = cool starlight ink
+     · Personal      = warm ivory ink
+   One accent only: the checker's red pencil.
+   ══════════════════════════════════════════════════════════════════ */
+
 :root {
-    --bg:          #09090b;
-    --bg-rgb:      9, 9, 11;
-    --surface:     #111113;
-    --text:        #f4f4f5;
-    --text-rgb:    244, 244, 245;
-    --text-dim:    rgba(244, 244, 245, 0.42);
-    --border:      rgba(244, 244, 245, 0.08);
-    --accent:      #ff6b2b;
-    --accent-rgb:  255, 107, 43;
+    /* Cool print (default / Professional) */
+    --paper:      #05070d;           /* deep space, blue-black */
+    --paper-rgb:  5, 7, 13;
+    --paper-high: #0b1322;           /* faint nebular lift at centre */
+    --ink:        #dde8f4;
+    --ink-rgb:    221, 232, 244;
+    --ink-strong: #f3f8fd;           /* titles / full-strength linework */
+    --ink-dim:    rgba(221, 232, 244, 0.56);
+    --ink-faint:  rgba(221, 232, 244, 0.14);
+    --red:        #ff5c4d;           /* checker's pencil */
+    --red-rgb:    255, 92, 77;
 
-    --font-display: 'Bebas Neue', sans-serif;
-    --font-body:    'IBM Plex Mono', monospace;
+    --font-display: 'Anton', 'Arial Narrow', sans-serif;
+    --font-mono:    'Sometype Mono', 'Courier New', monospace;
+    --font-prose:   'Archivo', 'Helvetica Neue', sans-serif;
 
-    /* Legacy aliases so untouched components still work */
-    --bg-color:    var(--bg);
-    --text-main:   var(--text);
-    --text-muted:  var(--text-dim);
+    /* Aliases kept so anything unconverted still prints legibly */
+    --bg:          var(--paper);
+    --bg-rgb:      5, 7, 13;
+    --surface:     var(--paper-high);
+    --text:        var(--ink);
+    --text-rgb:    221, 232, 244;
+    --text-dim:    var(--ink-dim);
+    --border:      rgba(221, 232, 244, 0.24);
+    --accent:      var(--red);
+    --accent-rgb:  255, 92, 77;
+    --font-body:   var(--font-mono);
+    --bg-color:    var(--paper);
+    --text-main:   var(--ink);
+    --text-muted:  var(--ink-dim);
     --border-color: var(--border);
-    --bg-color:    var(--bg);
     --svg-filter:  invert(1);
-    --ripple-rgb:  244, 244, 245;
+    --ripple-rgb:  221, 232, 244;
 }
 
-/* Both Professional and Personal share the dark palette. The toggle swaps the
-   background scene + section content, not the colors. Reserve this block for any
-   Personal-mode accent tweaks the /frontend-design pass may introduce. */
-/* [data-theme="personal"] { } */
+/* Warm print (Personal) — same sky, ivory ink */
+[data-theme="personal"] {
+    --paper:      #080706;           /* deep space, warm black */
+    --paper-rgb:  8, 7, 6;
+    --paper-high: #151110;
+    --ink:        #f0e8d8;
+    --ink-rgb:    240, 232, 216;
+    --ink-strong: #faf5ea;
+    --ink-dim:    rgba(240, 232, 216, 0.56);
+    --ink-faint:  rgba(240, 232, 216, 0.14);
+    --red:        #ff6a52;
+    --red-rgb:    255, 106, 82;
+
+    --bg:          var(--paper);
+    --bg-rgb:      8, 7, 6;
+    --surface:     var(--paper-high);
+    --text:        var(--ink);
+    --text-rgb:    240, 232, 216;
+    --text-dim:    var(--ink-dim);
+    --border:      rgba(240, 232, 216, 0.24);
+    --accent:      var(--red);
+    --accent-rgb:  255, 106, 82;
+}
