@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
-import { Github, Linkedin, Copy, Check } from 'lucide-react';
+import { SectionHeader } from './ui/SectionHeader';
+import { Github, Linkedin, Copy, Check, ArrowUp } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import './Contact.css';
 
+// Transmittal sheet: the form that accompanies every drawing set.
 const Contact = () => {
     const formRef = useRef();
     const [isSending, setIsSending] = useState(false);
@@ -55,13 +56,14 @@ const Contact = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Contact." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
-                <p className="section-subtitle">
-                    I'm currently open to new opportunities. Send a message and I will get back to you ASAP.
-                </p>
+                <SectionHeader
+                    title="Contact."
+                    meta="transmittal · reply requested"
+                    subtitle="I'm currently open to new opportunities. Send a message and I will get back to you ASAP."
+                />
 
                 <div className="email-card">
+                    <span className="email-card-label">CORRESPONDENCE</span>
                     <a href="mailto:anthonykhle@gmail.com" className="email-card-address">
                         anthonykhle@gmail.com
                     </a>
@@ -71,38 +73,65 @@ const Contact = () => {
                         aria-label={copied ? 'Copied!' : 'Copy email address'}
                         title={copied ? 'Copied!' : 'Copy email'}
                     >
-                        {copied ? <Check size={16} /> : <Copy size={16} />}
+                        {copied ? <Check size={14} /> : <Copy size={14} />}
                     </button>
                 </div>
 
                 <form ref={formRef} onSubmit={sendEmail} className="contact-form">
+                    <p className="contact-form-caption">TRANSMITTAL FORM</p>
                     <div className="form-group">
-                        <input type="email" name="user_email" placeholder="Your Email" required className="form-input" />
+                        <label htmlFor="contact-email" className="form-label">From</label>
+                        <input id="contact-email" type="email" name="user_email" placeholder="Your Email" required className="form-input" />
                     </div>
                     <div className="form-group">
-                        <input type="text" name="subject" placeholder="Subject" required className="form-input" />
+                        <label htmlFor="contact-subject" className="form-label">Re</label>
+                        <input id="contact-subject" type="text" name="subject" placeholder="Subject" required className="form-input" />
                     </div>
                     <div className="form-group">
-                        <textarea name="message" placeholder="Your Message" required className="form-textarea" rows="5"></textarea>
+                        <label htmlFor="contact-message" className="form-label">Remarks</label>
+                        <textarea id="contact-message" name="message" placeholder="Your Message" required className="form-textarea" rows="5"></textarea>
                     </div>
                     <button type="submit" className="btn-primary" disabled={isSending}>
                         {isSending ? 'Sending...' : 'Send Message'}
                     </button>
                     {responseMessage && (
-                        <p className={`form-message ${isSuccess ? 'success' : 'error'}`}>
+                        <p role="status" className={`form-message ${isSuccess ? 'success' : 'error'}`}>
                             {responseMessage}
                         </p>
                     )}
                 </form>
 
                 <div className="social-links">
-                    <a href="https://github.com/Ayprusss" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github size={24} /></a>
-                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin size={24} /></a>
+                    <a href="https://github.com/Ayprusss" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><Github size={20} /></a>
+                    <a href="https://www.linkedin.com/in/anthonykhle/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><Linkedin size={20} /></a>
                 </div>
             </motion.div>
 
+            {/* Closing title block — the drawing set signs off here */}
             <footer className="footer">
-                <p>Built by Anthony Le.</p>
+                <div className="footer-cell">
+                    <span className="footer-label">Drawn by</span>
+                    <span className="footer-value">ANTHONY LE · © {new Date().getFullYear()}</span>
+                </div>
+                <div className="footer-cell">
+                    <span className="footer-label">Location</span>
+                    <span className="footer-value">45.4215° N · 75.6972° W — OTTAWA, CA</span>
+                </div>
+                <div className="footer-cell footer-cell-sht">
+                    <span className="footer-label">Sheet</span>
+                    <span className="footer-value">06 / 06 · END OF SET</span>
+                </div>
+                <button
+                    type="button"
+                    className="footer-top"
+                    onClick={() => {
+                        const reduce = window.matchMedia &&
+                            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+                    }}
+                >
+                    Back to top <ArrowUp size={13} />
+                </button>
             </footer>
         </section>
     );
