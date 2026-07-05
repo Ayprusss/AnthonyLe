@@ -1,3 +1,4 @@
+/* Paper tooth + uneven print exposure — sits above everything, very quiet */
 .grain-overlay {
     position: fixed;
     inset: 0;
@@ -7,12 +8,25 @@
     height: 100%;
 }
 
+/* fibrous paper texture */
 .grain-overlay::after {
     content: '';
     position: absolute;
     inset: 0;
-    opacity: 0.055;
-    mix-blend-mode: screen;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
     filter: url(#grainFilter);
     background: transparent;
+}
+
+/* blotchy exposure — cyanotypes and diazo prints never develop evenly */
+.grain-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+    background:
+        radial-gradient(90% 60% at 12% 8%,  rgba(var(--ink-rgb), 0.05), transparent 60%),
+        radial-gradient(70% 50% at 88% 90%, rgba(var(--ink-rgb), 0.05), transparent 65%),
+        radial-gradient(50% 40% at 70% 20%, rgba(var(--paper-rgb), 0.12), transparent 70%);
 }
