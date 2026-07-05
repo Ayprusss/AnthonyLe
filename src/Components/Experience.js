@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TextScramble } from './ui/TextScramble';
+import { SectionHeader } from './ui/SectionHeader';
 import './Experience.css';
 
 const experiences = [
@@ -29,6 +29,8 @@ const experiences = [
     }
 ];
 
+// Revision table: every posting is a revision of the engineer.
+// Latest revision carries the highest number, drafting-style.
 const Experience = () => {
     return (
         <section className="section-container">
@@ -38,28 +40,38 @@ const Experience = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <TextScramble text="Experience." as="h2" className="section-title" inView />
-                <div className="section-divider"></div>
+                <SectionHeader
+                    title="Experience."
+                    meta={`revision table · ${experiences.length} revisions`}
+                />
             </motion.div>
 
-            <div className="experience-timeline">
+            <div className="rule-table rev-table">
+                <div className="rule-table-head rev-head">
+                    <span>Rev</span>
+                    <span>Date</span>
+                    <span>Description of revision</span>
+                </div>
+
                 {experiences.map((exp, idx) => (
                     <motion.div
-                        className="timeline-item"
+                        className="rev-row"
                         key={idx}
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: idx * 0.15 }}
+                        viewport={{ once: true, margin: "-80px" }}
+                        transition={{ duration: 0.5, delay: idx * 0.1 }}
                     >
-                        <div className="timeline-dot"></div>
-                        <div className="timeline-content">
-                            <div className="timeline-header">
-                                <h3 className="role-title">{exp.role}</h3>
-                                <span className="period">{exp.period}</span>
-                            </div>
-                            <h4 className="company-name">{exp.company}</h4>
-                            <p className="role-description">{exp.description}</p>
+                        <span className="rev-no">
+                            {String(experiences.length - idx).padStart(2, '0')}
+                        </span>
+                        <span className="rev-period">{exp.period}</span>
+                        <div className="rev-body">
+                            <h3 className="rev-role">{exp.role}</h3>
+                            <h4 className="rev-company">{exp.company}</h4>
+                            {exp.description && (
+                                <p className="rev-description">{exp.description}</p>
+                            )}
                         </div>
                     </motion.div>
                 ))}
