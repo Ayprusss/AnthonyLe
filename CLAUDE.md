@@ -16,27 +16,28 @@ npm test -- --watch                          # Interactive watch mode
 
 **Single-page React 18 portfolio app** (Create React App, no Next.js). React Router v6 defines one route (`/`) that renders `Home.js`.
 
-### Design System — "DEEP SIGNAL"
-Cinematic dark-first editorial aesthetic.
+### Design System — "WORKING PRINT"
+The site is presented as an **engineer's drawing set drafted on the void of space**: white-ink drafting linework, ruled tables, and title blocks printed directly over a black starfield. Drafting conventions carry the information architecture — the hero is the **cover sheet** with a drawing index, Skills is a **bill of materials**, Experience is the **revision table**, deployed projects carry an **AS BUILT** stamp, Contact is a **transmittal form**, and the footer is the closing **title block**. Every section is a numbered sheet (`SHT 02/06`).
 
-- **Display font**: `Bebas Neue` (condensed — section titles, hero name, project/role headings)
-- **Body font**: `IBM Plex Mono` (all body text, labels, nav links, form inputs)
-- **Accent color**: `#ff6b2b` (electric amber-orange) — used sparingly for labels, active states, hover accents
-- **Base**: near-black `#09090b` — single dark palette. The Navbar toggle switches **Professional ↔ Personal** (content + background), NOT colors. (A cream light mode was removed; both themes share the dark palette.)
-- **Ghost section numbers**: CSS counters on `main > div` render auto-numbered `::before` on `.section-container` at low opacity
+- **Display font**: `Anton` (single weight 400 — strong, minimal; sheet titles, hero name, role/project headings; always uppercase with slight positive tracking)
+- **Annotation font**: `Sometype Mono` (labels, bands, tables, nav, form inputs — `--font-mono`)
+- **Prose font**: `Archivo` (reading paragraphs — `--font-prose`)
+- **Palette**: black paper + pale ink + one accent, the **checker's red pencil** (`--red`). Both themes are black ("we are in space"); the toggle shifts ink temperature, not the sky: Professional = blue-black paper `#05070d` with cool ink `#dde8f4`, Personal = warm black `#080706` with ivory ink `#f0e8d8`.
+- **SHT tags**: CSS counters on `main > div` render a bordered `SHT NN` box via `.section-container::before`; the same counter fills `.sheet-band-sht` in each section's header band, so the two can never disagree.
 
 ### Rendering & Animation Stack
 
-- **Canvas starfield** (`SpaceBackground.js`) — 225 procedural stars across 3 depth layers with mouse parallax, scroll drift, twinkling, and shooting stars. In **Professional** theme it animates spacecraft (Saturn V, Space Shuttle, Falcon 9) flying across the screen on curved arcs with engine flame and smoke particle trails, plus a hero-centered **3D supernova** (`drawSupernova`) — an exploding star at the same `W*0.5, H*0.72` anchor as the Earth. Its ejecta shell, SN 1987A-style shockwave bead-ring, and corona rays are projected with the Earth's spin+tilt language (`rot3`, `SUPERNOVA_TILT`) so near-side features draw in front of the core and far-side behind it. It **detonates on load** (and re-detonates on each return to Professional) via the `burstT` 0→1 clock, which scales the ejecta out from a collapsed point (`expand`) behind a decaying first-light `flash` and an expanding shockwave circle. It watches `data-theme`: in **Personal** theme it suppresses rockets, fades out the supernova, and crossfades (`personalT`) to a procedural Earth scene. `drawEarthScene` renders a day/night globe whose continents are **vector silhouettes** (`LAND_SHAPES` lon/lat polygons, densified + orthographically projected onto the rotating sphere, far-side vertices clamped to the limb), shaded by a single sub-solar terminator overlay, with amber night-side city lights (`CITIES`), an orbiting Moon (near-edge-on orbit, passes in front of/behind Earth), and a corner Sun. Earth spin + Moon orbit are driven by both `now` and `pageScrollY`.
-- **Custom cursor** (`Home.js`) — lagged ring (lerp `t=0.13`) + instant dot, both `requestAnimationFrame`-driven. Ring expands on hover over links/buttons. Hidden on touch devices.
-- **Framer Motion** — hero entrance animations (staggered slide-in) and section scroll reveals
-- **React Scroll** — smooth anchor navigation between sections
-- `GrainOverlay.css` — film grain texture via SVG `feTurbulence`, fixed at z-index 10
+- **Canvas** (`SpaceBackground.js`) — 225 procedural stars across 3 depth layers with mouse parallax, scroll drift, twinkling, and shooting stars, in the ink color (`--ink-rgb`). In **Professional** theme it animates 3D-wireframe spacecraft (Saturn V, Falcon 9 — bodies of revolution, depth-shaded edges) on curved arcs with flame + smoke, plus a hero-centered **3D supernova** (`drawSupernova`) at `W*0.5, H*0.72`: ejecta shell, SN 1987A **triple-ring** (equatorial bead-ring + two polar rings), nebular **filaments**, corona rays, and periodic **light echoes**, all projected with a shared spin+tilt frame (`rot3`) so near-side features draw in front of the core. It **detonates on load** (and on each return to Professional) via the `burstT` 0→1 clock. In **Personal** theme it crossfades (`personalT`) to a procedural Earth scene (`drawEarthScene`): day/night globe with vector-silhouette continents (`LAND_SHAPES`), drifting **cloud decks**, city lights, orbiting Moon, low-orbit **satellite**, and a geocentric planet ring driven by scroll. A **drafting overlay** inks in over both scenes once settled: dashed construction circles and `drawCallout` leader-line labels (`EJECTA FIELD`, `SHOCK FRONT` in red, `TERRA — HOME`, `LUNA`, `SOL`) whose targets ride the scene rotation. Canvas ink colors come from `--ink-rgb` / `--red-rgb` (re-read on `data-theme` mutation). **Reduced motion**: a `matchMedia('(prefers-reduced-motion: reduce)')` flag freezes the animation clock (`anim`), skips rocket/shooter spawns, and snaps `burstT`/`personalT` — scroll- and pointer-driven movement stays.
+- **Drafting crosshair cursor** (`Home.js`) — two full-viewport hairlines track the pointer instantly; a lagged **detail bubble** (lerp `t=0.2`) with a red center prick follows, expanding on link/button hover. Hidden on touch devices.
+- **Framer Motion** — hero entrance, section scroll reveals, Hobbies sheet-flip. `Home.js` wraps everything in `MotionConfig reducedMotion="user"`.
+- **React Scroll** — smooth anchor navigation (drawing index, navbar, mobile index)
+- `GrainOverlay.css` — paper tooth via SVG `feTurbulence` + faint uneven-exposure blotches, fixed at z-index 10
+- **Fixed sheet frame** (`Home.css` `.sheet-frame`) — a 10px-inset drawing border with fold ticks, fixed above content (z 40, pointer-events none)
 
 ### Layout Flow
-`App.js` → `Home.js` (global `theme` state, IntersectionObserver section tracking, cursor rAF loop) → renders `Navbar`, then `Hero` + a theme-dependent section set + `Contact`.
+`App.js` → `Home.js` (global `theme` state, IntersectionObserver section tracking, crosshair rAF loop) → renders `Navbar`, then `Hero` (receives `sections` for the cover-sheet drawing index) + a theme-dependent section set + `Contact`.
 
-The section set is the `SECTIONS` config in `Home.js`. `Hero` and `Contact` bookend both themes; the middle slots swap by theme (slots stay position-aligned so ghost numbers 01–06 never shift):
+The section set is the `SECTIONS` config in `Home.js`. `Hero` and `Contact` bookend both themes; the middle slots swap by theme (slots stay position-aligned so sheet numbers 01–06 never shift):
 
 | Slot | Professional | Personal       |
 |------|--------------|----------------|
@@ -47,36 +48,35 @@ The section set is the `SECTIONS` config in `Home.js`. `Hero` and `Contact` book
 
 `Home.js` renders `SECTIONS[theme]` into `<div id={s.id}>` wrappers and passes the same list to `Navbar` as `links` (which appends a static `contact` link). The IntersectionObserver effect depends on `theme` so it re-observes after a swap.
 
-Background z-index stack: `base-bg` (−3, solid color) → `SpaceBackground` canvas (−2) → content → `grain-overlay` (10).
+Background z-index stack: `base-bg` (−3, radial nebular lift) → `SpaceBackground` canvas (−2) → content → `sheet-frame` (40) → `grain-overlay` (10, visually above content but below frame chrome due to stacking).
 
 ### Theming (Professional / Personal)
-Both themes share **one dark palette** — the toggle swaps content + background, not colors. `src/theme.css` defines the dark `:root` tokens only (the old `[data-mode="light"]` block was removed; an empty `[data-theme="personal"]` block is reserved for any future accent tweaks). Key variables:
-- `--bg`, `--text`, `--text-dim`, `--border`, `--accent` — primary tokens
-- `--bg-rgb`, `--text-rgb`, `--accent-rgb` — RGB triplets for `rgba()` usage
-- `--font-display`, `--font-body` — font stack references
-- Legacy aliases (`--bg-color`, `--text-main`, etc.) kept for backward compat
+Both prints share the **black paper**; `src/theme.css` defines cool-ink `:root` tokens and a warm-ink `[data-theme="personal"]` override. Key variables:
+- `--paper`, `--ink`, `--ink-strong`, `--ink-dim`, `--ink-faint`, `--red` — primary tokens
+- `--paper-rgb`, `--ink-rgb`, `--red-rgb` — RGB triplets for `rgba()` usage
+- `--font-display` (Anton), `--font-mono` (Sometype Mono), `--font-prose` (Archivo)
+- Legacy aliases (`--bg`, `--text`, `--accent`, `--border`, `--font-body`, etc.) map onto the ink tokens for backward compat
 
-`Home.js` holds the `theme` state (`'professional'` | `'personal'`, default professional), sets `data-theme` on `document.documentElement`, and persists it to `localStorage('site-theme')`. `SpaceBackground.js` reads `data-theme` via a `MutationObserver` to drive the rocket/Earth swap.
+`Home.js` holds the `theme` state (`'professional'` | `'personal'`, default professional), sets `data-theme` on `document.documentElement`, and persists it to `localStorage('site-theme')`. `SpaceBackground.js` reads `data-theme` via a `MutationObserver` to drive the rocket/Earth swap and re-read ink colors. The Navbar toggle is styled as a red **RE-PRINT** stamp.
+
+### Section Presentation (shared drafting chrome in `index.css`)
+- `SectionHeader` (`ui/SectionHeader.js`) — every section opens with a `.sheet-band` (DWG AL-26 box · SHT counter · rule · content-derived readout) then the Anton `.section-title`. Sections pass `title` / `meta` / `subtitle`.
+- `.rule-table` + `.rule-table-head` — shared ruled-table chrome used by Skills (`.bom-*`), Experience (`.rev-*`), Volunteering (`.vol-*`)
+- `.btn-primary` — red stamp button (2px red border, hard offset shadow); `.btn-secondary` — quiet ink outline
+- Experience REV numbers count **down** from latest (`experiences.length - idx`); Projects detail panels use callout bubbles `A–E` and a `MATL` strip; the fifth (odd) panel spans the full grid row
 
 ### SpaceBackground — Spacecraft System
-
-All spacecraft are defined in the `CRAFT` array inside `useEffect`. Each entry has:
-- `scale`, `cx`/`cy` — SVG scale and rotation pivot (visual center of mass in SVG space)
-- `tailD` — world-space px offset from pivot to flame/smoke origin
-- `noseOffset` — radians **added to `r.angle`** so the SVG nose faces the travel direction. Formula: `noseOffset = -(SVG nose angle in screen coords)`. Nose-UP SVGs (−π/2) need `+π/2`; nose-RIGHT SVGs (0) need `0`.
-- `hasFlame` — whether to draw the engine flame cone and emit smoke particles
-- `draw(now)` — Path2D paint function; `ctx` and `starRgb` are captured from closure
-
-Each spawned rocket gets `speed` and `curve` (rad/s angular velocity, `rand(-0.18, 0.18)`). The update loop applies `r.angle += r.curve * dt` then recomputes `vx`/`vy`, producing smooth arcing paths. Path2D objects are created once at `useEffect` init — never inside the draw loop.
+Spacecraft are 3D wireframes: a nose→tail profile of `[axial, radius]` rings (`SATURN_PROFILE`, `FALCON_PROFILE`) spun into a mesh by `buildCraft`, plus flat appendages (fins/grid fins/legs). At draw time `orient()` builds a velocity-derived basis (with `pitch` out-of-plane tilt and continuous `roll`), `projVert` projects each vertex, and edges are depth-sorted and stroked — near edges bright, far edges dim; the engine-end ring and appendages stroke in red. Each spawned rocket gets `speed` and `curve` (rad/s, `rand(-0.18, 0.18)`); the update loop applies `r.angle += r.curve * dt` for smooth arcs.
 
 ### Contact Form
-`Contact.js` uses EmailJS via environment variables (`REACT_APP_EMAILJS_SERVICE_ID`, `REACT_APP_EMAILJS_TEMPLATE_ID`, `REACT_APP_EMAILJS_PUBLIC_KEY`). No backend.
+`Contact.js` uses EmailJS via environment variables (`REACT_APP_EMAILJS_SERVICE_ID`, `REACT_APP_EMAILJS_TEMPLATE_ID`, `REACT_APP_EMAILJS_PUBLIC_KEY`). No backend. Keep the input placeholders (`Your Email` / `Subject` / `Your Message`) and the `Send Message` button text — tests match them.
 
 ### Testing Notes
-Tests use `@testing-library/react` with jsdom. Two consistent mock patterns appear throughout:
+Tests use `@testing-library/react` with jsdom. Mock patterns:
 
 ```js
-// Framer Motion — strip animation props to avoid React warnings
+// Framer Motion — most tests expose ONLY motion.div (Hobbies also motion.article).
+// Use motion.div in components unless you update the test's mock.
 jest.mock('framer-motion', () => ({
   motion: {
     div: require('react').forwardRef(({ children, initial, whileInView, viewport, transition, ...props }, ref) =>
@@ -91,12 +91,12 @@ global.IntersectionObserver = jest.fn().mockReturnValue({
 });
 ```
 
-`SpaceBackground` uses Canvas 2D APIs unavailable in jsdom — mock it as `() => <canvas />` in any test that renders `Home`.
+Component tests also mock `./ui/TextScramble` (legacy; only matters if a component imports it). `SpaceBackground` uses Canvas 2D APIs unavailable in jsdom — mock it as `() => <canvas />` in any test that renders `Home`. Other contracts tests rely on: section titles are `h2` with a trailing period (`Skills.`), Volunteering orgs are `h4`, Projects renders exactly 7 links, Resume exactly 2, Hobbies has `Previous hobby`/`Next hobby` buttons that cycle `h3` names.
 
 ### Key Files
-- `src/Pages/Home/Home.js` — global `theme` state, `SECTIONS` config (Professional/Personal swap), IntersectionObserver section tracking, custom cursor rAF loop
-- `src/Components/About.js` / `Volunteering.js` / `Hobbies.js` — Personal-theme sections (swap in for Skills / Projects / Resume). Volunteering models the `Experience.js` timeline.
-- `src/Components/SpaceBackground.js` — canvas starfield + spacecraft animation system (CRAFT registry, curved paths, smoke particles)
-- `src/Components/Hero.js` — split-name hero (`ANTHONY` solid / `LE` outline stroke)
-- `src/theme.css` — all design tokens
-- `src/index.css` — font import, reset, shared `.section-container` / `.btn-*` / ghost number styles
+- `src/Pages/Home/Home.js` — global `theme` state, `SECTIONS` config, IntersectionObserver tracking, crosshair cursor rAF loop, `MotionConfig`, sheet frame markup
+- `src/Components/ui/SectionHeader.js` — shared sheet band + title header used by all sections
+- `src/Components/SpaceBackground.js` — starfield, wireframe spacecraft, supernova + Earth scenes, drafting callout overlay, reduced-motion handling
+- `src/Components/Hero.js` — cover sheet: split name (`ANTHONY` solid / `LE` outline stroke), drawing index (from `sections` prop), title block with live Ottawa clock
+- `src/theme.css` — all design tokens (cool/warm ink prints on black)
+- `src/index.css` — font imports, reset, `.sheet-band`, `.rule-table`, stamp buttons, SHT counter tags, focus + reduced-motion rules
