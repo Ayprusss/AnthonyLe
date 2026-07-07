@@ -10,136 +10,59 @@
     inset: 0;
     z-index: -3;
     background:
-        radial-gradient(120% 90% at 50% 30%, var(--paper-high) 0%, var(--paper) 70%);
-    transition: background 0.6s ease;
+        radial-gradient(115% 85% at 50% 38%, var(--screen-high) 0%, var(--screen) 72%);
+    transition: background 0.5s ease;
 }
 
-/* ── Fixed drawing-sheet frame: border + corner ticks + fold marks ── */
-.sheet-frame {
+/* ── Receiver bezel: soft rounded-corner shadow of the tube glass ── */
+.crt-bezel {
     position: fixed;
-    inset: 10px;
+    inset: 0;
     z-index: 40;
     pointer-events: none;
-    border: 1px solid rgba(var(--ink-rgb), 0.34);
-    transition: border-color 0.6s ease;
+    border-radius: 18px;
+    box-shadow:
+        inset 0 0 90px rgba(0, 0, 0, 0.55),
+        inset 0 0 14px rgba(0, 0, 0, 0.7);
 }
 
-.sheet-frame::before,
-.sheet-frame::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 14px;
-    height: 1px;
-    background: rgba(var(--ink-rgb), 0.4);
+/* ── Channel retune: brief vertical-hold roll on the picture ── */
+@keyframes channel-roll {
+    0%   { transform: translateY(0);      opacity: 1; }
+    18%  { transform: translateY(-14px);  opacity: 0.55; }
+    36%  { transform: translateY(9px);    opacity: 0.8; }
+    55%  { transform: translateY(-5px);   opacity: 0.5; }
+    74%  { transform: translateY(3px);    opacity: 0.9; }
+    100% { transform: translateY(0);      opacity: 1; }
 }
-.sheet-frame::before { left: -1px; }
-.sheet-frame::after  { right: -1px; }
 
-.sheet-frame-tick {
-    position: absolute;
-    left: 50%;
-    width: 1px;
-    height: 14px;
-    background: rgba(var(--ink-rgb), 0.4);
+.home-container.is-tuning main {
+    animation: channel-roll 0.6s steps(6, end);
 }
-.sheet-frame-tick.top    { top: -1px; }
-.sheet-frame-tick.bottom { bottom: -1px; }
 
 main {
-    flex-grow: 1;
-}
-
-main > div {
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 9rem 4rem 7rem;
+    gap: 9rem;
+    padding-bottom: 4rem;
+}
+
+main > div[id] {
+    width: 100%;
     max-width: 1180px;
     margin: 0 auto;
-    width: 100%;
+    padding: 0 4rem;
+    scroll-margin-top: 6rem;
 }
 
-/* Cover sheet fills edge-to-edge and handles its own padding */
 main > div#hero {
+    max-width: none;
     padding: 0;
-    max-width: 100%;
-}
-
-/* ── Drafting crosshair cursor ── */
-.crosshair-h,
-.crosshair-v {
-    position: fixed;
-    z-index: 9997;
-    pointer-events: none;
-    background: rgba(var(--ink-rgb), 0.22);
-    will-change: transform;
-}
-
-.crosshair-h {
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 1px;
-}
-
-.crosshair-v {
-    top: 0;
-    left: 0;
-    width: 1px;
-    height: 100vh;
-}
-
-.cursor-bubble {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 9998;
-    pointer-events: none;
-    will-change: transform;
-}
-
-.cursor-bubble-inner {
-    width: 26px;
-    height: 26px;
-    border: 1px solid rgba(var(--ink-rgb), 0.75);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
-    position: relative;
-}
-
-/* centre prick point */
-.cursor-bubble-inner::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 3px;
-    height: 3px;
-    margin: -1.5px 0 0 -1.5px;
-    border-radius: 50%;
-    background: var(--red);
-}
-
-.cursor-bubble.hover .cursor-bubble-inner {
-    width: 46px;
-    height: 46px;
-    border-color: var(--red);
-}
-
-@media (pointer: coarse) {
-    .crosshair-h,
-    .crosshair-v,
-    .cursor-bubble {
-        display: none;
-    }
 }
 
 @media (max-width: 768px) {
-    main > div {
-        padding: 7.5rem 1.75rem 4.5rem;
-    }
-    .sheet-frame { inset: 6px; }
+    main { gap: 6.5rem; }
+    main > div[id] { padding: 0 1.4rem; }
+    main > div#hero { padding: 0; }
+    .crt-bezel { border-radius: 10px; }
 }

@@ -1,11 +1,11 @@
-/* ── Detail drawings grid ── */
+/* ── Programme grid ── */
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.4rem;
 }
 
-/* the fifth detail spans the full row */
+/* the fifth programme spans the full row */
 .detail-panel:last-child:nth-child(odd) {
     grid-column: 1 / -1;
 }
@@ -13,138 +13,132 @@
 .detail-panel {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
-    background: rgba(var(--ink-rgb), 0.03);
-    transition: border-color 0.25s ease, background 0.25s ease;
+    background: rgba(var(--ink-rgb), 0.035);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .detail-panel:hover {
-    border-color: rgba(var(--ink-rgb), 0.6);
-    background: rgba(var(--ink-rgb), 0.055);
+    background: rgba(var(--ink-rgb), 0.06);
+    box-shadow: 0 0 0 1px rgba(var(--lab-rgb), 0.4);
 }
 
+/* ── Programme title bar — inverse video ── */
 .detail-top {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    padding: 0.85rem 1.2rem;
-    border-bottom: 1px solid var(--border);
+    background: var(--bar);
+    padding: 0.45rem 0.8rem;
+    transition: background 0.5s ease;
 }
 
-/* Callout bubble — the drafting detail circle */
 .detail-bubble {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
-    border: 1.5px solid var(--ink);
-    border-radius: 50%;
     font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1rem;
-    color: var(--ink-strong);
-    flex-shrink: 0;
-    transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
-}
-
-.detail-panel:hover .detail-bubble {
-    border-color: var(--red);
-    color: var(--red);
+    font-size: 1.15rem;
+    line-height: 1;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--screen);
+    background: var(--hl);
+    transition: background 0.5s ease;
 }
 
 .detail-caption {
-    font-family: var(--font-mono);
-    font-size: 0.56rem;
-    letter-spacing: 0.22em;
-    color: var(--ink-dim);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.9);
 }
 
-/* AS BUILT — the checker's stamp on deployed work */
 .detail-asbuilt {
     font-family: var(--font-mono);
-    font-weight: 700;
     font-size: 0.52rem;
-    letter-spacing: 0.24em;
-    color: var(--red);
-    border: 1.5px solid var(--red);
-    padding: 0.26rem 0.5rem 0.2rem;
-    border-radius: 1px;
-    transform: rotate(-3deg);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: #050508;
+    background: var(--grn);
+    padding: 0.24rem 0.5rem;
+    animation: dot-pulse 2s steps(1) infinite;
 }
 
 .detail-top-fill { flex: 1; }
 
 .detail-links {
     display: flex;
-    gap: 0.9rem;
+    align-items: center;
+    gap: 0.7rem;
 }
 
 .detail-links a {
-    color: var(--ink-dim);
-    transition: color 0.2s ease;
     display: inline-flex;
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.15s ease;
 }
 
-.detail-links a:hover { color: var(--red); }
+.detail-links a:hover { color: var(--hl); }
 
+/* ── Programme body ── */
 .detail-title {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(1.9rem, 3.4vw, 2.8rem);
-    letter-spacing: 0.035em;
+    font-size: 2.1rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     color: var(--ink-strong);
-    line-height: 1;
-    margin: 0;
-    padding: 1.4rem 1.2rem 0.9rem;
+    padding: 1.2rem 1.2rem 0.5rem;
 }
 
 .detail-description {
     font-family: var(--font-prose);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
+    line-height: 1.75;
     color: var(--ink-dim);
-    line-height: 1.7;
-    padding: 0 1.2rem 1.5rem;
-    margin: 0;
-    flex-grow: 1;
-    max-width: 640px;
+    padding: 0 1.2rem 1.2rem;
+    flex: 1;
 }
 
-/* Materials strip */
+/* ── Credits strip ── */
 .detail-matl {
     display: flex;
     align-items: baseline;
-    gap: 1rem;
+    gap: 0.9rem;
     padding: 0.8rem 1.2rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--ink-faint);
 }
 
 .detail-matl-label {
     font-family: var(--font-mono);
     font-size: 0.52rem;
-    letter-spacing: 0.24em;
-    color: var(--red);
-    font-weight: 700;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: var(--lab);
     flex-shrink: 0;
 }
 
 .detail-matl-list {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.3rem 0;
     font-family: var(--font-mono);
     font-size: 0.66rem;
-    letter-spacing: 0.04em;
     color: var(--ink-dim);
 }
 
-.detail-matl-list span:not(:last-child)::after {
+.detail-matl-list > span { white-space: nowrap; }
+
+.detail-matl-list > span:not(:last-child)::after {
     content: '·';
-    margin: 0 0.55rem;
-    color: rgba(var(--ink-rgb), 0.35);
+    color: rgba(var(--hl-rgb), 0.7);
+    margin: 0 0.45rem;
 }
 
 @media (max-width: 860px) {
     .detail-grid { grid-template-columns: 1fr; }
     .detail-panel:last-child:nth-child(odd) { grid-column: auto; }
+    .detail-title { font-size: 1.8rem; }
 }

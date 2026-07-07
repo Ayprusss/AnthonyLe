@@ -3,70 +3,47 @@
     justify-content: flex-start;
 }
 
-/* Attachment frame with drafting corner ticks */
+/* Hard-copy frame */
 .resume-card {
     position: relative;
-    border: 1px solid var(--border);
-    background: rgba(var(--ink-rgb), 0.03);
+    background: rgba(var(--ink-rgb), 0.035);
+    box-shadow: 0 0 0 1px var(--ink-faint);
     padding: 2.2rem;
     width: 100%;
     max-width: 900px;
     display: flex;
     flex-direction: column;
     gap: 1.8rem;
-    transition: border-color 0.3s ease;
+    transition: box-shadow 0.2s ease;
 }
 
-.resume-card:hover { border-color: rgba(var(--ink-rgb), 0.6); }
-
-.resume-card::before,
-.resume-card::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    pointer-events: none;
-}
-
-.resume-card::before {
-    top: 7px;
-    left: 7px;
-    border-top: 2px solid var(--red);
-    border-left: 2px solid var(--red);
-}
-
-.resume-card::after {
-    bottom: 7px;
-    right: 7px;
-    border-bottom: 2px solid var(--red);
-    border-right: 2px solid var(--red);
-}
+.resume-card:hover { box-shadow: 0 0 0 1px rgba(var(--lab-rgb), 0.45); }
 
 .resume-header {
     display: flex;
-    align-items: center;
-    gap: 1.1rem;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
-.resume-icon { color: var(--red); flex-shrink: 0; }
+.resume-icon { color: var(--hl); flex-shrink: 0; margin-top: 0.2rem; }
 
 .resume-title {
     font-family: var(--font-display);
     font-weight: 400;
     font-size: 1.9rem;
-    letter-spacing: 0.035em;
+    line-height: 1;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     color: var(--ink-strong);
-    margin: 0 0 0.35rem;
-    line-height: 1;
+    margin-bottom: 0.4rem;
 }
 
 .resume-subtitle {
     font-family: var(--font-mono);
-    font-size: 0.56rem;
+    font-size: 0.58rem;
+    font-weight: 500;
     letter-spacing: 0.2em;
-    color: var(--ink-dim);
-    margin: 0;
+    color: var(--lab);
 }
 
 .resume-actions {
@@ -75,37 +52,34 @@
     flex-wrap: wrap;
 }
 
+/* ── The received page ── */
 .pdf-viewer-container {
     display: flex;
     justify-content: center;
-    width: 100%;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: #fff;
+    background: rgba(var(--ink-rgb), 0.03);
+    box-shadow: 0 0 0 1px var(--ink-faint);
+    padding: 1.2rem;
+    overflow-x: auto;
 }
 
-.pdf-document {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-.pdf-loading {
-    padding: 3rem;
-    color: var(--ink-dim);
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-align: center;
-}
+.pdf-document { display: flex; justify-content: center; }
 
 .pdf-page canvas {
-    max-width: 100% !important;
+    max-width: 100%;
     height: auto !important;
 }
 
+.pdf-loading {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    color: var(--hl);
+    padding: 4rem 1rem;
+    animation: dot-pulse 1.2s steps(1) infinite;
+}
+
 @media (max-width: 768px) {
-    .resume-card    { padding: 1.4rem; }
-    .resume-actions { flex-direction: column; }
-    .resume-actions a { width: 100%; }
+    .resume-card { padding: 1.2rem; }
+    .resume-actions .btn-primary,
+    .resume-actions .btn-secondary { flex: 1; }
 }

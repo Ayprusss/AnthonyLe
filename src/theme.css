@@ -1,68 +1,93 @@
 /* ══════════════════════════════════════════════════════════════════
-   WORKING PRINT — a drawing set drafted on the void
-   Both views print on black (we are in space). The re-print toggle
-   shifts the ink, not the sky:
-     · Professional  = cool starlight ink
-     · Personal      = warm ivory ink
-   One accent only: the checker's red pencil.
+   CH·741 — a teletext service broadcast on a CRT
+   Two channels, one receiver. The tune knob changes the service,
+   not the television:
+     · CH 1 / NEWS     = blue header bars, yellow headlines, cyan labels
+     · CH 2 / LEISURE  = magenta header bars, green headlines, yellow labels
+   Saturated colour is structural (bars, keys, labels) — never decorative.
    ══════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* Cool print (default / Professional) */
-    --paper:      #05070d;           /* deep space, blue-black */
-    --paper-rgb:  5, 7, 13;
-    --paper-high: #0b1322;           /* faint nebular lift at centre */
-    --ink:        #dde8f4;
-    --ink-rgb:    221, 232, 244;
-    --ink-strong: #f3f8fd;           /* titles / full-strength linework */
-    --ink-dim:    rgba(221, 232, 244, 0.56);
-    --ink-faint:  rgba(221, 232, 244, 0.14);
-    --red:        #ff5c4d;           /* checker's pencil */
-    --red-rgb:    255, 92, 77;
+    /* CH 1 — NEWS (default / Professional) */
+    --screen:      #07070e;          /* CRT black, blue cast */
+    --screen-rgb:  7, 7, 14;
+    --screen-high: #0d0d20;          /* phosphor lift at centre */
+    --bar:         #1a1ad0;          /* teletext header blue */
+    --bar-rgb:     26, 26, 208;
+    --ink:         #eceef8;
+    --ink-rgb:     236, 238, 248;
+    --ink-strong:  #ffffff;
+    --ink-dim:     rgba(236, 238, 248, 0.62);
+    --ink-faint:   rgba(236, 238, 248, 0.12);
+    --hl:          #ffd21f;          /* headline yellow */
+    --hl-rgb:      255, 210, 31;
+    --lab:         #38e1e6;          /* label cyan */
+    --lab-rgb:     56, 225, 230;
+    --grn:         #3bf07d;
+    --grn-rgb:     59, 240, 125;
+    --red:         #ff3352;          /* alert / fastext red */
+    --red-rgb:     255, 51, 82;
+    --mag:         #ff54d7;
+    --mag-rgb:     255, 84, 215;
 
-    --font-display: 'Anton', 'Arial Narrow', sans-serif;
-    --font-mono:    'Sometype Mono', 'Courier New', monospace;
-    --font-prose:   'Archivo', 'Helvetica Neue', sans-serif;
+    --font-display: 'VT323', 'Courier New', monospace;
+    --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+    --font-prose:   'IBM Plex Mono', 'Courier New', monospace;
 
-    /* Aliases kept so anything unconverted still prints legibly */
-    --bg:          var(--paper);
-    --bg-rgb:      5, 7, 13;
-    --surface:     var(--paper-high);
+    /* Aliases kept so anything unconverted still renders legibly */
+    --paper:       var(--screen);
+    --paper-rgb:   7, 7, 14;
+    --paper-high:  var(--screen-high);
+    --bg:          var(--screen);
+    --bg-rgb:      7, 7, 14;
+    --surface:     var(--screen-high);
     --text:        var(--ink);
-    --text-rgb:    221, 232, 244;
+    --text-rgb:    236, 238, 248;
     --text-dim:    var(--ink-dim);
-    --border:      rgba(221, 232, 244, 0.24);
-    --accent:      var(--red);
-    --accent-rgb:  255, 92, 77;
+    --border:      rgba(236, 238, 248, 0.2);
+    --accent:      var(--hl);
+    --accent-rgb:  255, 210, 31;
     --font-body:   var(--font-mono);
-    --bg-color:    var(--paper);
+    --bg-color:    var(--screen);
     --text-main:   var(--ink);
     --text-muted:  var(--ink-dim);
     --border-color: var(--border);
     --svg-filter:  invert(1);
-    --ripple-rgb:  221, 232, 244;
+    --ripple-rgb:  236, 238, 248;
 }
 
-/* Warm print (Personal) — same sky, ivory ink */
+/* CH 2 — LEISURE (Personal): magenta bars, green headlines, yellow labels */
 [data-theme="personal"] {
-    --paper:      #080706;           /* deep space, warm black */
-    --paper-rgb:  8, 7, 6;
-    --paper-high: #151110;
-    --ink:        #f0e8d8;
-    --ink-rgb:    240, 232, 216;
-    --ink-strong: #faf5ea;
-    --ink-dim:    rgba(240, 232, 216, 0.56);
-    --ink-faint:  rgba(240, 232, 216, 0.14);
-    --red:        #ff6a52;
-    --red-rgb:    255, 106, 82;
+    --screen:      #0c0710;          /* CRT black, violet cast */
+    --screen-rgb:  12, 7, 16;
+    --screen-high: #180d20;
+    --bar:         #b3128f;
+    --bar-rgb:     179, 18, 143;
+    --ink:         #f4eef6;
+    --ink-rgb:     244, 238, 246;
+    --ink-strong:  #ffffff;
+    --ink-dim:     rgba(244, 238, 246, 0.62);
+    --ink-faint:   rgba(244, 238, 246, 0.12);
+    --hl:          #3bf07d;          /* headline green */
+    --hl-rgb:      59, 240, 125;
+    --lab:         #ffd21f;          /* label yellow */
+    --lab-rgb:     255, 210, 31;
+    --grn:         #3bf07d;
+    --grn-rgb:     59, 240, 125;
+    --red:         #ff3352;
+    --red-rgb:     255, 51, 82;
+    --mag:         #ff54d7;
+    --mag-rgb:     255, 84, 215;
 
-    --bg:          var(--paper);
-    --bg-rgb:      8, 7, 6;
-    --surface:     var(--paper-high);
+    --paper:       var(--screen);
+    --paper-rgb:   12, 7, 16;
+    --bg:          var(--screen);
+    --bg-rgb:      12, 7, 16;
+    --surface:     var(--screen-high);
     --text:        var(--ink);
-    --text-rgb:    240, 232, 216;
+    --text-rgb:    244, 238, 246;
     --text-dim:    var(--ink-dim);
-    --border:      rgba(240, 232, 216, 0.24);
-    --accent:      var(--red);
-    --accent-rgb:  255, 106, 82;
+    --border:      rgba(244, 238, 246, 0.2);
+    --accent:      var(--hl);
+    --accent-rgb:  59, 240, 125;
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500&family=Sometype+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /* ── Reset ── */
 *, *::before, *::after {
@@ -13,36 +13,33 @@ html, body, #root {
 }
 
 body {
-    background-color: var(--paper);
+    background-color: var(--screen);
     color: var(--ink);
     font-family: var(--font-mono);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.6s ease, color 0.6s ease;
+    transition: background-color 0.5s ease, color 0.5s ease;
     overflow-x: hidden;
 }
 
-/* ── Text selection — red pencil swipe ── */
+/* ── Text selection — inverse video ── */
 ::selection {
-    background-color: rgba(var(--red-rgb), 0.28);
+    background-color: var(--hl);
+    color: var(--screen);
     text-shadow: none;
 }
 ::-moz-selection {
-    background-color: rgba(var(--red-rgb), 0.28);
+    background-color: var(--hl);
+    color: var(--screen);
     text-shadow: none;
 }
 
-/* Hide the system pointer — the drafting crosshair takes over */
-@media (pointer: fine) {
-    * { cursor: none !important; }
-}
-
 h1, h2, h3, h4, h5, h6 { font-weight: 600; }
-p  { line-height: 1.7; color: var(--ink-dim); }
+p  { line-height: 1.75; color: var(--ink-dim); }
 a  { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 
-/* ── Sheet layout ── */
+/* ── Page layout ── */
 .section-container {
     display: flex;
     flex-direction: column;
@@ -50,94 +47,91 @@ ul { list-style: none; }
     position: relative;
 }
 
-/* Big sheet titles — Anton: strong, minimal, no ornament */
+/* Headlines — VT323 with a faint phosphor bloom */
 .section-title {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(3.2rem, 7.5vw, 6.4rem);
-    letter-spacing: 0.035em;
+    font-size: clamp(3.6rem, 8vw, 7rem);
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: var(--ink-strong);
-    line-height: 0.95;
-    margin: 1.6rem 0 2.6rem;
-    transition: color 0.6s ease;
+    color: var(--hl);
+    text-shadow: 0 0 18px rgba(var(--hl-rgb), 0.35);
+    line-height: 0.9;
+    margin: 1.6rem 0 2.4rem;
+    transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 .section-subtitle {
     font-family: var(--font-prose);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     color: var(--ink-dim);
-    max-width: 560px;
-    margin: -1.2rem 0 2.8rem;
-    line-height: 1.7;
-    letter-spacing: 0.01em;
+    max-width: 580px;
+    margin: -1rem 0 2.8rem;
+    line-height: 1.75;
 }
 
-/* ── Sheet header band: DWG NO · rule · readout, then SHT box ── */
-.sheet-band {
+/* ── Page header bar: P n00 · CH·741 · readout — white on service colour ── */
+.page-bar {
     display: flex;
     align-items: stretch;
-    border: 1px solid var(--border);
-    font-family: var(--font-mono);
+    background: var(--bar);
+    color: var(--ink-strong);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1;
     user-select: none;
+    transition: background 0.5s ease;
 }
 
-.sheet-band > * {
+.page-bar > * {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    padding: 0.45rem 0.8rem;
     white-space: nowrap;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
-.sheet-band-dwg {
-    color: var(--ink-dim);
-    border-right: 1px solid var(--border);
+.page-bar-no {
+    color: var(--hl);
+    text-shadow: none;
 }
 
-.sheet-band-sht {
-    color: var(--red);
-    border-right: 1px solid var(--border);
-    font-weight: 700;
+.page-bar-no::before {
+    content: 'P' counter(section-counter) '00';
 }
 
-.sheet-band-sht::before {
-    content: 'SHT\00a0' counter(section-counter, decimal-leading-zero) '\00a0/\00a006';
+.page-bar-ch { color: rgba(255, 255, 255, 0.85); }
+
+.page-bar-fill { flex: 1; padding: 0; }
+
+.page-bar-meta {
+    color: rgba(255, 255, 255, 0.85);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
 }
 
-.sheet-band-fill { flex: 1; padding: 0; }
-
-.sheet-band-meta {
-    color: var(--ink-dim);
-    border-left: 1px solid var(--border);
-}
-
-/* ── Ruled tables (BOM, revision blocks, spec tables) ── */
+/* ── Listings (skills, broadcast log, community service) ── */
 .rule-table {
-    border: 1px solid var(--border);
-    border-bottom: none;
+    border-top: 2px solid var(--bar);
+    transition: border-color 0.5s ease;
 }
 
 .rule-table-head {
     display: grid;
     font-family: var(--font-mono);
-    font-size: 0.58rem;
-    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--ink-dim);
-    border-bottom: 1px solid var(--border);
-    background: rgba(var(--ink-rgb), 0.045);
+    color: var(--lab);
+    border-bottom: 1px solid var(--ink-faint);
 }
 
-.rule-table-head > span {
-    padding: 0.55rem 0.9rem;
-    border-right: 1px solid var(--border);
-}
-.rule-table-head > span:last-child { border-right: none; }
+.rule-table-head > span { padding: 0.7rem 0.9rem; }
 
-/* ── Stamp buttons — rubber-stamp boxes ── */
+/* ── Fastext keys — solid colour blocks, hard pixel shadow ── */
 .btn-primary,
 .btn-secondary {
     display: inline-flex;
@@ -145,73 +139,81 @@ ul { list-style: none; }
     justify-content: center;
     gap: 0.55rem;
     font-family: var(--font-mono);
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.72rem;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     padding: 0.8rem 1.6rem;
-    border-radius: 1px;
-    background: transparent;
-    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    border-radius: 0;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .btn-primary {
-    color: var(--red);
-    border: 2px solid var(--red);
-    box-shadow: 2px 2px 0 rgba(var(--red-rgb), 0.35);
+    background: var(--hl);
+    color: var(--screen);
+    border: none;
+    box-shadow: 4px 4px 0 rgba(var(--hl-rgb), 0.28);
 }
 
 .btn-primary:hover {
-    background: var(--red);
-    color: var(--paper);
-    box-shadow: 1px 1px 0 rgba(var(--red-rgb), 0.35);
-    transform: translate(1px, 1px);
+    background: var(--ink-strong);
+    color: var(--screen);
+    box-shadow: 2px 2px 0 rgba(var(--ink-rgb), 0.35);
+    transform: translate(2px, 2px);
 }
 
 .btn-primary:disabled { opacity: 0.4; }
 
 .btn-secondary {
-    color: var(--ink);
-    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--lab);
+    border: 2px solid rgba(var(--lab-rgb), 0.6);
 }
 
 .btn-secondary:hover {
-    border-color: var(--ink);
-    background: rgba(var(--ink-rgb), 0.06);
+    border-color: var(--lab);
+    background: rgba(var(--lab-rgb), 0.12);
 }
 
-/* ── SHT corner tag — replaces the old ghost numerals ── */
+/* ── Page-number corner tag — the receiver reports the page it's on ── */
 main { counter-reset: section-counter; }
 main > div { counter-increment: section-counter; }
 
 .section-container::before {
-    content: 'SHT ' counter(section-counter, decimal-leading-zero);
+    content: 'P' counter(section-counter) '00';
     position: absolute;
     top: -3.4rem;
     right: 0;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.24em;
-    color: var(--ink-dim);
-    border: 1px solid var(--border);
-    padding: 0.45rem 0.8rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: var(--ink-strong);
+    background: var(--bar);
+    padding: 0.4rem 0.7rem;
     pointer-events: none;
     user-select: none;
     z-index: 0;
-    transition: color 0.6s ease, border-color 0.6s ease;
+    transition: background 0.5s ease;
 }
 
-/* ── Keyboard focus — red pencil ring (pointer is hidden) ── */
+/* ── Keyboard focus — headline-colour ring ── */
 :focus-visible {
-    outline: 2px solid rgba(var(--red-rgb), 0.8);
+    outline: 2px solid var(--hl);
     outline-offset: 3px;
-    border-radius: 1px;
+    border-radius: 0;
 }
 
-/* ── Shared status pulse ── */
+/* ── Shared teletext blink (status dots, cursors) ── */
 @keyframes dot-pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
+    0%, 49%  { opacity: 1; }
+    50%, 100% { opacity: 0.25; }
+}
+
+/* ── Ticker crawl ── */
+@keyframes ticker-crawl {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
 }
 
 /* ── Reduced motion ── */

@@ -13,7 +13,7 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
             if (!ticking) {
                 requestAnimationFrame(() => {
                     setScrolled(window.scrollY > 60);
-                    // Red-pencil progress: how far through the drawing set
+                    // Headline-colour progress: how far through the service
                     const max = document.documentElement.scrollHeight - window.innerHeight;
                     const p = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
                     if (progressRef.current) {
@@ -51,8 +51,8 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
 
             <div className="nav-inner">
                 <Link to="hero" smooth duration={500} className="nav-logo" onClick={() => setMenuOpen(false)}>
-                    <span className="nav-logo-dwg">DWG</span>
-                    AL-26
+                    <span className="nav-logo-ch">CH</span>
+                    ·741
                 </Link>
 
                 <ul className="nav-links">
@@ -63,7 +63,7 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
                                 spy smooth offset={0} duration={500}
                                 activeClass="active"
                             >
-                                <span className="nav-link-num">{String(i + 2).padStart(2, '0')}</span>
+                                <span className="nav-link-num">{i + 2}00</span>
                                 {label}
                             </Link>
                         </li>
@@ -76,8 +76,8 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
                         onClick={onToggleTheme}
                         aria-label={`Switch to ${theme === 'professional' ? 'personal' : 'professional'} view`}
                     >
-                        <span className="nav-mode-prefix">RE-PRINT:</span>
-                        {theme === 'professional' ? 'PERSONAL' : 'PROFESSIONAL'}
+                        <span className="nav-mode-prefix">TUNE:</span>
+                        {theme === 'professional' ? 'CH 2 · PERSONAL' : 'CH 1 · PROFESSIONAL'}
                     </button>
 
                     <button
@@ -93,13 +93,13 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
                 </div>
             </div>
 
-            {/* Mobile drawing index — numbers match the SHT tags on the sheets */}
+            {/* Mobile page index — numbers match the corner tags on the pages */}
             <div
                 id="nav-mobile-menu"
                 className={`nav-mobile ${menuOpen ? 'open' : ''}`}
                 aria-hidden={!menuOpen}
             >
-                <p className="nav-mobile-caption">DRAWING INDEX</p>
+                <p className="nav-mobile-caption">PAGE INDEX</p>
                 <ul className="nav-mobile-list">
                     {allLinks.map(({ id, label }, i) => (
                         <li key={id} style={{ transitionDelay: menuOpen ? `${0.06 + i * 0.05}s` : '0s' }}>
@@ -109,7 +109,7 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
                                 tabIndex={menuOpen ? 0 : -1}
                                 onClick={() => setMenuOpen(false)}
                             >
-                                <span className="nav-mobile-num">SHT {String(i + 2).padStart(2, '0')}</span>
+                                <span className="nav-mobile-num">P{i + 2}00</span>
                                 {label}
                             </Link>
                         </li>

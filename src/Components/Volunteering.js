@@ -41,7 +41,7 @@ const Volunteering = () => {
             >
                 <SectionHeader
                     title="Volunteering."
-                    meta={`field log · ${activities.length} entries`}
+                    meta={`community service · ${activities.length} entries`}
                     subtitle="Communities and causes I give my time to."
                 />
             </motion.div>
