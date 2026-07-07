@@ -170,7 +170,9 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    z-index: -1;
+    /* Above the page content, below the navbar bar (z 1000) so the TUNE
+       key and the close button stay on top of the overlay. */
+    z-index: 900;
 }
 
 .nav-mobile.open {
