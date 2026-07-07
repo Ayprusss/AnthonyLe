@@ -44,6 +44,7 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
     const allLinks = [...links, { id: 'contact', label: 'contact' }];
 
     return (
+        <>
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="nav-progress" aria-hidden="true">
                 <div className="nav-progress-fill" ref={progressRef} />
@@ -92,31 +93,35 @@ const Navbar = ({ theme, links = [], onToggleTheme }) => {
                     </button>
                 </div>
             </div>
-
-            {/* Mobile page index — numbers match the corner tags on the pages */}
-            <div
-                id="nav-mobile-menu"
-                className={`nav-mobile ${menuOpen ? 'open' : ''}`}
-                aria-hidden={!menuOpen}
-            >
-                <p className="nav-mobile-caption">PAGE INDEX</p>
-                <ul className="nav-mobile-list">
-                    {allLinks.map(({ id, label }, i) => (
-                        <li key={id} style={{ transitionDelay: menuOpen ? `${0.06 + i * 0.05}s` : '0s' }}>
-                            <Link
-                                to={id}
-                                smooth offset={0} duration={500}
-                                tabIndex={menuOpen ? 0 : -1}
-                                onClick={() => setMenuOpen(false)}
-                            >
-                                <span className="nav-mobile-num">P{i + 2}00</span>
-                                {label}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            </div>
         </nav>
+
+        {/* Mobile page index — kept OUTSIDE <nav> on purpose: when the navbar
+            scrolls it gains a backdrop-filter, which would make this fixed
+            overlay's containing block the navbar's little bar (so it would stop
+            covering the scrolled page). As a sibling it stays viewport-fixed. */}
+        <div
+            id="nav-mobile-menu"
+            className={`nav-mobile ${menuOpen ? 'open' : ''}`}
+            aria-hidden={!menuOpen}
+        >
+            <p className="nav-mobile-caption">PAGE INDEX</p>
+            <ul className="nav-mobile-list">
+                {allLinks.map(({ id, label }, i) => (
+                    <li key={id} style={{ transitionDelay: menuOpen ? `${0.06 + i * 0.05}s` : '0s' }}>
+                        <Link
+                            to={id}
+                            smooth offset={0} duration={500}
+                            tabIndex={menuOpen ? 0 : -1}
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            <span className="nav-mobile-num">P{i + 2}00</span>
+                            {label}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
+        </>
     );
 };
 
