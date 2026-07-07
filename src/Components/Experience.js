@@ -42,15 +42,15 @@ const Experience = () => {
             >
                 <SectionHeader
                     title="Experience."
-                    meta={`revision table · ${experiences.length} revisions`}
+                    meta={`broadcast log · ${experiences.length} entries`}
                 />
             </motion.div>
 
             <div className="rule-table rev-table">
                 <div className="rule-table-head rev-head">
-                    <span>Rev</span>
-                    <span>Date</span>
-                    <span>Description of revision</span>
+                    <span>Ep</span>
+                    <span>Aired</span>
+                    <span>Listing</span>
                 </div>
 
                 {experiences.map((exp, idx) => (

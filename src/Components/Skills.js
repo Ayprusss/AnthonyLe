@@ -43,15 +43,15 @@ const Skills = () => {
             >
                 <SectionHeader
                     title="Skills."
-                    meta={`bill of materials · ${totalItems} items`}
+                    meta={`${totalItems} items listed`}
                     subtitle="Technologies and tools I work with to build digital products."
                 />
             </motion.div>
 
             <div className="rule-table bom-table">
                 <div className="rule-table-head bom-head">
-                    <span>Assy</span>
-                    <span>Description</span>
+                    <span>Row</span>
+                    <span>Listing</span>
                     <span>Qty</span>
                 </div>
 

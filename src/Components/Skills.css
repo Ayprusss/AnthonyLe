@@ -1,4 +1,4 @@
-/* ── Bill of materials ── */
+/* ── Skills listings ── */
 .bom-head {
     grid-template-columns: 190px 1fr 64px;
 }
@@ -6,88 +6,79 @@
 .bom-row {
     display: grid;
     grid-template-columns: 190px 1fr 64px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.2s ease;
+    border-bottom: 1px solid var(--ink-faint);
+    transition: background 0.15s ease;
 }
 
-.bom-row:hover { background: rgba(var(--ink-rgb), 0.05); }
+.bom-row:hover { background: rgba(var(--lab-rgb), 0.06); }
 
 .bom-assy {
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
     padding: 1.3rem 0.9rem;
-    border-right: 1px solid var(--border);
 }
 
 .bom-assy-no {
-    font-family: var(--font-mono);
-    font-size: 0.56rem;
-    letter-spacing: 0.2em;
-    color: var(--red);
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--hl);
 }
 
 .bom-assy-title {
     font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.72rem;
+    font-weight: 600;
+    font-size: 0.78rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ink);
-    margin: 0;
+    color: var(--lab);
 }
 
 .bom-items {
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    gap: 0.35rem 0;
-    padding: 1.25rem 1.1rem;
+    gap: 0.4rem 0;
+    padding: 1.3rem 0.9rem;
 }
 
 .bom-item {
     font-family: var(--font-mono);
-    font-size: 0.76rem;
-    letter-spacing: 0.02em;
-    color: var(--ink-dim);
-    transition: color 0.15s ease;
+    font-size: 0.74rem;
+    color: var(--ink);
+    white-space: nowrap;
 }
 
-/* drafting tick between items */
+/* teletext separator dot between items */
 .bom-item:not(:last-child)::after {
-    content: '/';
-    margin: 0 0.65rem;
-    color: rgba(var(--ink-rgb), 0.3);
+    content: '·';
+    color: rgba(var(--hl-rgb), 0.7);
+    margin: 0 0.55rem;
 }
-
-.bom-item:hover { color: var(--ink-strong); }
 
 .bom-qty {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.72rem;
+    padding: 1.3rem 0;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1;
     color: var(--ink-dim);
-    border-left: 1px solid var(--border);
 }
 
-@media (max-width: 700px) {
-    .bom-head { grid-template-columns: 1fr 54px; }
-    .bom-head > span:first-child { display: none; }
+@media (max-width: 768px) {
+    .bom-head { display: none; }
 
-    .bom-row { grid-template-columns: 1fr 54px; }
-    .bom-assy {
-        grid-column: 1 / -1;
-        border-right: none;
-        border-bottom: 1px dashed var(--border);
-        flex-direction: row;
-        align-items: baseline;
-        gap: 0.8rem;
-        padding: 0.9rem;
+    .bom-row {
+        grid-template-columns: 1fr 48px;
+        grid-template-areas:
+            "assy qty"
+            "items items";
     }
-    .bom-qty { padding: 0.9rem 0; }
-    .bom-items { padding: 0.9rem; }
+
+    .bom-assy  { grid-area: assy; padding-bottom: 0.4rem; }
+    .bom-qty   { grid-area: qty; padding-bottom: 0; }
+    .bom-items { grid-area: items; padding-top: 0.5rem; }
 }

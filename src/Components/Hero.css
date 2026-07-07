@@ -5,215 +5,260 @@
     justify-content: center;
     min-height: 100vh;
     width: 100%;
-    padding: 7.5rem 4rem 6.5rem;
+    padding: 6.5rem 4rem 5.5rem;
     max-width: 1180px;
     margin: 0 auto;
 }
 
-/* ── Issue line ── */
+/* ── Service header bar — the top row of every teletext page ── */
+.hero-ceefax {
+    display: flex;
+    align-items: stretch;
+    background: var(--bar);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    line-height: 1;
+    letter-spacing: 0.05em;
+    user-select: none;
+    transition: background 0.5s ease;
+}
+
+.hero-ceefax > * {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    white-space: nowrap;
+}
+
+.hero-ceefax-page { color: var(--hl); }
+.hero-ceefax-svc  { color: rgba(255, 255, 255, 0.9); }
+.hero-ceefax-fill { flex: 1; padding: 0; }
+.hero-ceefax-date { color: rgba(255, 255, 255, 0.75); }
+.hero-ceefax .hero-clock { color: var(--hl); }
+
+/* ── Status line ── */
 .hero-eyebrow {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     font-family: var(--font-mono);
     font-size: 0.62rem;
+    font-weight: 500;
     letter-spacing: 0.22em;
-    color: var(--ink-dim);
-    margin-bottom: 2.2rem;
+    color: var(--lab);
+    margin: 1.6rem 0 1.2rem;
 }
 
 .hero-status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--red);
-    flex-shrink: 0;
-    animation: dot-pulse 2.4s ease-in-out infinite;
+    width: 8px;
+    height: 8px;
+    background: var(--grn);
+    animation: dot-pulse 1.2s steps(1) infinite;
 }
 
-/* ── Cover title ── */
+/* ── Headline — double-height teletext rows ── */
 .hero-name-block {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    margin: 0.4rem 0 2.6rem;
+}
+
+.hero-name-first,
+.hero-name-last {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(4.6rem, 13vw, 11.5rem);
     line-height: 0.86;
-    margin-bottom: 3.2rem;
-    user-select: none;
+    letter-spacing: 0.01em;
+    transform: scaleY(1.12);
+    transform-origin: left top;
 }
 
 .hero-name-first {
-    display: block;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(4.2rem, 12.5vw, 12.5rem);
-    letter-spacing: 0.025em;
     color: var(--ink-strong);
-    transition: color 0.6s ease;
+    background: var(--bar);
+    padding: 0.06em 0.14em 0.02em;
+    transition: background 0.5s ease;
 }
 
-/* "LE" — outline print, right-aligned, enormous */
 .hero-name-last {
-    display: block;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(6.5rem, 24vw, 24rem);
-    letter-spacing: 0.025em;
-    text-align: right;
-    color: transparent;
-    -webkit-text-stroke: 2px var(--ink);
-    margin-right: -0.5vw;
-    transition: -webkit-text-stroke-color 0.6s ease;
+    color: var(--hl);
+    text-shadow: 0 0 26px rgba(var(--hl-rgb), 0.4);
+    padding: 0.06em 0.02em 0.02em;
 }
 
-/* ── Drawing index + actions row ── */
+/* ── Page index ── */
 .hero-lower {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 3rem;
     flex-wrap: wrap;
-    margin-bottom: 3.4rem;
 }
 
-.hero-index {
-    min-width: 300px;
-    max-width: 420px;
-    flex: 1 1 300px;
-}
+.hero-index { max-width: 460px; width: 100%; }
 
 .hero-index-caption {
-    font-family: var(--font-mono);
-    font-size: 0.56rem;
-    letter-spacing: 0.26em;
-    color: var(--red);
-    margin-bottom: 0.7rem;
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    color: var(--screen);
+    background: var(--lab);
+    padding: 0.28rem 0.6rem 0.18rem;
+    margin-bottom: 0.9rem;
+    transition: background 0.5s ease, color 0.5s ease;
 }
 
-.hero-index-list {
-    border-top: 1px solid var(--border);
-}
+.hero-index-list { display: flex; flex-direction: column; }
 
 .hero-index-row {
     display: flex;
     align-items: baseline;
-    gap: 0.9rem;
-    padding: 0.62rem 0.15rem;
-    border-bottom: 1px solid var(--border);
+    gap: 0.7rem;
+    padding: 0.42rem 0.2rem;
     font-family: var(--font-mono);
-    transition: background 0.15s ease;
-}
-
-.hero-index-row:hover { background: rgba(var(--ink-rgb), 0.06); }
-
-.hero-index-sht {
-    font-size: 0.58rem;
-    letter-spacing: 0.14em;
-    color: var(--ink-dim);
-    white-space: nowrap;
-}
-
-.hero-index-row:hover .hero-index-sht { color: var(--red); }
-
-.hero-index-label {
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink);
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
 }
 
 .hero-index-dots {
     flex: 1;
-    border-bottom: 1px dotted rgba(var(--ink-rgb), 0.35);
-    transform: translateY(-3px);
+    border-bottom: 2px dotted rgba(var(--ink-rgb), 0.3);
+    transform: translateY(-4px);
 }
 
+.hero-index-page {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--hl);
+}
+
+.hero-index-row:hover {
+    background: var(--hl);
+    color: var(--screen);
+}
+.hero-index-row:hover .hero-index-page { color: var(--screen); }
+.hero-index-row:hover .hero-index-dots { border-color: rgba(var(--screen-rgb), 0.5); }
+
+/* ── Actions ── */
 .hero-actions {
     display: flex;
     align-items: center;
     gap: 1.4rem;
-    padding-bottom: 0.3rem;
+    flex-wrap: wrap;
 }
 
 .hero-btn-quiet {
     font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 0.68rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
     color: var(--ink-dim);
-    border-bottom: 1px solid transparent;
-    padding-bottom: 2px;
-    transition: color 0.2s ease, border-bottom-color 0.2s ease;
+    padding: 0.8rem 0.4rem;
+    border-bottom: 2px solid rgba(var(--ink-rgb), 0.25);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .hero-btn-quiet:hover {
-    color: var(--ink);
-    border-bottom-color: var(--red);
+    color: var(--ink-strong);
+    border-color: var(--ink-strong);
 }
 
-/* ── Title block ── */
+/* ── Studio status row ── */
 .hero-titleblock {
     display: flex;
-    border: 1px solid var(--border);
-    background: rgba(var(--ink-rgb), 0.035);
-    max-width: 720px;
+    flex-wrap: wrap;
+    margin-top: 3.4rem;
+    border-top: 1px solid var(--ink-faint);
+    border-bottom: 1px solid var(--ink-faint);
 }
 
 .tb-cell {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    padding: 0.65rem 0.95rem;
-    border-right: 1px solid var(--border);
+    padding: 0.85rem 1.4rem 0.85rem 0;
+    margin-right: 1.4rem;
 }
-
-.tb-cell:last-child { border-right: none; }
-
-.tb-cell-sht .tb-value { color: var(--red); }
 
 .tb-label {
     font-family: var(--font-mono);
-    font-size: 0.5rem;
-    letter-spacing: 0.22em;
+    font-size: 0.52rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: var(--ink-dim);
+    color: var(--lab);
 }
 
 .tb-value {
     font-family: var(--font-mono);
-    font-weight: 700;
     font-size: 0.72rem;
     letter-spacing: 0.1em;
     color: var(--ink);
-    white-space: nowrap;
 }
 
-.tb-clock {
-    font-variant-numeric: tabular-nums;
+.tb-onair {
+    color: var(--red);
+    font-weight: 600;
+    animation: dot-pulse 1.6s steps(1) infinite;
 }
 
-/* ── Continuation note ── */
-.hero-continued {
-    position: absolute;
-    bottom: 2.4rem;
-    right: 4rem;
+.tb-cell-page { margin-left: auto; margin-right: 0; }
+
+/* ── Fastext row — red / green / yellow / cyan keys ── */
+.hero-fastext {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 1.6rem;
+}
+
+.fastext-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.7rem 0.5rem;
     font-family: var(--font-mono);
-    font-size: 0.56rem;
-    letter-spacing: 0.24em;
-    color: var(--ink-dim);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #050508;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
 }
+
+.fastext-key:hover { filter: brightness(1.25); transform: translateY(-2px); }
+
+.fastext-red    { background: var(--red); }
+.fastext-green  { background: var(--grn); }
+.fastext-yellow { background: #ffd21f; }
+.fastext-cyan   { background: #38e1e6; }
 
 /* ── Responsive ── */
-@media (max-width: 900px) {
-    .hero-section { padding: 6.5rem 1.75rem 5rem; }
-    .hero-name-last { -webkit-text-stroke-width: 1.5px; }
-    .hero-lower { flex-direction: column; align-items: stretch; }
-    .hero-titleblock { flex-wrap: wrap; }
-    .tb-cell { flex: 1 1 40%; border-top: 1px solid var(--border); margin-top: -1px; }
-    .hero-continued { display: none; }
-}
+@media (max-width: 768px) {
+    .hero-section { padding: 6rem 1.4rem 4.5rem; }
 
-@media (max-width: 480px) {
-    .hero-name-first { font-size: clamp(3.2rem, 17vw, 5.5rem); }
-    .hero-name-last  { font-size: clamp(5rem, 30vw, 10rem); -webkit-text-stroke-width: 1px; }
+    .hero-ceefax { font-size: 0.85rem; }
+    .hero-ceefax-date { display: none; }
+
+    .hero-name-first,
+    .hero-name-last { font-size: clamp(3.6rem, 17vw, 5.4rem); }
+
+    .hero-lower { flex-direction: column; align-items: stretch; }
+
+    .hero-titleblock .tb-cell { padding-right: 0.8rem; margin-right: 0.8rem; }
+    .tb-cell-page { margin-left: 0; }
+
+    .hero-fastext { grid-template-columns: repeat(2, 1fr); }
 }

@@ -49,7 +49,7 @@ const Resume = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <SectionHeader title="Resume." meta="attachment 1 · full-size print" />
+                <SectionHeader title="Resume." meta="hard copy · pdf on request" />
             </motion.div>
 
             <motion.div
@@ -64,7 +64,7 @@ const Resume = () => {
                         <Paperclip size={22} className="resume-icon" aria-hidden="true" />
                         <div>
                             <h3 className="resume-title">Anthony Le — Resume</h3>
-                            <p className="resume-subtitle">ATTACHED REPRODUCTION · REDUCED PRINT · NOT TO SCALE</p>
+                            <p className="resume-subtitle">HARD COPY · TRANSMITTED IN FULL · PRINTS AT A4</p>
                         </div>
                     </div>
 
@@ -94,7 +94,7 @@ const Resume = () => {
                             file="/Resume_Anthony_Le.pdf"
                             onLoadSuccess={onDocumentLoadSuccess}
                             className="pdf-document"
-                            loading={<div className="pdf-loading">DEVELOPING PRINT…</div>}
+                            loading={<div className="pdf-loading">RECEIVING PAGE…</div>}
                         >
                             <Page
                                 pageNumber={1}

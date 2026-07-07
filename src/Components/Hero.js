@@ -15,7 +15,15 @@ const ottawaTime = () =>
         hour12: false,
     }).format(new Date());
 
-// Live clock for the title-block DATE cell — drafting office local time.
+const ottawaDate = () =>
+    new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'America/Toronto',
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+    }).format(new Date()).toUpperCase();
+
+// Live clock in the service header — studio local time.
 const LocalClock = () => {
     const [time, setTime] = useState(ottawaTime);
 
@@ -24,33 +32,52 @@ const LocalClock = () => {
         return () => clearInterval(id);
     }, []);
 
-    return <span className="tb-clock">{time} ET</span>;
+    return <span className="hero-clock">{time}</span>;
 };
 
-// Cover sheet — giant title, drawing index, title block.
+// Fastext key colours, in remote-control order.
+const FASTEXT = ['red', 'green', 'yellow', 'cyan'];
+
+// Page 100 — the service index.
 const Hero = ({ sections = [] }) => {
     const index = [...sections, { id: 'contact', label: 'contact' }];
+    // Four fastext keys: the first three pages plus contact.
+    const fastext = [...sections.slice(0, 3), { id: 'contact', label: 'contact' }];
 
     return (
         <section className="hero-section">
-            {/* Issue line */}
+            {/* Service header bar */}
             <motion.div
-                className="hero-eyebrow"
+                className="hero-ceefax"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.15, ease }}
+                transition={{ duration: 0.5, delay: 0.1, ease }}
             >
-                <span className="hero-status-dot" />
-                COMPUTER SCIENCE · UOTTAWA · ISSUED FOR REVIEW · 2026
+                <span className="hero-ceefax-page">P100</span>
+                <span className="hero-ceefax-svc">CH·741 ANTHONY LE SERVICE</span>
+                <span className="hero-ceefax-fill" />
+                <span className="hero-ceefax-date">{ottawaDate()}</span>
+                <LocalClock />
             </motion.div>
 
-            {/* Cover title — solid line over outline line */}
+            {/* Status line */}
+            <motion.div
+                className="hero-eyebrow"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.3, ease }}
+            >
+                <span className="hero-status-dot" />
+                COMPUTER SCIENCE · UOTTAWA · NOW BROADCASTING · 2026
+            </motion.div>
+
+            {/* Headline — double-height rows on service colour */}
             <div className="hero-name-block">
                 <motion.span
                     className="hero-name-first"
                     initial={{ opacity: 0, x: -48 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.9, delay: 0.3, ease }}
+                    transition={{ duration: 0.8, delay: 0.4, ease }}
                 >
                     ANTHONY
                 </motion.span>
@@ -58,28 +85,28 @@ const Hero = ({ sections = [] }) => {
                     className="hero-name-last"
                     initial={{ opacity: 0, x: 48 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.9, delay: 0.46, ease }}
+                    transition={{ duration: 0.8, delay: 0.55, ease }}
                 >
                     LE
                 </motion.span>
             </div>
 
-            {/* Drawing index + actions */}
+            {/* Page index + actions */}
             <motion.div
                 className="hero-lower"
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.72, ease }}
+                transition={{ duration: 0.6, delay: 0.78, ease }}
             >
                 <div className="hero-index">
-                    <p className="hero-index-caption">DRAWING INDEX</p>
+                    <p className="hero-index-caption">PAGE INDEX</p>
                     <ul className="hero-index-list">
                         {index.map(({ id, label }, i) => (
                             <li key={id}>
                                 <Link to={id} smooth duration={600} className="hero-index-row">
-                                    <span className="hero-index-sht">SHT {String(i + 2).padStart(2, '0')}</span>
                                     <span className="hero-index-label">{label}</span>
                                     <span className="hero-index-dots" aria-hidden="true" />
+                                    <span className="hero-index-page">{i + 2}00</span>
                                 </Link>
                             </li>
                         ))}
@@ -96,7 +123,7 @@ const Hero = ({ sections = [] }) => {
                 </div>
             </motion.div>
 
-            {/* Title block */}
+            {/* Studio status row */}
             <motion.div
                 className="hero-titleblock"
                 initial={{ opacity: 0 }}
@@ -104,36 +131,46 @@ const Hero = ({ sections = [] }) => {
                 transition={{ delay: 1.05, duration: 0.8 }}
             >
                 <div className="tb-cell">
-                    <span className="tb-label">Drawn by</span>
+                    <span className="tb-label">Broadcast by</span>
                     <span className="tb-value">ANTHONY LE</span>
                 </div>
                 <div className="tb-cell">
-                    <span className="tb-label">Location</span>
+                    <span className="tb-label">Studio</span>
                     <span className="tb-value">OTTAWA, CA</span>
                 </div>
                 <div className="tb-cell">
-                    <span className="tb-label">Date</span>
-                    <span className="tb-value"><LocalClock /></span>
+                    <span className="tb-label">Time</span>
+                    <span className="tb-value"><LocalClock /> ET</span>
                 </div>
                 <div className="tb-cell">
-                    <span className="tb-label">Scale</span>
-                    <span className="tb-value">NTS</span>
+                    <span className="tb-label">Status</span>
+                    <span className="tb-value tb-onair">ON AIR</span>
                 </div>
-                <div className="tb-cell tb-cell-sht">
-                    <span className="tb-label">Sheet</span>
-                    <span className="tb-value">01 / 06</span>
+                <div className="tb-cell tb-cell-page">
+                    <span className="tb-label">Page</span>
+                    <span className="tb-value">100 / 600</span>
                 </div>
             </motion.div>
 
-            {/* Drafting convention: the set continues */}
-            <motion.p
-                className="hero-continued"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.3, duration: 0.8 }}
+            {/* Fastext row — the coloured keys on the remote */}
+            <motion.div
+                className="hero-fastext"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2, duration: 0.6, ease }}
             >
-                CONTINUED ON SHT 02 ↓
-            </motion.p>
+                {fastext.map(({ id, label }, i) => (
+                    <Link
+                        key={id}
+                        to={id}
+                        smooth
+                        duration={600}
+                        className={`fastext-key fastext-${FASTEXT[i]}`}
+                    >
+                        {label}
+                    </Link>
+                ))}
+            </motion.div>
         </section>
     );
 };

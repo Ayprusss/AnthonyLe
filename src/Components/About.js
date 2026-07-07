@@ -28,7 +28,7 @@ const About = () => {
             >
                 <SectionHeader
                     title="About."
-                    meta="general notes · read before proceeding"
+                    meta="viewer profile · 2 notes"
                     subtitle="Computer Science Student at the University of Ottawa."
                 />
             </motion.div>
@@ -41,7 +41,7 @@ const About = () => {
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                 >
-                    <p className="about-notes-caption">GENERAL NOTES:</p>
+                    <p className="about-notes-caption">IN HIS OWN WORDS:</p>
                     <ol className="about-notes-list">
                         {paragraphs.map((text, idx) => (
                             <li className="about-note" key={idx}>
@@ -70,11 +70,11 @@ const About = () => {
                                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
                             <div className="about-portrait-placeholder" aria-hidden="true">
-                                <span className="about-portrait-ph-label">NO PHOTO ON FILE</span>
+                                <span className="about-portrait-ph-label">NO SIGNAL</span>
                             </div>
                         </div>
                         <figcaption className="about-portrait-caption">
-                            <span className="about-portrait-tag">FIG. A-1</span>
+                            <span className="about-portrait-tag">STILL A-1</span>
                             <span>Anthony Le — Ottawa</span>
                         </figcaption>
                     </motion.figure>
@@ -86,7 +86,7 @@ const About = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                        <p className="about-facts-caption">SPECIFICATIONS</p>
+                        <p className="about-facts-caption">QUICK FACTS</p>
                         <dl className="about-facts">
                             {facts.map((fact, idx) => (
                                 <div className="about-fact" key={idx}>

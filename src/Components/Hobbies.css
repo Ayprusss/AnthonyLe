@@ -1,4 +1,4 @@
-/* ── Appendix figure sheets — flip through the stack ── */
+/* ── After-hours programmes — flip through the channels ── */
 .fig-deck {
     display: flex;
     align-items: stretch;
@@ -7,7 +7,7 @@
 }
 
 .fig-deck:focus-visible {
-    outline: 1px solid rgba(var(--red-rgb), 0.6);
+    outline: 2px solid var(--hl);
     outline-offset: 0.9rem;
 }
 
@@ -18,180 +18,167 @@
     display: flex;
 }
 
-/* sheets underneath — slightly skewed like a loose paper stack */
+/* ghost frames behind the tuned channel */
 .fig-under {
     position: absolute;
     inset: 0;
-    border: 1px solid var(--border);
-    background: rgba(var(--paper-rgb), 0.6);
+    background: rgba(var(--ink-rgb), 0.02);
+    box-shadow: 0 0 0 1px var(--ink-faint);
     pointer-events: none;
 }
-.fig-under-1 { transform: translate(8px, 9px) rotate(0.5deg); opacity: 0.7; }
-.fig-under-2 { transform: translate(16px, 18px) rotate(-0.4deg); opacity: 0.35; }
 
-/* ── The top sheet ── */
+.fig-under-1 { transform: translate(7px, 7px); }
+.fig-under-2 { transform: translate(14px, 14px); opacity: 0.6; }
+
+/* ── The tuned channel card ── */
 .fig-sheet {
     position: relative;
-    z-index: 1;
-    flex: 1 1 auto;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 320px;
-    border: 1px solid var(--ink);
-    background: var(--paper);
-    transition: background 0.6s ease, border-color 0.6s ease;
+    background: var(--screen-high);
+    box-shadow: 0 0 0 1px rgba(var(--lab-rgb), 0.35);
+    padding: 0 0 1.6rem;
     cursor: grab;
 }
+
 .fig-sheet:active { cursor: grabbing; }
 
 .fig-sheet-band {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.8rem 1.6rem;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
+    background: var(--bar);
+    color: #fff;
+    padding: 0.45rem 0.9rem;
+    margin-bottom: 1.4rem;
+    transition: background 0.5s ease;
 }
 
 .fig-no {
-    font-weight: 700;
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
-    color: var(--red);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--hl);
 }
 
 .fig-of {
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
-    color: var(--ink-dim);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .fig-band-fill { flex: 1; }
 
 .fig-tag {
+    font-family: var(--font-mono);
     font-size: 0.54rem;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    color: var(--ink-dim);
-    padding: 0.3rem 0.6rem;
-    border: 1px solid var(--border);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .fig-name {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(2.3rem, 5.5vw, 3.8rem);
-    letter-spacing: 0.035em;
+    font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     color: var(--ink-strong);
-    line-height: 0.98;
-    margin: 0;
-    padding: 1.6rem 1.6rem 1rem;
+    padding: 0 1.4rem 0.6rem;
 }
 
 .fig-blurb {
     font-family: var(--font-prose);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    line-height: 1.8;
     color: var(--ink-dim);
-    line-height: 1.75;
-    max-width: 540px;
-    margin: 0 0 auto;
-    padding: 0 1.6rem 1.4rem;
+    padding: 0 1.4rem;
+    max-width: 640px;
 }
 
 .fig-spec {
     display: flex;
     align-items: baseline;
-    gap: 0.75rem;
+    gap: 0.9rem;
+    padding: 1.1rem 1.4rem 0.4rem;
     min-height: 2.4rem;
-    margin: 0 1.6rem;
-    padding-top: 0.9rem;
-    border-top: 1px dashed var(--border);
 }
 
 .fig-spec-label {
     font-family: var(--font-mono);
     font-size: 0.54rem;
+    font-weight: 600;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--red);
-    font-weight: 700;
+    color: var(--lab);
 }
 
 .fig-spec-value {
     font-family: var(--font-mono);
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     color: var(--ink);
 }
 
 .fig-link {
     align-self: flex-start;
-    margin: 0.4rem 1.6rem 1.5rem;
+    margin: 0.6rem 1.4rem 0;
 }
-.fig-link svg { transition: transform 0.25s ease; }
-.fig-link:hover svg { transform: translateX(4px); }
 
-/* ── Flip arrows ── */
+/* ── Channel up / down ── */
 .fig-arrow {
-    flex: 0 0 auto;
-    align-self: center;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 52px;
-    height: 52px;
+    flex-shrink: 0;
     background: transparent;
-    color: var(--ink-dim);
-    border: 1px solid var(--border);
-    border-radius: 1px;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    border: 2px solid rgba(var(--lab-rgb), 0.4);
+    color: var(--lab);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.fig-arrow:hover {
-    color: var(--red);
-    border-color: var(--red);
-    background: rgba(var(--red-rgb), 0.06);
-}
-.fig-arrow:active { transform: scale(0.92); }
 
-/* ── Sheet tabs ── */
+.fig-arrow:hover {
+    background: var(--lab);
+    color: var(--screen);
+    border-color: var(--lab);
+}
+
+/* ── Channel presets ── */
 .fig-tabs {
     display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    margin-top: 1.6rem;
-    padding-left: calc(52px + 1.4rem);
+    gap: 0.5rem;
+    margin-top: 1.4rem;
 }
 
 .fig-tab {
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    padding: 0.4rem 0.62rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0.45rem 0.7rem 0.35rem;
     background: transparent;
+    border: 1px solid var(--ink-faint);
     color: var(--ink-dim);
-    border: 1px solid var(--border);
-    border-radius: 1px;
-    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
 }
 
-.fig-tab:hover { color: var(--ink); border-color: var(--ink); }
+.fig-tab:hover { color: var(--ink-strong); }
 
 .fig-tab.is-active {
-    color: var(--paper);
-    background: var(--red);
-    border-color: var(--red);
-    font-weight: 700;
+    background: var(--hl);
+    border-color: var(--hl);
+    color: var(--screen);
 }
 
-/* ── Responsive ── */
-@media (max-width: 640px) {
-    .fig-deck { gap: 0.6rem; }
-    .fig-arrow { width: 42px; height: 42px; }
-    .fig-sheet { min-height: 380px; }
-    .fig-name, .fig-blurb, .fig-sheet-band { padding-left: 1.1rem; padding-right: 1.1rem; }
-    .fig-spec, .fig-link { margin-left: 1.1rem; margin-right: 1.1rem; }
-    .fig-tabs {
-        justify-content: center;
-        padding-left: 0;
-    }
+@media (max-width: 768px) {
+    .fig-deck { flex-direction: column; }
+    .fig-arrow { width: 100%; height: 44px; }
+    .fig-arrow-prev { order: 2; }
+    .fig-stage { order: 1; }
+    .fig-arrow-next { order: 3; }
+    .fig-under { display: none; }
 }

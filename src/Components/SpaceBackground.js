@@ -1,1916 +1,667 @@
 import React, { useEffect, useRef } from 'react';
 import './SpaceBackground.css';
 
-// Three depth layers: [count, minSize, maxSize, minOpacity, maxOpacity, parallaxStrength, scrollRate, twinkleFraction]
-const LAYERS = [
-  { count: 130, size: [0.35, 0.85], opacity: [0.07, 0.20], parallax: 0.007, scroll: 0.018, twinkle: 0.28 },
-  { count: 65, size: [0.80, 1.50], opacity: [0.20, 0.40], parallax: 0.020, scroll: 0.048, twinkle: 0.18 },
-  { count: 30, size: [1.40, 2.20], opacity: [0.35, 0.60], parallax: 0.044, scroll: 0.095, twinkle: 0.10 },
-];
+// The ether behind the page: a mosaic-block starfield (the sky as a
+// teletext graphic), occasional interference bands rolling down the
+// picture, and a burst of full-screen static whenever the receiver
+// retunes to the other channel.
+//
+// Two service illustrations ride the ether, transmitted as chunky sixel
+// mosaic graphics — the kind a 1980s broadcaster sent down the VBI:
+//   · CH 1 / NEWS    — a SUPERNOVA starburst, detonating on tune-in
+//   · CH 2 / LEISURE — the EARTH (+ Moon), the "TERRA — HOME" page
+// Both are drawn on the same block grid, quantised to the teletext-7
+// palette with ordered dithering. No gradients, no glow — this is a
+// picture assembled from coloured squares.
 
-// Supernova sprite color palette — RGB triplets
-const SUPERNOVA_COLORS = [
-  [255, 247, 135], // hot yellow-white
-  [255, 183, 77],  // amber
-  [255, 107, 43],  // orange accent
-  [255, 56, 145],  // electric pink
-  [176, 68, 255],  // violet
-  [59, 158, 255],  // electric blue
-  [0, 255, 225],   // cyan
-];
+const CELL = 4;                       // mosaic block size, px (starfield)
+const MCELL = 6;                      // graphics block size, px (illustrations)
+const STAR_DENSITY = 1 / 16000;       // stars per px²
+const TAU = Math.PI * 2;
 
-// Leans the ejecta sphere + shockwave ring for a 3D read (matches Earth's tilt).
-const SUPERNOVA_TILT = -0.34;
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * t;
 
 // Uniform random direction on the unit sphere — seeds the 3D ejecta shell.
 const randUnit = () => {
-  const z = rand(-1, 1);
-  const th = rand(0, Math.PI * 2);
-  const rr = Math.sqrt(1 - z * z);
-  return [rr * Math.cos(th), z, rr * Math.sin(th)];
+    const z = rand(-1, 1);
+    const t = rand(0, Math.PI * 2);
+    const r = Math.sqrt(1 - z * z);
+    return [r * Math.cos(t), z, r * Math.sin(t)];
 };
 
-const rand = (a, b) => a + Math.random() * (b - a);
-const lerp = (a, b, t) => a + (b - a) * t;
-const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+// Ordered dither — a 4×4 Bayer matrix turns a 0..1 intensity into a
+// scattered on/off pattern, so shading reads as period-correct stipple
+// rather than a smooth ramp.
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const dither = (gx, gy, v) => v > (BAYER[(gy & 3) * 4 + (gx & 3)] + 0.5) / 16;
 
-const buildStars = () => {
-  const stars = [];
-  LAYERS.forEach((layer, li) => {
-    for (let i = 0; i < layer.count; i++) {
-      const twinkles = Math.random() < layer.twinkle;
-      stars.push({
-        nx: Math.random(),
-        ny: Math.random(),
-        size: rand(...layer.size),
-        baseOpacity: rand(...layer.opacity),
-        parallax: layer.parallax,
-        scrollRate: layer.scroll,
-        twinkles,
-        twinkleSpeed: twinkles ? rand(0.35, 1.1) : 0,
-        twinklePhase: Math.random() * Math.PI * 2,
-        layer: li,
-      });
-    }
-  });
-  return stars;
+// The seven teletext colours (fixed hardware palette — the service
+// graphics keep these regardless of which channel is tuned, matching
+// CH 1's tokens), plus a few illustration mixes.
+const TT = {
+    white:  '236, 238, 248',
+    yellow: '255, 210, 31',
+    amber:  '255, 156, 66',
+    cyan:   '56, 225, 230',
+    green:  '59, 240, 125',
+    red:    '255, 51, 82',
+    mag:    '255, 84, 215',
+    violet: '176, 100, 255',
+    blue:   '64, 132, 236',
+    ocean:  '46, 116, 214',
+    land:   '70, 196, 108',
+    night:  '26, 40, 92',
+    moon:   '158, 168, 190',
+};
+
+// Coarse continent outlines as [lon, lat] degree polygons — rasterised
+// once into an equirectangular land mask, then sampled per cell as the
+// globe turns.
+const LAND_SHAPES = [
+    [[-158, 71], [-128, 70], [-100, 69], [-84, 70], [-82, 73], [-74, 68], [-64, 60], [-56, 52],
+     [-66, 47], [-70, 43], [-74, 40], [-76, 35], [-81, 31], [-81, 25], [-90, 30], [-97, 26],
+     [-97, 20], [-92, 18], [-87, 16], [-83, 9], [-77, 8], [-83, 14], [-95, 16], [-105, 20],
+     [-112, 24], [-117, 32], [-123, 38], [-124, 46], [-130, 52], [-141, 60], [-152, 59], [-165, 60]],
+    [[-45, 60], [-30, 61], [-20, 70], [-22, 76], [-32, 82], [-46, 83], [-58, 79], [-54, 72], [-50, 64]],
+    [[-77, 8], [-70, 12], [-61, 10], [-50, 0], [-44, -2], [-35, -6], [-39, -14], [-48, -25],
+     [-56, -34], [-64, -41], [-69, -52], [-66, -55], [-74, -50], [-73, -41], [-71, -30],
+     [-72, -18], [-78, -8], [-81, -4], [-80, 2], [-78, 6]],
+    [[-16, 15], [-12, 25], [-5, 32], [2, 36], [10, 37], [18, 32], [25, 32], [33, 31], [35, 24],
+     [38, 16], [43, 11], [51, 12], [49, 4], [42, -1], [40, -11], [35, -22], [26, -34], [19, -35],
+     [14, -22], [9, -1], [5, 5], [-4, 5], [-10, 6]],
+    [[44, -16], [50, -15], [50, -25], [45, -25]],
+    [[-9, 37], [-9, 44], [-2, 49], [2, 51], [8, 54], [5, 58], [10, 63], [18, 69], [28, 71], [30, 66],
+     [26, 60], [22, 56], [16, 54], [14, 46], [19, 42], [24, 41], [14, 38], [3, 42]],
+    [[-5, 50], [-3, 53], [-2, 57], [-6, 58], [-8, 55], [-6, 51]],
+    [[40, 68], [55, 71], [70, 73], [95, 77], [110, 76], [128, 73], [142, 72], [160, 70], [172, 67],
+     [178, 65], [170, 60], [160, 61], [150, 53], [142, 46], [135, 44], [127, 40], [122, 40],
+     [122, 30], [110, 21], [106, 11], [100, 6], [96, 16], [90, 22], [88, 21], [80, 8], [77, 9],
+     [73, 18], [66, 25], [57, 26], [50, 30], [44, 38], [40, 44], [48, 52], [55, 56], [46, 62]],
+    [[131, 33], [136, 35], [140, 38], [142, 41], [139, 42], [135, 35], [132, 32]],
+    [[109, -3], [117, -2], [119, 2], [114, 5], [109, 2], [107, 0]],
+    [[114, -22], [122, -18], [130, -12], [137, -12], [143, -11], [146, -18], [151, -25],
+     [150, -38], [143, -39], [136, -35], [129, -32], [122, -34], [115, -34]],
+    [[167, -46], [171, -44], [175, -41], [178, -38], [173, -42], [168, -45]],
+];
+
+const readColors = () => {
+    const css = getComputedStyle(document.documentElement);
+    const rgb = (name, fallback) => (css.getPropertyValue(name).trim() || fallback);
+    return {
+        ink: rgb('--ink-rgb', '236, 238, 248'),
+        lab: rgb('--lab-rgb', '56, 225, 230'),
+        hl:  rgb('--hl-rgb',  '255, 210, 31'),
+        bar: rgb('--bar-rgb', '26, 26, 208'),
+    };
 };
 
 const SpaceBackground = () => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let W = 0, H = 0, dpr = 1;
-    let mouseNX = 0.5, mouseNY = 0.5;
-    let smoothNX = 0.5, smoothNY = 0.5;
-    let pageScrollY = 0;
-    let stars = [];
-    let rafId = null;
-    let isRunning = true;
-    let lastTime = performance.now();
-    let starRgb = '221, 232, 244';   // drafting ink (reads --ink-rgb)
-    let redRgb = '255, 92, 77';      // checker's pencil (reads --red-rgb)
-
-    // Personal theme: suppress rockets and (eventually) reveal the Earth scene.
-    // 0 = full space/Professional, 1 = full Personal. Eased every frame for a crossfade.
-    let isPersonal = false;
-    let personalT = 0;
-
-    // Reduced motion: freeze every time-driven phase (spin, twinkle, orbits,
-    // detonation) and stop spawning shooters/rockets. Scroll- and pointer-
-    // driven movement stays — it only moves when the user moves.
-    const rmQuery = window.matchMedia
-      ? window.matchMedia('(prefers-reduced-motion: reduce)')
-      : null;
-    let reduceMotion = rmQuery ? rmQuery.matches : false;
-    const onRmChange = (e) => { reduceMotion = e.matches; };
-    if (rmQuery && rmQuery.addEventListener) rmQuery.addEventListener('change', onRmChange);
-
-    // ── Shooting stars ──────────────────────────────────────────────
-    let shooters = [];
-    let nextShootAt = Date.now() + rand(3500, 8000);
-
-    const spawnShooter = () => {
-      const speed = rand(380, 680);
-      const angleDeg = rand(18, 36);
-      const angle = angleDeg * Math.PI / 180;
-      shooters.push({
-        startX: rand(W * 0.05, W * 0.65),
-        startY: rand(H * 0.02, H * 0.38),
-        vx: speed * Math.cos(angle),
-        vy: speed * Math.sin(angle),
-        length: rand(70, 160),
-        life: 0,
-        duration: rand(0.48, 0.82),
-        maxOpacity: rand(0.5, 0.85),
-      });
-      nextShootAt = Date.now() + rand(5000, 13000);
-    };
-
-    // ── Spacecraft models (3D wireframe bodies of revolution) ─────────
-    // Each craft is a nose→tail profile of [axial, radius] rings spun into a
-    // 3D mesh, plus flat appendages (fins / grid fins / legs). At draw time the
-    // mesh is oriented by the rocket's velocity-derived basis (see orient()) and
-    // projected with the same orthographic language as the Earth + supernova, so
-    // near-side edges read bright and far-side edges dim.
-    // Axial coord: +1 = nose (points along travel), −1 = engine end.
-    const FOUR = [0, Math.PI / 2, Math.PI, Math.PI * 1.5];
-    const FOUR_OFF = [Math.PI / 4, Math.PI * 0.75, Math.PI * 1.25, Math.PI * 1.75];
-
-    // Saturn V — broad, gently tapered stack with an engine skirt + 4 fins
-    const SATURN_PROFILE = [
-      [1.00, 0.00], [0.88, 0.10], [0.74, 0.17], [0.56, 0.20], [0.22, 0.215],
-      [-0.20, 0.215], [-0.54, 0.205], [-0.78, 0.19], [-0.88, 0.235], [-0.97, 0.265],
-    ];
-    const SATURN_FIN = [[-0.60, 0.21], [-0.96, 0.21], [-0.96, 0.47], [-0.72, 0.40]];
-
-    // Falcon 9 — slim, long first stage with a small fairing, grid fins + legs
-    const FALCON_PROFILE = [
-      [1.00, 0.00], [0.90, 0.085], [0.80, 0.14], [0.64, 0.155], [0.40, 0.155],
-      [-0.54, 0.155], [-0.84, 0.15], [-0.92, 0.115], [-0.99, 0.175],
-    ];
-    const FALCON_GRIDFIN = [[0.58, 0.155], [0.68, 0.155], [0.68, 0.30], [0.58, 0.30]];
-    const FALCON_LEG = [[-0.84, 0.15], [-0.99, 0.42], [-0.92, 0.18]];
-
-    // Spin a profile into rings of N points (apex rings collapse to one point).
-    const buildCraft = (profile, N, appendages) => {
-      const rings = profile.map(([ax, rad]) => {
-        if (rad < 1e-4) return [{ ax, c: 0, s: 0, rad: 0 }];
-        const ring = [];
-        for (let k = 0; k < N; k++) {
-          const th = (k / N) * Math.PI * 2;
-          ring.push({ ax, c: Math.cos(th), s: Math.sin(th), rad });
-        }
-        return ring;
-      });
-      return {
-        rings,
-        appendages: appendages || [],
-        tailAx: profile[profile.length - 1][0],
-      };
-    };
-
-    // scale    — model→screen px multiplier
-    // hasFlame — draw engine flame + emit smoke
-    // geo      — ring/appendage geometry from buildCraft()
-    const CRAFT = [
-      {
-        scale: 17, hasFlame: true,
-        geo: buildCraft(SATURN_PROFILE, 9, [{ angles: FOUR, poly: SATURN_FIN }]),
-      },
-      {
-        scale: 16, hasFlame: true,
-        geo: buildCraft(FALCON_PROFILE, 9, [
-          { angles: FOUR, poly: FALCON_GRIDFIN },
-          { angles: FOUR_OFF, poly: FALCON_LEG },
-        ]),
-      },
-    ];
-
-    let rockets = [];
-    let smokeParticles = [];
-    let nextRocketAt = Date.now() + rand(6000, 14000);
-
-    // ── Supernova (footer ambient bloom) ─────────────────────────────
-    // A 3D exploding star: an expanding ejecta shell + a tilted shockwave
-    // ring, projected with the same rotation/tilt language as the Earth so
-    // both scenes share a depth read. Driven by time + scroll.
-    let supernovaSprites = [];   // ejecta particles riding unit directions
-    let supernovaRing = [];      // shockwave bead-ring (SN 1987A-style)
-    let supernovaOuterRings = []; // the two fainter polar rings (SN 1987A hourglass)
-    let supernovaFilaments = []; // curled nebular tendrils (Crab-style)
-    let supernovaRays = [];      // volumetric corona rays (3D directions)
-    let smoothSupernovaAlpha = 0;
-    let burstT = 0;              // detonation clock 0→1 (0 = collapsed flash)
-
-    const spawnRocket = () => {
-      const modelIdx = Math.floor(Math.random() * CRAFT.length);
-      const side = Math.floor(Math.random() * 4);
-      let startX, startY;
-      const margin = 90;
-
-      const targetX = W * (0.25 + Math.random() * 0.5);
-      const targetY = H * (0.25 + Math.random() * 0.5);
-
-      switch (side) {
-        case 0: startX = rand(W * 0.05, W * 0.95); startY = -margin; break;
-        case 1: startX = W + margin; startY = rand(H * 0.05, H * 0.95); break;
-        case 2: startX = rand(W * 0.05, W * 0.95); startY = H + margin; break;
-        default: startX = -margin; startY = rand(H * 0.05, H * 0.95); break;
-      }
-
-      const dx = targetX - startX;
-      const dy = targetY - startY;
-      const angle = Math.atan2(dy, dx);
-      const speed = rand(130, 230);
-
-      // curve: angular velocity in rad/s — negative = left arc, positive = right arc
-      const curve = rand(-0.18, 0.18);
-
-      rockets.push({
-        x: startX, y: startY,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        angle,
-        speed,
-        curve,
-        modelIdx,
-        // pitch tilts the body axis out of the screen plane (so cross-section
-        // rings read as ellipses); roll spins it about its long axis (so fins
-        // orbit and the wireframe visibly rotates, like the Earth).
-        pitch: rand(0.42, 0.8) * (Math.random() < 0.5 ? 1 : -1),
-        roll: Math.random() * Math.PI * 2,
-        rollSpeed: rand(0.35, 0.85) * (Math.random() < 0.5 ? 1 : -1),
-        smokeTimer: 0,
-      });
-
-      nextRocketAt = Date.now() + rand(22000, 50000);
-    };
-
-    // Build the rocket's orthonormal orientation basis from its heading +
-    // pitch + roll. `fwd` points along travel (with an out-of-plane tilt from
-    // pitch); `right`/`up` span the body cross-section and spin with `roll`.
-    const orient = (r) => {
-      const cp = Math.cos(r.pitch), sp = Math.sin(r.pitch);
-      const fwd = { x: Math.cos(r.angle) * cp, y: Math.sin(r.angle) * cp, z: sp };
-      // right0 = fwd × worldUp(0,0,1) — stays in the screen plane
-      let rx = fwd.y, ry = -fwd.x, rz = 0;
-      let rl = Math.hypot(rx, ry, rz);
-      if (rl < 1e-4) { rx = 1; ry = 0; rz = 0; rl = 1; }
-      rx /= rl; ry /= rl; rz /= rl;
-      // up0 = right0 × fwd — gains the out-of-plane (z) component
-      const ux = ry * fwd.z - rz * fwd.y;
-      const uy = rz * fwd.x - rx * fwd.z;
-      const uz = rx * fwd.y - ry * fwd.x;
-      const cr = Math.cos(r.roll), sr = Math.sin(r.roll);
-      return {
-        fwd,
-        right: { x: cr * rx + sr * ux, y: cr * ry + sr * uy, z: cr * rz + sr * uz },
-        up:    { x: -sr * rx + cr * ux, y: -sr * ry + cr * uy, z: -sr * rz + cr * uz },
-      };
-    };
-
-    // Project a model vertex {ax, c, s, rad} through the basis to screen + depth.
-    const projVert = (r, scale, B, v) => {
-      const dx = B.fwd.x * v.ax + (B.right.x * v.c + B.up.x * v.s) * v.rad;
-      const dy = B.fwd.y * v.ax + (B.right.y * v.c + B.up.y * v.s) * v.rad;
-      const dz = B.fwd.z * v.ax + (B.right.z * v.c + B.up.z * v.s) * v.rad;
-      return { x: r.x + scale * dx, y: r.y + scale * dy, z: dz };
-    };
-
-    const drawRocket = (r, now) => {
-      const model = CRAFT[r.modelIdx];
-      const scale = model.scale;
-      const B = orient(r);
-
-      // ── Engine flame — 2D billboard anchored at the projected engine plane,
-      // thrusting opposite the on-screen travel direction.
-      if (model.hasFlame) {
-        const tailX = r.x + scale * B.fwd.x * model.geo.tailAx;
-        const tailY = r.y + scale * B.fwd.y * model.geo.tailAx;
-        const tailDir = Math.atan2(-B.fwd.y, -B.fwd.x);
-        const perpX = -Math.sin(tailDir);
-        const perpY = Math.cos(tailDir);
-        const flicker = Math.sin(now * 0.011) * 0.5 + Math.sin(now * 0.023) * 0.35 + Math.sin(now * 0.037) * 0.15;
-        const flameLen = 16 + flicker * 7;
-        const flameW = 4.5 + flicker * 1.8;
-        const wiggle = Math.sin(now * 0.019) * 2;
-        const flameTipX = tailX + Math.cos(tailDir) * flameLen;
-        const flameTipY = tailY + Math.sin(tailDir) * flameLen;
-        const midX = tailX + Math.cos(tailDir) * flameLen * 0.45 + perpX * wiggle;
-        const midY = tailY + Math.sin(tailDir) * flameLen * 0.45 + perpY * wiggle;
-
-        const flameGrad = ctx.createLinearGradient(tailX, tailY, flameTipX, flameTipY);
-        flameGrad.addColorStop(0, 'rgba(255, 235, 140, 1)');
-        flameGrad.addColorStop(0.3, 'rgba(255, 107, 43, 0.92)');
-        flameGrad.addColorStop(0.7, 'rgba(255, 40, 10, 0.55)');
-        flameGrad.addColorStop(1, 'rgba(200, 20, 0, 0)');
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(tailX + perpX * flameW, tailY + perpY * flameW);
-        ctx.quadraticCurveTo(midX, midY, flameTipX, flameTipY);
-        ctx.quadraticCurveTo(midX, midY, tailX - perpX * flameW, tailY - perpY * flameW);
-        ctx.closePath();
-        ctx.fillStyle = flameGrad;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = 'rgba(255, 100, 20, 0.65)';
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.restore();
-      }
-
-      // ── 3D wireframe — project rings, collect edges, depth-sort, stroke.
-      const rings = model.geo.rings;
-      const ringPts = [];
-      let zmin = Infinity, zmax = -Infinity;
-      for (const ring of rings) {
-        const pts = [];
-        for (const v of ring) {
-          const p = projVert(r, scale, B, v);
-          if (p.z < zmin) zmin = p.z;
-          if (p.z > zmax) zmax = p.z;
-          pts.push(p);
-        }
-        ringPts.push(pts);
-      }
-
-      const segs = [];
-      const pushSeg = (p1, p2, amber, base) =>
-        segs.push({ p1, p2, zm: (p1.z + p2.z) * 0.5, amber, base });
-
-      // Ring hoops (the engine-end ring reads as the nozzle mouth → amber)
-      for (let i = 0; i < ringPts.length; i++) {
-        const pts = ringPts[i];
-        if (pts.length < 3) continue;
-        const amber = i === ringPts.length - 1;
-        for (let k = 0; k < pts.length; k++) {
-          pushSeg(pts[k], pts[(k + 1) % pts.length], amber, amber ? 0.85 : 0.7);
-        }
-      }
-      // Longerons between adjacent rings (apex rings fan out to the next ring)
-      for (let i = 0; i < ringPts.length - 1; i++) {
-        const a = ringPts[i], b = ringPts[i + 1];
-        if (a.length === 1) { for (const p of b) pushSeg(a[0], p, false, 0.85); }
-        else if (b.length === 1) { for (const p of a) pushSeg(p, b[0], false, 0.85); }
-        else { const n = Math.min(a.length, b.length); for (let k = 0; k < n; k++) pushSeg(a[k], b[k], false, 0.85); }
-      }
-      // Appendages (fins / grid fins / legs) — closed amber polylines
-      for (const app of model.geo.appendages) {
-        for (const th0 of app.angles) {
-          const c0 = Math.cos(th0), s0 = Math.sin(th0);
-          const poly = app.poly.map(([ax, rad]) => projVert(r, scale, B, { ax, c: c0, s: s0, rad }));
-          for (let k = 0; k < poly.length; k++) {
-            pushSeg(poly[k], poly[(k + 1) % poly.length], true, 0.92);
-          }
-        }
-      }
-
-      const zRange = (zmax - zmin) || 1;
-      segs.sort((m, n) => m.zm - n.zm); // painter's order: far edges first
-      ctx.save();
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      for (const sg of segs) {
-        const d = (sg.zm - zmin) / zRange;          // 0 = far, 1 = near
-        ctx.globalAlpha = clamp(lerp(0.14, 1, d) * sg.base, 0, 1);
-        ctx.lineWidth = sg.amber ? 1.15 : 1;
-        ctx.strokeStyle = sg.amber ? 'rgb(255, 107, 43)' : `rgb(${starRgb})`;
-        ctx.beginPath();
-        ctx.moveTo(sg.p1.x, sg.p1.y);
-        ctx.lineTo(sg.p2.x, sg.p2.y);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.restore();
-    };
-
-    const buildSupernovaSprites = () => {
-      const pickColor = () =>
-        SUPERNOVA_COLORS[Math.floor(Math.random() * SUPERNOVA_COLORS.length)];
-
-      // ── Ejecta shell ──────────────────────────────────────────────
-      // Each particle rides a fixed unit direction (ux,uy,uz); `dist` is its
-      // radial throw in screen px and breathes between min/max. At draw time
-      // the direction is spun + tilted, so the cloud reads as a real sphere
-      // — near-side (z>0) bright & large, far-side (z<0) dim & small.
-      supernovaSprites = [];
-      // Dense inner shell — vibrant cluster near the core
-      for (let i = 0; i < 46; i++) {
-        const [r, g, b] = pickColor();
-        const [ux, uy, uz] = randUnit();
-        const minD = rand(28, 86);
-        const maxD = rand(140, 250);
-        supernovaSprites.push({
-          ux, uy, uz,
-          dist: rand(minD, maxD), minDist: minD, maxDist: maxD,
-          vDist: rand(5, 20) * (Math.random() < 0.5 ? 1 : -1),
-          size: rand(1.4, 4.2),
-          baseOpacity: rand(0.55, 0.95),
-          twinkleSpeed: rand(1.2, 3.5),
-          twinklePhase: Math.random() * Math.PI * 2,
-          r, g, b,
-        });
-      }
-      // Sparse outer spray — wider, dimmer
-      for (let i = 0; i < 26; i++) {
-        const [r, g, b] = pickColor();
-        const [ux, uy, uz] = randUnit();
-        const minD = rand(200, 290);
-        const maxD = rand(350, 500);
-        supernovaSprites.push({
-          ux, uy, uz,
-          dist: rand(minD, maxD), minDist: minD, maxDist: maxD,
-          vDist: rand(3, 12) * (Math.random() < 0.5 ? 1 : -1),
-          size: rand(0.8, 2.6),
-          baseOpacity: rand(0.28, 0.66),
-          twinkleSpeed: rand(0.7, 2.1),
-          twinklePhase: Math.random() * Math.PI * 2,
-          r, g, b,
-        });
-      }
-
-      // ── Shockwave ring ────────────────────────────────────────────
-      // Beads spaced around an equatorial circle. The same spin+tilt that
-      // turns the shell leans this ring into an ellipse; its back arc draws
-      // behind the core and the front arc in front — exactly like the Moon.
-      supernovaRing = [];
-      const beads = 56;
-      for (let i = 0; i < beads; i++) {
-        supernovaRing.push({
-          a: (i / beads) * Math.PI * 2,
-          knot: Math.random() < 0.16 ? rand(1.7, 2.7) : 1, // bright hotspots
-          phase: Math.random() * Math.PI * 2,
-          flick: rand(0.8, 2.2),
-        });
-      }
-
-      // ── Outer rings (SN 1987A hourglass) ──────────────────────────
-      // The real remnant's two fainter rings sit above and below the
-      // equatorial plane on the polar axis. Same bead language as the
-      // main ring, dimmer and sparser, so the triple-ring structure
-      // reads without stealing focus.
-      supernovaOuterRings = [];
-      for (const sign of [-1, 1]) {
-        const beads = [];
-        const n = 40;
-        for (let i = 0; i < n; i++) {
-          beads.push({
-            a: (i / n) * TAU + rand(-0.03, 0.03),
-            knot: Math.random() < 0.1 ? rand(1.5, 2.2) : 1,
-            phase: Math.random() * TAU,
-            flick: rand(0.6, 1.6),
-          });
-        }
-        supernovaOuterRings.push({ sign, beads });
-      }
-
-      // ── Nebular filaments ─────────────────────────────────────────
-      // Crab-style tendrils: each rides a base unit direction and curls
-      // toward a perpendicular axis as it reaches out, sampled as a fixed
-      // 3D polyline that rot3 spins with the shell. Near-side filaments
-      // read bright and wide, far-side dim and thin.
-      supernovaFilaments = [];
-      for (let i = 0; i < 16; i++) {
-        const [ux, uy, uz] = randUnit();
-        let [px, py, pz] = randUnit();
-        const dot = px * ux + py * uy + pz * uz;
-        px -= dot * ux; py -= dot * uy; pz -= dot * uz;
-        const pl = Math.hypot(px, py, pz) || 1;
-        px /= pl; py /= pl; pz /= pl;
-        const bend = rand(0.35, 0.95) * (Math.random() < 0.5 ? 1 : -1);
-        const segsN = 6;
-        const pts = [];
-        for (let s = 0; s <= segsN; s++) {
-          const f = s / segsN;
-          const a = bend * f * f;          // curl grows toward the tip
-          const ca = Math.cos(a), sa = Math.sin(a);
-          pts.push({
-            x: ux * ca + px * sa,
-            y: uy * ca + py * sa,
-            z: uz * ca + pz * sa,
-            f: 0.3 + 0.7 * f,              // radial fraction, inner shell → tip
-          });
-        }
-        const [r, g, b] = pickColor();
-        supernovaFilaments.push({
-          pts, r, g, b,
-          len: rand(210, 380),
-          w: rand(0.8, 1.6),
-          phase: rand(0, TAU),
-          sway: rand(0.4, 1.1),
-        });
-      }
-
-      // ── Volumetric corona rays ────────────────────────────────────
-      // 3D ray directions that rotate with the shell; foreshorten + dim on
-      // the far side, so the burst looks like it radiates through space.
-      supernovaRays = [];
-      for (let i = 0; i < 16; i++) {
-        const [ux, uy, uz] = randUnit();
-        supernovaRays.push({
-          ux, uy, uz,
-          len: rand(150, 360),
-          phase: Math.random() * Math.PI * 2,
-          w: rand(0.7, 1.7),
-        });
-      }
-    };
-
-    const drawSupernova = (now, dt, alpha, burst) => {
-      // Centered hero placement — same anchor + mouse parallax as the
-      // Personal Earth scene, so the two themes share a focal point.
-      const cx = W * 0.5 + (smoothNX - 0.5) * -34;
-      const cy = H * 0.72 + (smoothNY - 0.5) * -22;
-
-      // Always advance the ejecta breathing so the shell is alive when revealed
-      for (const sp of supernovaSprites) {
-        sp.dist += sp.vDist * dt;
-        if (sp.dist <= sp.minDist || sp.dist >= sp.maxDist) {
-          sp.vDist *= -1;
-          sp.dist = clamp(sp.dist, sp.minDist, sp.maxDist);
-        }
-      }
-
-      if (alpha < 0.005) return;
-
-      // ── 3D frame ──────────────────────────────────────────────────
-      // Spin about the vertical axis (time + scroll, like the Earth) then a
-      // fixed tilt, so the whole explosion turns as a single solid object.
-      const spin = now * 0.00003 + pageScrollY * 0.0014;
-      const cS = Math.cos(spin), sS = Math.sin(spin);
-      const cT = Math.cos(SUPERNOVA_TILT), sT = Math.sin(SUPERNOVA_TILT);
-      const rot3 = (ux, uy, uz) => {
-        const xr = ux * cS + uz * sS;       // spin about Y
-        const zr0 = -ux * sS + uz * cS;
-        const yr = uy * cT - zr0 * sT;       // tilt about X
-        const zr = uy * sT + zr0 * cT;       // zr > 0 → toward the viewer
-        return { x: xr, y: yr, z: zr };
-      };
-      const breathe = 0.5 + 0.5 * Math.sin(now * 0.00046);
-
-      // Detonation envelope. `expand` throws the ejecta / ring / rays out
-      // from a collapsed point (0) to the settled remnant (1) with a small
-      // overshoot; `flash` is the blinding first-light that decays as the
-      // shell flies apart.
-      const expand = burst >= 1
-        ? 1
-        : (1 - Math.pow(1 - burst, 2.6)) + Math.sin(burst * Math.PI) * 0.1;
-      const flash = Math.pow(1 - burst, 2.2);
-
-      // ── Ambient glow (cool halo → warm corona) ────────────────────
-      const outerR = Math.min(W * 1.02, H * 1.17);
-      const g0 = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR);
-      g0.addColorStop(0.00, `rgba(176,68,255,${(0.13 * alpha).toFixed(3)})`);
-      g0.addColorStop(0.28, `rgba(59,158,255,${(0.11 * alpha).toFixed(3)})`);
-      g0.addColorStop(0.58, `rgba(0,220,255,${(0.06 * alpha).toFixed(3)})`);
-      g0.addColorStop(1.00, 'rgba(0,0,0,0)');
-      ctx.beginPath();
-      ctx.arc(cx, cy, outerR, 0, TAU);
-      ctx.fillStyle = g0;
-      ctx.fill();
-
-      const midR = Math.min(W * 0.60, H * 0.75);
-      const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, midR);
-      g1.addColorStop(0.00, `rgba(255,220,80,${(0.28 * alpha).toFixed(3)})`);
-      g1.addColorStop(0.22, `rgba(255,107,43,${(0.22 * alpha).toFixed(3)})`);
-      g1.addColorStop(0.48, `rgba(255,56,145,${(0.13 * alpha).toFixed(3)})`);
-      g1.addColorStop(1.00, 'rgba(0,0,0,0)');
-      ctx.beginPath();
-      ctx.arc(cx, cy, midR, 0, TAU);
-      ctx.fillStyle = g1;
-      ctx.fill();
-
-      // ── Project the shockwave ring + ejecta once, sort into depth halves
-      const ringBase = Math.min(W * 0.42, H * 0.52);
-      const ringR = ringBase * (0.9 + 0.13 * breathe) * expand;
-      const ringPts = supernovaRing.map((bd) => {
-        const p = rot3(Math.cos(bd.a), 0, Math.sin(bd.a)); // equatorial circle
-        return { sx: cx + p.x * ringR, sy: cy + p.y * ringR, depth: p.z, bd, dim: 1, sizeMul: 1 };
-      });
-      // Outer polar rings lag the main ring's expansion slightly, like the
-      // real remnant's rings lighting up after the equatorial one.
-      const outerExpand = Math.pow(expand, 1.35);
-      const polarR = ringBase * (0.9 + 0.13 * breathe) * outerExpand * 1.5;
-      for (const ring of supernovaOuterRings) {
-        for (const bd of ring.beads) {
-          const p = rot3(Math.cos(bd.a), ring.sign * 0.42, Math.sin(bd.a));
-          ringPts.push({
-            sx: cx + p.x * polarR, sy: cy + p.y * polarR, depth: p.z,
-            bd, dim: 0.42, sizeMul: 0.7,
-          });
-        }
-      }
-      const parts = supernovaSprites.map((sp) => {
-        const p = rot3(sp.ux, sp.uy, sp.uz);
-        const d = sp.dist * expand;
-        return { sp, sx: cx + p.x * d, sy: cy + p.y * d, depth: p.z };
-      });
-
-      // ── Light echoes — faint spherical wavefronts washing outward
-      // through the surrounding dust long after first light.
-      if (burst > 0.35) {
-        const settle = smoothstep(0.35, 0.9, burst);
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        for (let k = 0; k < 2; k++) {
-          const t = ((now * 0.001 / 7.5) + k * 0.5) % 1;
-          const eR = ringR * (0.55 + t * 2.1);
-          const eA = 0.055 * (1 - t) * Math.sin(Math.min(t * 4, 1) * Math.PI * 0.5) * settle * alpha;
-          if (eA < 0.008 || eR < 4) continue;
-          ctx.strokeStyle = `rgba(180,220,255,${eA.toFixed(3)})`;
-          ctx.lineWidth = 1.25;
-          ctx.beginPath();
-          ctx.arc(cx, cy, eR, 0, TAU);
-          ctx.stroke();
-        }
-        ctx.restore();
-      }
-
-      // ── Nebular filaments — project once, split by average depth ──
-      const filamentPasses = [[], []];
-      for (const fl of supernovaFilaments) {
-        const sway = 1 + 0.05 * Math.sin(now * 0.0004 * fl.sway + fl.phase);
-        const proj = fl.pts.map((q) => {
-          const p = rot3(q.x, q.y, q.z);
-          const d = fl.len * q.f * expand * sway;
-          return { x: cx + p.x * d, y: cy + p.y * d, z: p.z };
-        });
-        let zSum = 0;
-        for (const q of proj) zSum += q.z;
-        filamentPasses[zSum < 0 ? 0 : 1].push({ fl, proj, zAvg: zSum / proj.length });
-      }
-      const drawFilament = ({ fl, proj, zAvg }) => {
-        const d = (zAvg + 1) / 2;                     // 0 far .. 1 near
-        const flick = 0.75 + 0.25 * Math.sin(now * 0.0006 + fl.phase);
-        const baseA = (0.05 + 0.30 * d) * flick * alpha;
-        if (baseA < 0.012) return;
-        for (let s = 0; s < proj.length - 1; s++) {
-          const f = s / (proj.length - 1);
-          const segA = baseA * (1 - f * 0.85);        // fade toward the tip
-          if (proj[s].y > H + 8 && proj[s + 1].y > H + 8) continue;
-          ctx.strokeStyle = `rgba(${fl.r},${fl.g},${fl.b},${segA.toFixed(3)})`;
-          ctx.lineWidth = fl.w * (1.4 - f) * lerp(0.7, 1.3, d);
-          ctx.beginPath();
-          ctx.moveTo(proj[s].x, proj[s].y);
-          ctx.lineTo(proj[s + 1].x, proj[s + 1].y);
-          ctx.stroke();
-        }
-      };
-
-      // ── Paint helpers ─────────────────────────────────────────────
-      const drawBead = (rp) => {
-        const d = (rp.depth + 1) / 2;                 // 0 back .. 1 front
-        const flick = 0.6 + 0.4 * Math.sin(now * 0.001 * rp.bd.flick + rp.bd.phase);
-        const a = clamp((0.16 + 0.5 * d) * flick * rp.bd.knot * rp.dim * alpha, 0, 1);
-        if (a < 0.02 || rp.sy > H + 6) return;
-        const size = (0.85 + 1.7 * d) * rp.bd.knot * rp.sizeMul;
-        ctx.globalAlpha = a;
-        ctx.shadowBlur = size * 4;
-        ctx.shadowColor = 'rgba(255,150,70,0.9)';
-        ctx.fillStyle = 'rgba(255,214,150,1)';
-        ctx.beginPath();
-        ctx.arc(rp.sx, rp.sy, size, 0, TAU);
-        ctx.fill();
-      };
-      const drawParticle = (pt) => {
-        if (pt.sy > H + 6) return;
-        const sp = pt.sp;
-        const d = (pt.depth + 1) / 2;                 // 0 far .. 1 near
-        const tPhase = now * 0.001 * sp.twinkleSpeed + sp.twinklePhase;
-        const flicker = 0.42 + 0.58 * Math.abs(Math.sin(tPhase));
-        const opacity = sp.baseOpacity * flicker * lerp(0.3, 1, d) * alpha;
-        if (opacity < 0.025) return;
-        const size = sp.size * lerp(0.65, 1.3, d);
-        ctx.globalAlpha = clamp(opacity, 0, 1);
-        ctx.shadowBlur = size * 5.5 * lerp(0.6, 1.15, d);
-        ctx.shadowColor = `rgb(${sp.r},${sp.g},${sp.b})`;
-        ctx.fillStyle = `rgb(${sp.r},${sp.g},${sp.b})`;
-        ctx.beginPath();
-        ctx.arc(pt.sx, pt.sy, size, 0, TAU);
-        ctx.fill();
-      };
-
-      // ── Back hemisphere (behind the core) ─────────────────────────
-      ctx.save();
-      ctx.lineCap = 'round';
-      for (const f of filamentPasses[0]) drawFilament(f);
-      for (const pt of parts) if (pt.depth < 0) drawParticle(pt);
-      for (const rp of ringPts) if (rp.depth < 0) drawBead(rp);
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
-      ctx.restore();
-
-      // ── Volumetric corona rays (radiate from the core through the shell)
-      ctx.save();
-      ctx.lineCap = 'round';
-      for (const ray of supernovaRays) {
-        const p = rot3(ray.ux, ray.uy, ray.uz);
-        const d = (p.z + 1) / 2;
-        const pulse = 0.6 + 0.4 * Math.abs(Math.sin(now * 0.0007 + ray.phase));
-        const len = ray.len * (0.7 + 0.5 * breathe) * pulse * expand;
-        const ex = cx + p.x * len, ey = cy + p.y * len;
-        if (ey > H + 20 && cy > H + 20) continue;
-        const rA = (0.04 + 0.22 * d) * pulse * alpha;
-        if (rA < 0.015) continue;
-        const rGrad = ctx.createLinearGradient(cx, cy, ex, ey);
-        rGrad.addColorStop(0.0, `rgba(255,230,120,${rA.toFixed(3)})`);
-        rGrad.addColorStop(0.5, `rgba(255,150,60,${(rA * 0.44).toFixed(3)})`);
-        rGrad.addColorStop(1.0, 'rgba(200,80,30,0)');
-        ctx.lineWidth = ray.w * lerp(0.7, 1.5, d);
-        ctx.strokeStyle = rGrad;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(ex, ey);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // ── Hot core — sphere with an offset highlight for a volumetric read
-      const pulse = 1 + 0.13 * Math.sin(now * 0.00092);
-      const coreR = 120 * pulse;
-      const hx = cx - coreR * 0.16, hy = cy - coreR * 0.2; // highlight bias
-      const g2 = ctx.createRadialGradient(hx, hy, 0, cx, cy, coreR);
-      g2.addColorStop(0.00, `rgba(255,255,235,${(0.96 * alpha).toFixed(3)})`);
-      g2.addColorStop(0.13, `rgba(255,245,160,${(0.86 * alpha).toFixed(3)})`);
-      g2.addColorStop(0.34, `rgba(255,200,80,${(0.60 * alpha).toFixed(3)})`);
-      g2.addColorStop(0.65, `rgba(255,100,40,${(0.26 * alpha).toFixed(3)})`);
-      g2.addColorStop(1.00, 'rgba(0,0,0,0)');
-      ctx.save();
-      ctx.shadowBlur = 112;
-      ctx.shadowColor = `rgba(255,200,60,${(0.52 * alpha).toFixed(3)})`;
-      ctx.beginPath();
-      ctx.arc(cx, cy, coreR, 0, TAU);
-      ctx.fillStyle = g2;
-      ctx.fill();
-      ctx.restore();
-
-      // ── First-light flash — the blinding initial blast; grows as it dims
-      if (flash > 0.01) {
-        const fR = coreR + Math.min(W, H) * 0.5 * burst;
-        const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, fR);
-        fg.addColorStop(0.00, `rgba(255,255,250,${(0.85 * flash * alpha).toFixed(3)})`);
-        fg.addColorStop(0.35, `rgba(255,242,205,${(0.45 * flash * alpha).toFixed(3)})`);
-        fg.addColorStop(1.00, 'rgba(255,200,120,0)');
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = fg;
-        ctx.beginPath();
-        ctx.arc(cx, cy, fR, 0, TAU);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // ── Front hemisphere (in front of the core) ───────────────────
-      ctx.save();
-      ctx.lineCap = 'round';
-      for (const f of filamentPasses[1]) drawFilament(f);
-      for (const rp of ringPts) if (rp.depth >= 0) drawBead(rp);
-      for (const pt of parts) if (pt.depth >= 0) drawParticle(pt);
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
-      ctx.restore();
-
-      // ── Expanding shockwave — a bright shell racing out on detonation
-      if (burst < 0.999) {
-        const shockR = burst * Math.min(W, H) * 0.72;
-        const shockA = Math.pow(1 - burst, 1.6) * 0.5 * alpha;
-        if (shockA > 0.012 && shockR > 4) {
-          ctx.save();
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.strokeStyle = `rgba(255,226,184,${shockA.toFixed(3)})`;
-          ctx.lineWidth = 2 + 7 * (1 - burst);
-          ctx.beginPath();
-          ctx.arc(cx, cy, shockR, 0, TAU);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-
-      // Central lens flare cross
-      const fA = (0.58 + 0.18 * Math.sin(now * 0.00128)) * alpha;
-      const fLen = 81 + 29 * Math.sin(now * 0.00155);
-      ctx.save();
-      ctx.shadowBlur = 48;
-      ctx.shadowColor = `rgba(255,240,160,${fA.toFixed(3)})`;
-      ctx.strokeStyle = `rgba(255,255,215,${fA.toFixed(3)})`;
-      ctx.lineWidth = 1.3;
-      ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(cx - fLen, cy); ctx.lineTo(cx + fLen, cy); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx, cy - fLen * 0.65); ctx.lineTo(cx, cy + fLen * 0.65); ctx.stroke();
-      const dLen = fLen * 0.62;
-      ctx.globalAlpha = fA * 0.42;
-      ctx.beginPath(); ctx.moveTo(cx - dLen, cy - dLen); ctx.lineTo(cx + dLen, cy + dLen); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx + dLen, cy - dLen); ctx.lineTo(cx - dLen, cy + dLen); ctx.stroke();
-      ctx.globalAlpha = 1;
-      ctx.restore();
-
-      // ── Drafting overlay — the chart layer inks in once the blast
-      // settles: construction circles and callouts marking real features
-      // of the remnant, drawn like a star-chart survey plate.
-      const settle = smoothstep(0.72, 1, burst) * alpha;
-      if (settle > 0.02) {
-        ctx.save();
-        ctx.strokeStyle = `rgba(${starRgb},${(0.15 * settle).toFixed(3)})`;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 7]);
-        ctx.beginPath(); ctx.arc(cx, cy, ringBase * 0.55, 0, TAU); ctx.stroke();
-        ctx.beginPath(); ctx.arc(cx, cy, ringBase * 1.04, 0, TAU); ctx.stroke();
-        ctx.setLineDash([]);
-
-        if (W > 720) {
-          // Callout targets ride the same rotation as the scene, so the
-          // leader lines track their features as everything turns.
-          const pe = rot3(0.85, 0.25, 0.45);
-          const de = 190 * expand;
-          drawCallout('EJECTA FIELD',
-            cx - ringBase * 1.02, cy - ringBase * 0.4,
-            cx + pe.x * de, cy + pe.y * de,
-            starRgb, 0.72 * settle);
-
-          drawCallout('CORE · SN AL-26',
-            cx + ringBase * 0.58, cy - ringBase * 0.62,
-            cx + coreR * 0.3, cy - coreR * 0.34,
-            starRgb, 0.78 * settle);
-
-          const ps = rot3(1, 0, 0);
-          drawCallout('SHOCK FRONT · Ø VAR',
-            cx + ringBase * 0.86, cy + ringBase * 0.34,
-            cx + ps.x * ringR, cy + ps.y * ringR,
-            redRgb, 0.85 * settle);
-        }
-        ctx.restore();
-      }
-    };
-
-    // ── Mini solar system (Professional theme, top-right corner) ─────
-    // A tiny 3D orrery pinned to the SAME screen anchor as the Personal
-    // Sun (W*0.85, H*0.17). The whole disk shares the supernova's spin
-    // clock under a fixed tilt, so it turns in lockstep with the burst;
-    // each planet additionally revolves on its own Kepler-ish period.
-    // Orbit rings are depth-shaded and planets sort in front of / behind
-    // the Sun, giving the flat ecliptic a real 3D read.
-    const SS_TILT = -0.52;           // leans the ecliptic toward the viewer
-    const SOLAR_PLANETS = [
-      { orbit: 0.16,  size: 1.3, speed: 0.330, color: [176, 170, 160] }, // Mercury
-      { orbit: 0.235, size: 1.7, speed: 0.255, color: [214, 188, 140] }, // Venus
-      { orbit: 0.32,  size: 1.8, speed: 0.205, color: [90, 150, 210]  }, // Earth
-      { orbit: 0.41,  size: 1.5, speed: 0.168, color: [205, 110, 70]  }, // Mars
-      { orbit: 0.58,  size: 3.1, speed: 0.092, color: [206, 170, 132] }, // Jupiter
-      { orbit: 0.73,  size: 2.7, speed: 0.070, color: [222, 196, 140], ring: true }, // Saturn
-      { orbit: 0.87,  size: 2.1, speed: 0.050, color: [150, 214, 222] }, // Uranus
-      { orbit: 1.00,  size: 2.0, speed: 0.038, color: [90, 130, 224]  }, // Neptune
-    ].map((p) => ({ ...p, phase: Math.random() * Math.PI * 2 }));
-
-    // eslint-disable-next-line no-unused-vars
-    const drawMiniSolarSystem = (now, alpha) => {
-      if (alpha < 0.005) return;
-      const cx = W * 0.85 + (smoothNX - 0.5) * -20;
-      const cy = H * 0.17 + (smoothNY - 0.5) * -14;
-      const maxOrbit = Math.min(W, H) * 0.12;
-
-      // Shared 3D frame — identical spin to the supernova, fixed tilt, so
-      // the orrery and the explosion turn as one rigid system.
-      const spin = now * 0.00003 + pageScrollY * 0.0014;
-      const cS = Math.cos(spin), sS = Math.sin(spin);
-      const cT = Math.cos(SS_TILT), sT = Math.sin(SS_TILT);
-      const rot3 = (ux, uy, uz) => {
-        const xr = ux * cS + uz * sS;       // spin about Y
-        const zr0 = -ux * sS + uz * cS;
-        const yr = uy * cT - zr0 * sT;       // tilt about X
-        const zr = uy * sT + zr0 * cT;       // zr > 0 → toward the viewer
-        return { x: xr, y: yr, z: zr };
-      };
-
-      // ── Orbit rings — sampled + depth-shaded so the far arc dims ────
-      ctx.save();
-      ctx.lineCap = 'round';
-      const RINGSEG = 64;
-      for (const pl of SOLAR_PLANETS) {
-        const R = pl.orbit * maxOrbit;
-        let prev = null;
-        for (let i = 0; i <= RINGSEG; i++) {
-          const a = (i / RINGSEG) * TAU;
-          const p = rot3(Math.cos(a) * R, 0, Math.sin(a) * R);
-          const cur = { x: cx + p.x, y: cy + p.y, d: (p.z / R + 1) / 2 };
-          if (prev) {
-            const dd = (prev.d + cur.d) / 2;   // 0 back .. 1 front
-            ctx.globalAlpha = clamp(lerp(0.04, 0.22, dd) * alpha, 0, 1);
-            ctx.strokeStyle = `rgb(${starRgb})`;
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(prev.x, prev.y);
-            ctx.lineTo(cur.x, cur.y);
-            ctx.stroke();
-          }
-          prev = cur;
-        }
-      }
-      ctx.globalAlpha = 1;
-      ctx.restore();
-
-      // ── Planets — project, then split front/back around the Sun ─────
-      const placed = SOLAR_PLANETS.map((pl) => {
-        const R = pl.orbit * maxOrbit;
-        const a = pl.phase + now * 0.001 * pl.speed + pageScrollY * 0.0011 * pl.speed;
-        const p = rot3(Math.cos(a) * R, 0, Math.sin(a) * R);
-        return { pl, sx: cx + p.x, sy: cy + p.y, depth: p.z, R };
-      });
-
-      const drawPlanet = (it) => {
-        const pl = it.pl;
-        const d = (it.depth / it.R + 1) / 2;        // 0 back .. 1 front
-        const sz = pl.size * lerp(0.78, 1.18, d);
-        const [r, g, b] = pl.color;
-        const a = clamp(lerp(0.4, 1, d) * alpha, 0, 1);
-
-        // Saturn's ring — a tiny tilted ellipse in amber
-        if (pl.ring) {
-          ctx.save();
-          ctx.globalAlpha = a * 0.85;
-          ctx.strokeStyle = 'rgba(255,184,112,0.95)';
-          ctx.lineWidth = 0.9;
-          ctx.beginPath();
-          ctx.ellipse(it.sx, it.sy, sz * 2.3, sz * 0.82, spin * 0.5 - 0.4, 0, TAU);
-          ctx.stroke();
-          ctx.restore();
-        }
-
-        ctx.save();
-        ctx.globalAlpha = a;
-        ctx.shadowBlur = sz * 3.2;
-        ctx.shadowColor = `rgba(${r},${g},${b},0.9)`;
-        const grad = ctx.createRadialGradient(
-          it.sx - sz * 0.32, it.sy - sz * 0.32, 0, it.sx, it.sy, sz);
-        grad.addColorStop(0,
-          `rgb(${Math.min(255, r + 64)},${Math.min(255, g + 64)},${Math.min(255, b + 64)})`);
-        grad.addColorStop(1, `rgb(${r},${g},${b})`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(it.sx, it.sy, sz, 0, TAU);
-        ctx.fill();
-        ctx.restore();
-      };
-
-      // Back hemisphere (behind the Sun)
-      for (const it of placed) if (it.depth < 0) drawPlanet(it);
-
-      // ── Sun ─────────────────────────────────────────────────────────
-      const sunPulse = 0.5 + 0.5 * Math.sin(now * 0.0012);
-      const sunR = maxOrbit * 0.09 * (1 + 0.08 * sunPulse);
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunR * 6.5);
-      halo.addColorStop(0,   `rgba(255,206,96,${(0.5 * alpha).toFixed(3)})`);
-      halo.addColorStop(0.4, `rgba(255,140,50,${(0.12 * alpha).toFixed(3)})`);
-      halo.addColorStop(1,   'rgba(255,120,40,0)');
-      ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(cx, cy, sunR * 6.5, 0, TAU); ctx.fill();
-      const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunR);
-      core.addColorStop(0,    `rgba(255,252,238,${alpha.toFixed(3)})`);
-      core.addColorStop(0.55, `rgba(255,206,120,${alpha.toFixed(3)})`);
-      core.addColorStop(1,    'rgba(255,140,50,0)');
-      ctx.fillStyle = core;
-      ctx.beginPath(); ctx.arc(cx, cy, sunR, 0, TAU); ctx.fill();
-      ctx.restore();
-
-      // Front hemisphere (in front of the Sun)
-      for (const it of placed) if (it.depth >= 0) drawPlanet(it);
-    };
-
-    // ── Helpers ──────────────────────────────────────────────────────
-    const updateStarColor = () => {
-      const cs = window.getComputedStyle(document.documentElement);
-      const v = cs.getPropertyValue('--ink-rgb').trim() ||
-                cs.getPropertyValue('--text-rgb').trim();
-      if (v) starRgb = v;
-      const r = cs.getPropertyValue('--red-rgb').trim();
-      if (r) redRgb = r;
-    };
-
-    // ── Drafting callout: label, leader line, target ring ────────────
-    // The chart layer that marks features on the luminous scenes below.
-    const drawCallout = (text, tx, ty, px, py, rgb, a) => {
-      if (a < 0.02) return;
-      ctx.save();
-      ctx.font = '500 10px "Sometype Mono", monospace';
-      ctx.textBaseline = 'middle';
-      const w = ctx.measureText(text).width;
-      tx = clamp(tx, 14, W - w - 14);
-      ty = clamp(ty, 64, H - 20);
-      ctx.fillStyle = `rgba(${rgb},${a.toFixed(3)})`;
-      ctx.fillText(text, tx, ty);
-      // leader leaves from whichever text edge faces the target
-      const ex = px < tx ? tx - 6 : tx + w + 6;
-      ctx.strokeStyle = `rgba(${rgb},${(a * 0.5).toFixed(3)})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(ex, ty);
-      ctx.lineTo(px, py);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(px, py, 2.2, 0, TAU);
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    const updateTheme = () => {
-      isPersonal = document.documentElement.getAttribute('data-theme') === 'personal';
-    };
-
-    const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      stars = buildStars();
-    };
-
-    // ── Earth scene (Personal theme) ─────────────────────────────────
-    // Floating Earth (focus) + orbiting Moon + corner Sun, rendered procedurally
-    // to stay true to the wireframe/stippled "DEEP SIGNAL" aesthetic. The whole
-    // scene fades + scales in with `t` (eased Professional->Personal progress).
-    // Earth spin and Moon orbit are driven by BOTH time and scroll position, so
-    // scrolling the Personal page advances the little orbital-mechanics diagram.
-    const TAU = Math.PI * 2;
-    const smoothstep = (a, b, x) => {
-      const u = clamp((x - a) / (b - a), 0, 1);
-      return u * u * (3 - 2 * u);
-    };
-
-    // Simplified continent outlines as [lon, lat] polygons (degrees). Coarse but
-    // recognizable — densified + orthographically projected onto the rotating
-    // sphere each frame, then filled as silhouettes.
-    const LAND_SHAPES = [
-      // North America (+ Central America tail)
-      [[-158,71],[-128,70],[-100,69],[-84,70],[-82,73],[-74,68],[-64,60],[-56,52],
-       [-66,47],[-70,43],[-74,40],[-76,35],[-81,31],[-81,25],[-90,30],[-97,26],
-       [-97,20],[-92,18],[-87,16],[-83,9],[-77,8],[-83,14],[-95,16],[-105,20],
-       [-112,24],[-117,32],[-123,38],[-124,46],[-130,52],[-141,60],[-152,59],[-165,60]],
-      // Greenland
-      [[-45,60],[-30,61],[-20,70],[-22,76],[-32,82],[-46,83],[-58,79],[-54,72],[-50,64]],
-      // South America
-      [[-77,8],[-70,12],[-61,10],[-50,0],[-44,-2],[-35,-6],[-39,-14],[-48,-25],
-       [-56,-34],[-64,-41],[-69,-52],[-66,-55],[-74,-50],[-73,-41],[-71,-30],
-       [-72,-18],[-78,-8],[-81,-4],[-80,2],[-78,6]],
-      // Africa
-      [[-16,15],[-12,25],[-5,32],[2,36],[10,37],[18,32],[25,32],[33,31],[35,24],
-       [38,16],[43,11],[51,12],[49,4],[42,-1],[40,-11],[35,-22],[26,-34],[19,-35],
-       [14,-22],[9,-1],[5,5],[-4,5],[-10,6]],
-      // Madagascar
-      [[44,-16],[50,-15],[50,-25],[45,-25]],
-      // Europe
-      [[-9,37],[-9,44],[-2,49],[2,51],[8,54],[5,58],[10,63],[18,69],[28,71],[30,66],
-       [26,60],[22,56],[16,54],[14,46],[19,42],[24,41],[14,38],[3,42]],
-      // United Kingdom
-      [[-5,50],[-3,53],[-2,57],[-6,58],[-8,55],[-6,51]],
-      // Asia (India + SE Asia mainland included in the outline)
-      [[40,68],[55,71],[70,73],[95,77],[110,76],[128,73],[142,72],[160,70],[172,67],
-       [178,65],[170,60],[160,61],[150,53],[142,46],[135,44],[127,40],[122,40],
-       [122,30],[110,21],[106,11],[100,6],[96,16],[90,22],[88,21],[80,8],[77,9],
-       [73,18],[66,25],[57,26],[50,30],[44,38],[40,44],[48,52],[55,56],[46,62]],
-      // Japan
-      [[131,33],[136,35],[140,38],[142,41],[139,42],[135,35],[132,32]],
-      // SE Asia / Borneo
-      [[109,-3],[117,-2],[119,2],[114,5],[109,2],[107,0]],
-      // Australia
-      [[114,-22],[122,-18],[130,-12],[137,-12],[143,-11],[146,-18],[151,-25],
-       [150,-38],[143,-39],[136,-35],[129,-32],[122,-34],[115,-34]],
-      // New Zealand
-      [[167,-46],[171,-44],[175,-41],[178,-38],[173,-42],[168,-45]],
-    ];
-
-    const TO_RAD = Math.PI / 180;
-    const densify = (poly) => {
-      const out = [];
-      for (let i = 0; i < poly.length; i++) {
-        const a = poly[i], b = poly[(i + 1) % poly.length];
-        const steps = Math.max(1, Math.ceil(
-          Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1])) / 2.5));
-        for (let s = 0; s < steps; s++) {
-          const f = s / steps;
-          const lat = (a[1] + (b[1] - a[1]) * f) * TO_RAD;
-          out.push({
-            lon: (a[0] + (b[0] - a[0]) * f) * TO_RAD,
-            sinLat: Math.sin(lat),
-            cosLat: Math.cos(lat),
-          });
-        }
-      }
-      return out;
-    };
-    const LAND = LAND_SHAPES.map(densify);
-
-    // Major metros for the night-side "city lights" glimmer.
-    const CITIES = [
-      [-74,40],[-118,34],[-99,19],[-74,4],[-46,-23],[-58,-34],[0,51],[2,48],[-3,40],
-      [3,6],[31,30],[28,-26],[36,-1],[37,55],[29,41],[55,25],[72,19],[77,28],[116,40],
-      [121,31],[139,35],[127,37],[103,1],[106,-6],[151,-33],[100,13],
-    ].map(([lo, la]) => ({
-      lon: lo * TO_RAD,
-      sinLat: Math.sin(la * TO_RAD),
-      cosLat: Math.cos(la * TO_RAD),
-      flick: rand(0.6, 1.7),
-      phase: Math.random() * TAU,
-    }));
-
-    // Cloud decks — [lon, lat, radius as fraction of R]. They ride the same
-    // sphere as the continents but drift slightly faster, so weather reads as
-    // its own layer; the terminator overlay shades them with everything else.
-    const CLOUDS = [
-      [10, 55, 0.16], [-40, 10, 0.20], [95, -8, 0.17], [-120, 30, 0.22],
-      [60, 25, 0.13], [-70, -30, 0.18], [150, -35, 0.15], [-20, -15, 0.12],
-      [170, 15, 0.14],
-    ].map(([lo, la, r]) => ({
-      lon: lo * TO_RAD,
-      sinLat: Math.sin(la * TO_RAD),
-      cosLat: Math.cos(la * TO_RAD),
-      r,
-      drift: rand(0.5, 1.4),
-    }));
-
-    const EARTH_TILT = -0.24; // axial tilt — leans the globe for a 3D read
-    const cTilt = Math.cos(EARTH_TILT), sTilt = Math.sin(EARTH_TILT);
-
-    const MOON_CRATERS = [
-      [-0.34, -0.10, 0.16], [0.10, -0.34, 0.12], [0.30, 0.20, 0.18],
-      [-0.16, 0.36, 0.13], [0.42, -0.14, 0.09],
-    ];
-
-    // Geocentric ecliptic — the Sun + planets revolve around the Earth as the
-    // page scrolls (a "view from Earth"). All bodies ride one tilted plane so
-    // their orbits read as 3D ellipses and they pass in front of / behind the
-    // globe. `orbit` = radius as a fraction of min(W,H); `speed` scales the
-    // scroll+time revolution (inner bodies faster, Kepler-ish). The Sun is one
-    // of the bodies, and its live position drives the Earth's day/night light.
-    const SCENE_TILT = -0.42;
-    const GEO_BODIES = [
-      { orbit: 0.275, size: 2.0, speed: 2.05, color: [176, 170, 160] }, // Mercury
-      { orbit: 0.325, size: 2.6, speed: 1.55, color: [214, 188, 140] }, // Venus
-      { orbit: 0.380, size: 0,   speed: 1.15, color: [255, 210, 120], sun: true }, // Sun
-      { orbit: 0.430, size: 2.2, speed: 0.92, color: [205, 110, 70]  }, // Mars
-      { orbit: 0.475, size: 4.2, speed: 0.50, color: [206, 170, 132] }, // Jupiter
-      { orbit: 0.520, size: 3.6, speed: 0.37, color: [222, 196, 140], ring: true }, // Saturn
-      { orbit: 0.560, size: 3.0, speed: 0.27, color: [150, 214, 222] }, // Uranus
-      { orbit: 0.600, size: 2.9, speed: 0.21, color: [90, 130, 224]  }, // Neptune
-    ].map((b) => ({ ...b, phase: Math.random() * TAU }));
-
-    // Sun surface features ride a spinning, tilted sphere so the Sun visibly
-    // ROTATES on its axis (not just orbits): each spot/facula sweeps across the
-    // face and disappears around the limb. [lon, lat] in radians; `hot` = bright
-    // facula, otherwise a dark sunspot.
-    const SUN_TILT = -0.30;
-    const SUN_SPOTS = [
-      { lon: -0.6, lat:  0.28, r: 0.20, hot: false },
-      { lon:  0.25, lat: -0.36, r: 0.15, hot: false },
-      { lon:  1.0,  lat:  0.06, r: 0.12, hot: false },
-      { lon: -1.7, lat: -0.12, r: 0.16, hot: false },
-      { lon:  2.5,  lat:  0.30, r: 0.10, hot: true  },
-      { lon:  3.4,  lat: -0.22, r: 0.13, hot: true  },
-      { lon:  4.6,  lat:  0.14, r: 0.11, hot: false },
-    ].map((s) => ({ ...s, sinLat: Math.sin(s.lat), cosLat: Math.cos(s.lat) }));
-
-    // A compact orbiting Sun (used in the geocentric scene). Beyond riding its
-    // orbit, it SPINS on its axis: sunspots + faculae on a rotating sphere (time
-    // + scroll) sweep across the disc and around the limb, and the corona rays
-    // turn with it. `minWH`-scaled; depth ordering vs. the Earth handles eclipses.
-    const drawGeoSun = (now, sx, sy, minWH, ease) => {
-      const pulse = 0.5 + 0.5 * Math.sin(now * 0.0011);
-      const coreR = minWH * 0.028 * (1 + 0.06 * pulse);
-      const spin = now * 0.0006 + pageScrollY * 0.004;   // axial rotation
-      const cT = Math.cos(SUN_TILT), sT = Math.sin(SUN_TILT);
-
-      // ── Corona + rotating flare rays (additive glow) ─────────────────
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const corona = ctx.createRadialGradient(sx, sy, 0, sx, sy, coreR * 7);
-      corona.addColorStop(0,    `rgba(255,228,158,${(0.55 * ease).toFixed(3)})`);
-      corona.addColorStop(0.32, `rgba(255,150,60,${(0.18 * ease).toFixed(3)})`);
-      corona.addColorStop(0.6,  `rgba(255,107,43,${(0.06 * ease).toFixed(3)})`);
-      corona.addColorStop(1,    'rgba(255,107,43,0)');
-      ctx.fillStyle = corona;
-      ctx.beginPath(); ctx.arc(sx, sy, coreR * 7, 0, TAU); ctx.fill();
-
-      ctx.lineCap = 'round';
-      const RAYS = 12;
-      for (let i = 0; i < RAYS; i++) {
-        const a = spin * 0.7 + (i / RAYS) * TAU;
-        const flick = 0.6 + 0.4 * Math.sin(now * 0.0018 + i * 1.7);
-        const len = coreR * (1.5 + 1.4 * flick);
-        const rg = ctx.createLinearGradient(sx, sy, sx + Math.cos(a) * len, sy + Math.sin(a) * len);
-        rg.addColorStop(0, `rgba(255,200,110,${(0.16 * ease * flick).toFixed(3)})`);
-        rg.addColorStop(1, 'rgba(255,140,50,0)');
-        ctx.strokeStyle = rg;
-        ctx.lineWidth = coreR * 0.16;
-        ctx.beginPath();
-        ctx.moveTo(sx + Math.cos(a) * coreR * 0.9, sy + Math.sin(a) * coreR * 0.9);
-        ctx.lineTo(sx + Math.cos(a) * len, sy + Math.sin(a) * len);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // ── Body disc (soft-edged sphere) + rotating surface ─────────────
-      ctx.save();
-      const body = ctx.createRadialGradient(
-        sx - coreR * 0.25, sy - coreR * 0.28, 0, sx, sy, coreR);
-      body.addColorStop(0,    `rgba(255,250,232,${ease.toFixed(3)})`);
-      body.addColorStop(0.5,  `rgba(255,208,112,${ease.toFixed(3)})`);
-      body.addColorStop(0.85, `rgba(242,150,56,${ease.toFixed(3)})`);
-      body.addColorStop(1,    'rgba(220,120,40,0)');
-      ctx.fillStyle = body;
-      ctx.beginPath(); ctx.arc(sx, sy, coreR, 0, TAU); ctx.fill();
-
-      ctx.beginPath(); ctx.arc(sx, sy, coreR * 0.99, 0, TAU); ctx.clip();
-      for (const sp of SUN_SPOTS) {
-        const lon = sp.lon + spin;
-        const x = sp.cosLat * Math.sin(lon);
-        const z0 = sp.cosLat * Math.cos(lon);
-        const y0 = -sp.sinLat;
-        const y = y0 * cT - z0 * sT;
-        const z = y0 * sT + z0 * cT;
-        if (z <= 0.05) continue;                      // far side of the Sun
-        const px = sx + x * coreR, py = sy + y * coreR;
-        const r = sp.r * coreR * lerp(0.55, 1, z);    // foreshorten near the limb
-        const edge = smoothstep(0.05, 0.4, z);        // fade onto / off the limb
-        if (sp.hot) {                                 // bright facula
-          const fg = ctx.createRadialGradient(px, py, 0, px, py, r * 1.4);
-          fg.addColorStop(0, `rgba(255,255,236,${(0.5 * ease * edge).toFixed(3)})`);
-          fg.addColorStop(1, 'rgba(255,236,170,0)');
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.fillStyle = fg;
-          ctx.beginPath(); ctx.arc(px, py, r * 1.4, 0, TAU); ctx.fill();
-        } else {                                      // dark sunspot
-          const dg = ctx.createRadialGradient(px, py, 0, px, py, r);
-          dg.addColorStop(0,    `rgba(120,42,8,${(0.62 * ease * edge).toFixed(3)})`);
-          dg.addColorStop(0.55, `rgba(196,92,30,${(0.34 * ease * edge).toFixed(3)})`);
-          dg.addColorStop(1,    'rgba(196,92,30,0)');
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.fillStyle = dg;
-          ctx.beginPath(); ctx.arc(px, py, r, 0, TAU); ctx.fill();
-        }
-      }
-      // Limb darkening — sells the spherical, rotating read
-      ctx.globalCompositeOperation = 'source-over';
-      const limb = ctx.createRadialGradient(sx, sy, coreR * 0.55, sx, sy, coreR);
-      limb.addColorStop(0,    'rgba(120,52,18,0)');
-      limb.addColorStop(0.8,  'rgba(120,52,18,0)');
-      limb.addColorStop(1,    `rgba(120,52,18,${(0.45 * ease).toFixed(3)})`);
-      ctx.fillStyle = limb;
-      ctx.beginPath(); ctx.arc(sx, sy, coreR, 0, TAU); ctx.fill();
-      ctx.restore();
-
-      // ── Hot rim highlight (additive) ─────────────────────────────────
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const rim = ctx.createRadialGradient(sx, sy, coreR * 0.2, sx, sy, coreR * 1.05);
-      rim.addColorStop(0,   'rgba(255,240,200,0)');
-      rim.addColorStop(0.8, 'rgba(255,240,200,0)');
-      rim.addColorStop(1,   `rgba(255,226,150,${(0.4 * ease).toFixed(3)})`);
-      ctx.fillStyle = rim;
-      ctx.beginPath(); ctx.arc(sx, sy, coreR * 1.05, 0, TAU); ctx.fill();
-      ctx.restore();
-    };
-
-    const drawOrbitRing = (cx, cy, rx, ry, ease) => {
-      ctx.save();
-      ctx.strokeStyle = `rgba(${starRgb},${(0.07 * ease).toFixed(3)})`;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 7]);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, TAU);
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    const drawMoon = (mx, my, mr, Lx, Ly, Lz, ease, dim) => {
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const glow = ctx.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 2);
-      glow.addColorStop(0, `rgba(200,212,228,${(0.14 * ease * dim).toFixed(3)})`);
-      glow.addColorStop(1, 'rgba(200,212,228,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(mx, my, mr * 2, 0, TAU); ctx.fill();
-      ctx.restore();
-
-      ctx.save();
-      ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.clip();
-      const fx = mx + mr * 0.55 * Lx, fy = my + mr * 0.55 * Ly;
-      const body = ctx.createRadialGradient(fx, fy, mr * 0.1, mx, my, mr * 1.3);
-      body.addColorStop(0,    `rgba(200,202,210,${(ease * dim).toFixed(3)})`);
-      body.addColorStop(0.5,  `rgba(116,120,131,${(ease * dim).toFixed(3)})`);
-      body.addColorStop(0.82, `rgba(38,41,50,${(ease * dim).toFixed(3)})`);
-      body.addColorStop(1,    `rgba(7,8,13,${(ease * dim).toFixed(3)})`);
-      ctx.fillStyle = body;
-      ctx.fillRect(mx - mr, my - mr, mr * 2, mr * 2);
-
-      for (const c of MOON_CRATERS) {
-        const lit = clamp(c[0] * Lx + c[1] * Ly + 0.6 * Lz, 0, 1);
-        if (lit < 0.12) continue; // craters only catch the lit face
-        const cxp = mx + c[0] * mr, cyp = my + c[1] * mr, cr = c[2] * mr;
-        const cg = ctx.createRadialGradient(cxp, cyp, 0, cxp, cyp, cr);
-        cg.addColorStop(0, `rgba(58,61,70,${(0.38 * lit * ease * dim).toFixed(3)})`);
-        cg.addColorStop(1, 'rgba(58,61,70,0)');
-        ctx.fillStyle = cg;
-        ctx.beginPath(); ctx.arc(cxp, cyp, cr, 0, TAU); ctx.fill();
-      }
-      ctx.restore();
-    };
-
-    const drawEarth = (now, cx, cy, R, rot, Lx, Ly, Lz, ease) => {
-      // Atmospheric halo
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      const halo = ctx.createRadialGradient(cx, cy, R * 0.86, cx, cy, R * 1.2);
-      halo.addColorStop(0,    'rgba(96,176,224,0)');
-      halo.addColorStop(0.45, `rgba(120,194,236,${(0.20 * ease).toFixed(3)})`);
-      halo.addColorStop(1,    'rgba(96,176,224,0)');
-      ctx.fillStyle = halo;
-      ctx.beginPath(); ctx.arc(cx, cy, R * 1.2, 0, TAU); ctx.fill();
-      ctx.restore();
-
-      ctx.save();
-      ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.clip();
-
-      // Ocean — base sphere with gentle limb darkening (day/night added below)
-      const ocean = ctx.createRadialGradient(cx, cy, R * 0.05, cx, cy, R * 1.12);
-      ocean.addColorStop(0,    `rgba(38,104,142,${ease.toFixed(3)})`);
-      ocean.addColorStop(0.72, `rgba(28,86,120,${ease.toFixed(3)})`);
-      ocean.addColorStop(1,    `rgba(15,52,76,${ease.toFixed(3)})`);
-      ctx.fillStyle = ocean;
-      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-      // Continents — vector silhouettes projected onto the rotating sphere.
-      // Each landmass is clipped to the visible hemisphere; a span that dips behind
-      // the globe is closed along the limb ARC (the planet's edge), never a chord
-      // across the disc — so a continent can't spuriously fill the whole face as it
-      // rotates past the limb.
-      ctx.fillStyle = `rgba(86,134,92,${ease.toFixed(3)})`;
-      const norm = (a) => { a %= TAU; return a < 0 ? a + TAU : a; };
-      // Great-circle crossing (z = 0) of an edge, snapped to the limb circle.
-      const crossing = (A, B) => {
-        const t = A.z / (A.z - B.z);
-        const x = A.x + (B.x - A.x) * t;
-        const y = A.y + (B.y - A.y) * t;
-        const d = Math.hypot(x, y) || 1e-6;
-        return { x: x / d, y: y / d, ang: Math.atan2(y, x) };
-      };
-      for (const poly of LAND) {
-        const n = poly.length;
-        // Rotate + tilt every vertex onto the unit sphere; note visibility.
-        const P = new Array(n);
-        let anyVis = false, anyHid = false;
-        for (let i = 0; i < n; i++) {
-          const p = poly[i];
-          const lon = p.lon + rot;
-          const x = p.cosLat * Math.sin(lon);
-          const y0 = -p.sinLat;
-          const z0 = p.cosLat * Math.cos(lon);
-          const y = y0 * cTilt - z0 * sTilt;   // axial tilt about screen x-axis
-          const z = y0 * sTilt + z0 * cTilt;
-          P[i] = { x, y, z };
-          if (z >= 0) anyVis = true; else anyHid = true;
-        }
-        if (!anyVis) continue;                  // entirely on the far side
-
-        ctx.beginPath();
-        if (!anyHid) {                          // entirely on the near side
-          for (let i = 0; i < n; i++) {
-            const q = P[i];
-            if (i === 0) ctx.moveTo(cx + R * q.x, cy + R * q.y);
-            else         ctx.lineTo(cx + R * q.x, cy + R * q.y);
-          }
-          ctx.closePath();
-          ctx.fill();
-          continue;
-        }
-
-        // Mixed: start the walk on a visible vertex so every exit precedes its enter.
-        let s = 0;
-        while (P[s].z < 0) s++;
-
-        let started = false;
-        let exitAng = 0;
-        const emit = (sx, sy) => {
-          if (!started) { ctx.moveTo(sx, sy); started = true; }
-          else ctx.lineTo(sx, sy);
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let reduce = reduceQuery.matches;
+
+        let W = 0, H = 0, dpr = 1;
+        let stars = [];
+        let colors = readColors();
+
+        let staticT = 0;              // 1 → 0 while retuning
+        let bandY = -1;               // interference band position, -1 = idle
+        let nextBandAt = rand(5, 11); // seconds until next band
+        let clock = 0;
+        let scrollY = window.scrollY;
+        let rafId = null;
+        let last = performance.now();
+
+        // ── Service illustration state ────────────────────────────────
+        // Professional shows the supernova; Personal shows the Earth. Each
+        // fades to its target so the retune static masks a clean swap.
+        let isPersonal = document.documentElement.getAttribute('data-theme') === 'personal';
+        let snAlpha = isPersonal ? 0 : 0.5;   // supernova opacity
+        let earthAlpha = isPersonal ? 0.55 : 0;
+        let burstT = 0;                        // detonation clock 0→1
+
+        // ── Equirectangular land mask (built once) ────────────────────
+        const LMW = 360, LMH = 180;
+        let landMask = null;
+        const buildLandMask = () => {
+            try {
+                const oc = document.createElement('canvas');
+                oc.width = LMW; oc.height = LMH;
+                const octx = oc.getContext('2d');
+                if (!octx) return;
+                octx.fillStyle = '#000';
+                octx.fillRect(0, 0, LMW, LMH);
+                octx.fillStyle = '#fff';
+                for (const poly of LAND_SHAPES) {
+                    octx.beginPath();
+                    poly.forEach(([lo, la], i) => {
+                        const x = (lo + 180) / 360 * LMW;
+                        const y = (90 - la) / 180 * LMH;
+                        if (i === 0) octx.moveTo(x, y); else octx.lineTo(x, y);
+                    });
+                    octx.closePath();
+                    octx.fill();
+                }
+                const data = octx.getImageData(0, 0, LMW, LMH).data;
+                landMask = new Uint8Array(LMW * LMH);
+                for (let i = 0; i < LMW * LMH; i++) landMask[i] = data[i * 4] > 128 ? 1 : 0;
+            } catch (e) {
+                landMask = null;  // no mask → ocean world (still reads as a globe)
+            }
+        };
+        const sampleLand = (lon, lat) => {
+            if (!landMask) return 0;
+            let lonDeg = lon * 180 / Math.PI;
+            lonDeg = ((lonDeg + 180) % 360 + 360) % 360 - 180;
+            const latDeg = clamp(lat * 180 / Math.PI, -89.999, 89.999);
+            const ix = clamp(Math.floor((lonDeg + 180) / 360 * LMW), 0, LMW - 1);
+            const iy = clamp(Math.floor((90 - latDeg) / 180 * LMH), 0, LMH - 1);
+            return landMask[iy * LMW + ix];
         };
 
-        for (let k = 0; k < n; k++) {
-          const A = P[(s + k) % n];
-          const B = P[(s + k + 1) % n];
-          const aVis = A.z >= 0, bVis = B.z >= 0;
-
-          if (aVis) emit(cx + R * A.x, cy + R * A.y);
-
-          if (aVis && !bVis) {                  // leaving the near side
-            const c = crossing(A, B);
-            emit(cx + R * c.x, cy + R * c.y);
-            exitAng = c.ang;
-          } else if (!aVis && bVis) {           // returning to the near side
-            const c = crossing(A, B);
-            // A single landmass never dips behind across more than half the limb,
-            // so the hidden span is always the MINOR arc between the two crossings.
-            // (The winding direction of the boundary near a crossing is unreliable —
-            // the first hidden vertex can sit right on the exit angle — so picking the
-            // shorter arc is what keeps a continent from ever filling the whole disc.)
-            const spanCCW = norm(c.ang - exitAng);
-            const total = spanCCW <= Math.PI ? spanCCW : -(TAU - spanCCW);
-            const steps = Math.max(1, Math.ceil(Math.abs(total) / 0.12));
-            for (let t = 1; t < steps; t++) {  // sample the limb arc as segments
-              const a = exitAng + total * (t / steps);
-              emit(cx + R * Math.cos(a), cy + R * Math.sin(a));
-            }
-            emit(cx + R * c.x, cy + R * c.y);
-          }
-        }
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Cloud decks — soft white patches drifting a touch faster than the
-      // surface, foreshortened + faded toward the limb. Drawn before the
-      // terminator so night-side cloud goes dark with everything else.
-      for (const cl of CLOUDS) {
-        const lon = cl.lon + rot * 1.18 + now * 0.0000035 * cl.drift;
-        const x = cl.cosLat * Math.sin(lon);
-        const y0 = -cl.sinLat;
-        const z0 = cl.cosLat * Math.cos(lon);
-        const y = y0 * cTilt - z0 * sTilt;
-        const z = y0 * sTilt + z0 * cTilt;
-        if (z <= 0.02) continue;                 // far side
-        const px = cx + R * x, py = cy + R * y;
-        const cr = R * cl.r * lerp(0.55, 1, z);  // foreshorten near the limb
-        const ca = 0.13 * smoothstep(0.02, 0.3, z) * ease;
-        const cg = ctx.createRadialGradient(px, py, 0, px, py, cr);
-        cg.addColorStop(0, `rgba(224,236,248,${ca.toFixed(3)})`);
-        cg.addColorStop(1, 'rgba(224,236,248,0)');
-        ctx.fillStyle = cg;
-        ctx.beginPath(); ctx.arc(px, py, cr, 0, TAU); ctx.fill();
-      }
-
-      // Day/night terminator — one overlay shades land + ocean together, darkening
-      // the hemisphere facing away from the sun (centered on the sub-solar point).
-      const sox = cx + R * Lx, soy = cy + R * Ly;
-      const term = ctx.createRadialGradient(sox, soy, 0, sox, soy, R * 2.15);
-      term.addColorStop(0,    'rgba(2,7,14,0)');
-      term.addColorStop(0.42, 'rgba(2,7,14,0)');
-      term.addColorStop(0.6,  `rgba(2,7,14,${(0.45 * ease).toFixed(3)})`);
-      term.addColorStop(0.8,  `rgba(2,7,14,${(0.86 * ease).toFixed(3)})`);
-      term.addColorStop(1,    `rgba(2,7,14,${(0.97 * ease).toFixed(3)})`);
-      ctx.fillStyle = term;
-      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-      // City lights — amber glimmer on the night side only
-      ctx.globalCompositeOperation = 'lighter';
-      for (const c of CITIES) {
-        const lon = c.lon + rot;
-        const x = c.cosLat * Math.sin(lon);
-        const y0 = -c.sinLat;
-        const z0 = c.cosLat * Math.cos(lon);
-        const y = y0 * cTilt - z0 * sTilt;
-        const z = y0 * sTilt + z0 * cTilt;
-        if (z <= 0.05) continue;                 // far side
-        const lit = x * Lx + y * Ly + z * Lz;
-        if (lit > 0.05) continue;                // day side — skip
-        const flick = 0.6 + 0.4 * Math.sin(now * 0.004 * c.flick + c.phase);
-        const a = clamp(-lit * 3.5, 0.2, 1) * flick * smoothstep(0.05, 0.25, z) * ease;
-        ctx.fillStyle = `rgba(255,170,88,${(0.55 * a).toFixed(3)})`;
-        ctx.fillRect(cx + R * x, cy + R * y, R * 0.018, R * 0.018);
-      }
-
-      // Specular sun glint + bright atmospheric limb on the day side
-      ctx.globalCompositeOperation = 'lighter';
-      const gx = cx + R * 0.78 * Lx, gy = cy + R * 0.78 * Ly;
-      const glint = ctx.createRadialGradient(gx, gy, 0, gx, gy, R * 0.26);
-      glint.addColorStop(0, `rgba(196,230,255,${(0.18 * ease).toFixed(3)})`);
-      glint.addColorStop(1, 'rgba(196,230,255,0)');
-      ctx.fillStyle = glint;
-      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-      const rimx = cx + R * Lx, rimy = cy + R * Ly;
-      const rim = ctx.createRadialGradient(rimx, rimy, 0, rimx, rimy, R * 0.5);
-      rim.addColorStop(0,   `rgba(150,206,242,${(0.26 * ease).toFixed(3)})`);
-      rim.addColorStop(0.55, 'rgba(150,206,242,0)');
-      ctx.fillStyle = rim;
-      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-      ctx.restore();
-    };
-
-    const drawEarthScene = (now, t) => {
-      if (t < 0.01) return;
-      const ease = t * t * (3 - 2 * t);
-
-      // Earth sits low + centered (so the dark night side tucks under the body
-      // copy); it's shrunk from the old solo globe to leave room for the
-      // planetary system wheeling around it. Subtle mouse parallax.
-      const minWH = Math.min(W, H);
-      const R = minWH * 0.13 * lerp(0.92, 1, ease);
-      const cx = W * 0.5 + (smoothNX - 0.5) * -34;
-      const cy = H * 0.72 + (smoothNY - 0.5) * -22;
-      const ps = minWH / 900;                 // body-dot size scale
-
-      // Shared geocentric ecliptic: a single plane tilted about screen-x, so a
-      // body's flat orbit (cos a, 0, sin a) projects to a 3D ellipse and gains
-      // a depth (z>0 → in front of the globe). Revolution is driven by scroll
-      // (primary) + a slow time drift, so scrolling sweeps the whole system.
-      const cT = Math.cos(SCENE_TILT), sT = Math.sin(SCENE_TILT);
-      const place = (b) => {
-        const Rb = b.orbit * minWH;
-        const a = b.phase + pageScrollY * 0.0016 * b.speed + now * 0.00002 * b.speed;
-        const ux = Math.cos(a) * Rb, uz = Math.sin(a) * Rb;
-        return { b, sx: cx + ux, sy: cy - uz * sT, depth: uz * cT, Rb };
-      };
-      const placed = GEO_BODIES.map(place);
-
-      // Sun's live 3D offset from Earth IS the day/night light direction, so the
-      // lit hemisphere (and the city lights / Moon shading) tracks it as it
-      // wheels around — the whole reason this reads as a "view from Earth".
-      const sun = placed.find((p) => p.b.sun);
-      const svx = sun.sx - cx, svy = sun.sy - cy, svz = sun.depth;
-      const sl = Math.hypot(svx, svy, svz) || 1;
-      const Lx = svx / sl, Ly = svy / sl, Lz = svz / sl;
-
-      // ── Orbit rings — sampled + depth-shaded (far arc dims) ──────────
-      ctx.save();
-      ctx.lineCap = 'round';
-      const RSEG = 72;
-      for (const b of GEO_BODIES) {
-        const Rb = b.orbit * minWH;
-        let prev = null;
-        for (let i = 0; i <= RSEG; i++) {
-          const a = (i / RSEG) * TAU;
-          const uz = Math.sin(a) * Rb;
-          const cur = { x: cx + Math.cos(a) * Rb, y: cy - uz * sT, d: (Math.sin(a) * cT + 1) / 2 };
-          if (prev) {
-            const dd = (prev.d + cur.d) / 2;
-            ctx.globalAlpha = clamp(lerp(0.035, 0.16, dd) * ease, 0, 1);
-            ctx.strokeStyle = `rgb(${starRgb})`;
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(prev.x, prev.y);
-            ctx.lineTo(cur.x, cur.y);
-            ctx.stroke();
-          }
-          prev = cur;
-        }
-      }
-      ctx.globalAlpha = 1;
-      ctx.restore();
-
-      // ── Body painters ────────────────────────────────────────────────
-      const drawPlanetDot = (it) => {
-        const b = it.b;
-        const d = (it.depth / it.Rb + 1) / 2;     // 0 far .. 1 near
-        const sz = b.size * ps * lerp(0.8, 1.18, d);
-        const [r, g, bl] = b.color;
-        const a = clamp(lerp(0.45, 1, d) * ease, 0, 1);
-        // Saturn's ring — a tiny tilted ellipse in amber, leaning with the plane
-        if (b.ring) {
-          ctx.save();
-          ctx.globalAlpha = a * 0.85;
-          ctx.strokeStyle = 'rgba(255,196,128,0.95)';
-          ctx.lineWidth = 0.9;
-          ctx.beginPath();
-          ctx.ellipse(it.sx, it.sy, sz * 2.2, sz * 0.7, -0.4, 0, TAU);
-          ctx.stroke();
-          ctx.restore();
-        }
-        ctx.save();
-        ctx.globalAlpha = a;
-        ctx.shadowBlur = sz * 3.2;
-        ctx.shadowColor = `rgba(${r},${g},${bl},0.9)`;
-        const grad = ctx.createRadialGradient(
-          it.sx - sz * 0.32, it.sy - sz * 0.32, 0, it.sx, it.sy, sz);
-        grad.addColorStop(0,
-          `rgb(${Math.min(255, r + 64)},${Math.min(255, g + 64)},${Math.min(255, bl + 64)})`);
-        grad.addColorStop(1, `rgb(${r},${g},${bl})`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(it.sx, it.sy, sz, 0, TAU);
-        ctx.fill();
-        ctx.restore();
-      };
-      const drawBody = (it) =>
-        it.b.sun ? drawGeoSun(now, it.sx, it.sy, minWH, ease) : drawPlanetDot(it);
-
-      // ── Moon — its own near-edge-on orbit close to the Earth ─────────
-      const moonA = now * 0.00009 + pageScrollY * 0.0024;
-      const orbitR = R * 1.95;
-      const ORBIT_TILT = 1.3;
-      const oc = Math.cos(ORBIT_TILT), os = Math.sin(ORBIT_TILT);
-      const planeY = Math.sin(moonA) * orbitR;
-      const moonX = cx + Math.cos(moonA) * orbitR;
-      const moonY = cy + planeY * oc;
-      const moonDepth = planeY * os;          // > 0 → toward viewer (in front)
-      const moonFront = moonDepth > 0;
-      const moonR = R * 0.27 * (1 + 0.14 * (moonDepth / orbitR));
-
-      // ── Satellite — a low, fast orbiter with a fading track. Rides its
-      // own steeply-inclined plane so it crosses the Moon's lane; painter's
-      // order hides it behind the globe on the far half of the pass.
-      const satA = now * 0.00042 + pageScrollY * 0.005;
-      const SAT_TILT = 0.85;
-      const soc = Math.cos(SAT_TILT), sos = Math.sin(SAT_TILT);
-      const satR = R * 1.38;
-      const satPos = (a) => {
-        const py2 = Math.sin(a) * satR;
-        return { x: cx + Math.cos(a) * satR, y: cy + py2 * soc, depth: py2 * sos };
-      };
-      const sat = satPos(satA);
-      const satFront = sat.depth > 0;
-      const drawSat = () => {
-        ctx.save();
-        for (let i = 9; i >= 1; i--) {           // trail, oldest first
-          const p0 = satPos(satA - i * 0.05);
-          const p1 = satPos(satA - (i - 1) * 0.05);
-          const ta = 0.26 * (1 - i / 9) * ease;
-          if (ta < 0.01) continue;
-          ctx.strokeStyle = `rgba(${starRgb},${ta.toFixed(3)})`;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
-        }
-        ctx.globalAlpha = ease;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = `rgba(${starRgb},0.9)`;
-        ctx.fillStyle = `rgb(${starRgb})`;
-        ctx.beginPath(); ctx.arc(sat.x, sat.y, 1.3, 0, TAU); ctx.fill();
-        ctx.restore();
-      };
-
-      // ── Composite back→front: far bodies, globe + moon, near bodies ──
-      const rot = now * 0.00002 + pageScrollY * 0.0016;   // Earth's own spin
-
-      for (const it of placed) if (it.depth < 0) drawBody(it);
-
-      drawOrbitRing(cx, cy, orbitR, orbitR * oc, ease);
-      if (!moonFront) drawMoon(moonX, moonY, moonR, Lx, Ly, Lz, ease, 0.72);
-      if (!satFront) drawSat();
-      drawEarth(now, cx, cy, R, rot, Lx, Ly, Lz, ease);
-      if (satFront) drawSat();
-      if (moonFront) drawMoon(moonX, moonY, moonR, Lx, Ly, Lz, ease, 1);
-
-      for (const it of placed) if (it.depth >= 0) drawBody(it);
-
-      // ── Chart callouts — the orrery labelled like a survey plate ────
-      if (W > 720 && ease > 0.5) {
-        const la = (ease - 0.5) * 2;
-        drawCallout('TERRA — HOME',
-          cx + R * 2.3, cy - R * 1.3,
-          cx + R * 0.5, cy - R * 0.55,
-          redRgb, 0.85 * la);
-        drawCallout('LUNA',
-          moonX + moonR * 3.4, moonY - moonR * 2.6,
-          moonX + moonR * 0.7, moonY - moonR * 0.7,
-          starRgb, 0.62 * la);
-        drawCallout('SOL',
-          sun.sx + 46, sun.sy - 30,
-          sun.sx + 9, sun.sy - 9,
-          starRgb, 0.62 * la);
-      }
-    };
-
-    // ── Main render loop ─────────────────────────────────────────────
-    const draw = (now) => {
-      if (!isRunning) return;
-      const dt = clamp((now - lastTime) / 1000, 0, 0.05);
-      lastTime = now;
-
-      // Frozen clock under reduced motion — a fixed, non-zero timestamp so
-      // sin/cos phases land on a natural-looking still frame. Scroll and
-      // pointer terms keep using live values.
-      const anim = reduceMotion ? 8000 : now;
-      const sdt = reduceMotion ? 0 : dt;
-
-      smoothNX = lerp(smoothNX, mouseNX, 0.05);
-      smoothNY = lerp(smoothNY, mouseNY, 0.05);
-
-      // Ease the Professional <-> Personal crossfade (0..1).
-      personalT = reduceMotion
-        ? (isPersonal ? 1 : 0)
-        : lerp(personalT, isPersonal ? 1 : 0, 0.06);
-
-      ctx.clearRect(0, 0, W, H);
-
-      // Stars
-      ctx.fillStyle = `rgb(${starRgb})`;
-      for (const s of stars) {
-        const px = (smoothNX - 0.5) * s.parallax * W;
-        const py = (smoothNY - 0.5) * s.parallax * H;
-        const sy = s.scrollRate * pageScrollY;
-
-        const x = ((s.nx * W + px) % W + W) % W;
-        const y = ((s.ny * H + py - sy) % H + H) % H;
-
-        let opacity = s.baseOpacity;
-        if (s.twinkles) {
-          const t = anim * 0.001 * s.twinkleSpeed + s.twinklePhase;
-          opacity *= 0.55 + 0.45 * Math.sin(t);
-        }
-
-        ctx.globalAlpha = opacity;
-        ctx.beginPath();
-        ctx.arc(x, y, s.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1.0;
-
-      // Earth scene fades in over the starfield in Personal theme
-      drawEarthScene(anim, personalT);
-
-      // Supernova — the Professional-theme hero centerpiece (mirrors the
-      // Personal Earth's placement). It detonates on load and re-detonates
-      // each time you return to Professional; `burstT` advances on active
-      // frame-time so a backgrounded tab doesn't skip the blast.
-      if (isPersonal) {
-        burstT = 0;                                 // hold pre-detonation
-      } else if (reduceMotion) {
-        burstT = 1;                                 // skip the blast, show remnant
-      } else {
-        burstT = Math.min(1, burstT + dt / 2.6);    // ~2.6s explosion
-      }
-      const targetSupernovaAlpha = isPersonal ? 0 : 1;
-      const aLerp = targetSupernovaAlpha > smoothSupernovaAlpha ? 0.14 : 0.05;
-      smoothSupernovaAlpha = reduceMotion
-        ? targetSupernovaAlpha
-        : lerp(smoothSupernovaAlpha, targetSupernovaAlpha, aLerp);
-      drawSupernova(anim, sdt, smoothSupernovaAlpha, burstT);
-
-      // Mini solar-system orrery in the top-right — Professional only.
-      // It shares the supernova's alpha so it crossfades away in Personal
-      // (where the corner is occupied by the Earth scene's Sun).
-      // Disabled for now (stashed):
-      // drawMiniSolarSystem(now, smoothSupernovaAlpha);
-
-      // Spawn / draw shooting stars
-      if (!reduceMotion && Date.now() >= nextShootAt) spawnShooter();
-
-      for (let i = shooters.length - 1; i >= 0; i--) {
-        const s = shooters[i];
-        if (s.life >= s.duration) {
-          shooters.splice(i, 1);
-          continue;
-        }
-
-        s.life += dt;
-        const prog = s.life / s.duration;
-        const alpha = s.maxOpacity * Math.sin(prog * Math.PI);
-
-        const headX = s.startX + s.vx * s.life;
-        const headY = s.startY + s.vy * s.life;
-        const dist = Math.hypot(s.vx, s.vy);
-        const nx = s.vx / dist;
-        const ny = s.vy / dist;
-        const tailX = headX - nx * s.length * Math.min(prog * 3, 1);
-        const tailY = headY - ny * s.length * Math.min(prog * 3, 1);
-
-        const grad = ctx.createLinearGradient(tailX, tailY, headX, headY);
-        grad.addColorStop(0, `rgba(${starRgb},0)`);
-        grad.addColorStop(0.6, `rgba(${starRgb},${(alpha * 0.4).toFixed(3)})`);
-        grad.addColorStop(1, `rgba(${starRgb},${alpha.toFixed(3)})`);
-
-        ctx.beginPath();
-        ctx.moveTo(tailX, tailY);
-        ctx.lineTo(headX, headY);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-      }
-
-      // ── Rocket + smoke ────────────────────────────────────────────
-
-      // Spawn new rocket when timer fires — Professional theme only.
-      // In Personal mode hold the timer in the future so no rockets queue up.
-      if (isPersonal || reduceMotion) {
-        nextRocketAt = Date.now() + rand(22000, 50000);
-      } else if (Date.now() >= nextRocketAt) {
-        spawnRocket();
-      }
-
-      // Accumulate smoke — only for engine-driven craft
-      for (const r of rockets) {
-        if (!CRAFT[r.modelIdx].hasFlame) continue;
-        r.smokeTimer += dt;
-        if (r.smokeTimer >= 0.04) {
-          r.smokeTimer = 0;
-          const model = CRAFT[r.modelIdx];
-          const B = orient(r);
-          const tailX = r.x + model.scale * B.fwd.x * model.geo.tailAx;
-          const tailY = r.y + model.scale * B.fwd.y * model.geo.tailAx;
-          const tailDir = Math.atan2(-B.fwd.y, -B.fwd.x);
-          const perpAngle = tailDir + Math.PI / 2;
-
-          for (let i = 0; i < 3; i++) {
-            const spread = rand(-7, 7);
-            smokeParticles.push({
-              x: tailX + Math.cos(perpAngle) * spread + rand(-2, 2),
-              y: tailY + Math.sin(perpAngle) * spread + rand(-2, 2),
-              vx: Math.cos(tailDir) * rand(8, 22) + rand(-10, 10),
-              vy: Math.sin(tailDir) * rand(8, 22) + rand(-10, 10),
-              life: 0,
-              maxLife: rand(1.2, 2.8),
-              size: rand(1.5, 3),
-              maxSize: rand(9, 18),
+        const seedStars = () => {
+            const count = Math.round(W * H * STAR_DENSITY);
+            stars = Array.from({ length: count }, () => {
+                const roll = Math.random();
+                return {
+                    x: Math.floor(rand(0, W / CELL)),
+                    y: Math.floor(rand(0, H / CELL)),
+                    // most stars are ink; a few carry service colour
+                    tone: roll < 0.78 ? 'ink' : roll < 0.92 ? 'lab' : 'hl',
+                    base: rand(0.05, 0.3),
+                    depth: rand(0.02, 0.12),      // scroll parallax rate
+                    phase: Math.floor(rand(0, 4)),
+                    period: rand(0.7, 2.4),        // seconds per twinkle step
+                    tall: Math.random() < 0.3,     // some stars are 1×2 blocks
+                };
             });
-          }
-        }
-      }
+        };
 
-      // Guard against runaway particles
-      if (smokeParticles.length > 240) smokeParticles = smokeParticles.slice(-180);
+        const resize = () => {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            W = window.innerWidth;
+            H = window.innerHeight;
+            canvas.width = W * dpr;
+            canvas.height = H * dpr;
+            canvas.style.width = `${W}px`;
+            canvas.style.height = `${H}px`;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            seedStars();
+            if (reduce) draw(0);
+        };
 
-      // Update + draw smoke (behind rockets)
-      smokeParticles = smokeParticles.filter(p => p.life < p.maxLife);
-      for (const p of smokeParticles) {
-        p.life += dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.vx *= 0.984;
-        p.vy *= 0.984;
+        const drawStars = () => {
+            const rows = Math.ceil(H / CELL);
+            for (const s of stars) {
+                // quantized twinkle: alpha steps, never fades
+                const step = (Math.floor(clock / s.period) + s.phase) % 4;
+                const a = s.base * (step === 0 ? 0.4 : step === 2 ? 1.6 : 1);
+                const yy = (((s.y - scrollY * s.depth / CELL) % rows) + rows) % rows;
+                ctx.fillStyle = `rgba(${colors[s.tone]}, ${Math.min(a, 0.55)})`;
+                ctx.fillRect(s.x * CELL, Math.floor(yy) * CELL, CELL - 1, (s.tall ? 2 : 1) * CELL - 1);
+            }
+        };
 
-        const t = clamp(p.life / p.maxLife, 0, 1);
-        const size = lerp(p.size, p.maxSize, Math.sqrt(t));
-        const alpha = Math.pow(1 - t, 1.8) * 0.38;
-        if (alpha < 0.003) continue;
+        // Paint one mosaic block on the graphics grid (1px gutter, like the
+        // starfield, so the picture reads as assembled squares).
+        const cell = (gx, gy, rgb, a) => {
+            if (a <= 0.004) return;
+            ctx.fillStyle = `rgba(${rgb}, ${a.toFixed(3)})`;
+            ctx.fillRect(gx * MCELL, gy * MCELL, MCELL - 1, MCELL - 1);
+        };
 
-        const sg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
-        sg.addColorStop(0, `rgba(${starRgb},${alpha.toFixed(3)})`);
-        sg.addColorStop(1, `rgba(${starRgb},0)`);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-        ctx.fillStyle = sg;
-        ctx.fill();
-      }
+        // Stepped per-cell twinkle — quantised, never a smooth fade.
+        const cellTwinkle = (gx, gy) => {
+            const step = (Math.floor(clock * 1.6) + ((gx * 3 + gy * 5) & 3)) % 4;
+            return step === 0 ? 0.45 : step === 2 ? 1.3 : 1;
+        };
+        // Deterministic per-cell hash in 0..1 (for city-light / glint gating).
+        const cellHash = (gx, gy) => {
+            const n = Math.sin(gx * 12.9898 + gy * 78.233) * 43758.5453;
+            return n - Math.floor(n);
+        };
 
-      // Update + draw rockets (in front of smoke)
-      rockets = rockets.filter(r =>
-        r.x > -160 && r.x < W + 160 && r.y > -160 && r.y < H + 160
-      );
-      for (const r of rockets) {
-        r.angle += r.curve * dt;
-        r.roll += r.rollSpeed * dt;
-        r.vx = r.speed * Math.cos(r.angle);
-        r.vy = r.speed * Math.sin(r.angle);
-        r.x += r.vx * dt;
-        r.y += r.vy * dt;
-        drawRocket(r, now);
-      }
+        // ── Earth (CH 2 / LEISURE) ────────────────────────────────────
+        // A mosaic globe: green continents, blue seas, white ice caps, a
+        // dithered day/night terminator and amber city-glow on the night
+        // side. Spin + light direction are driven by scroll, so paging down
+        // turns the planet and sweeps the terminator.
+        const EARTH_TILT = -0.24;
+        const cET = Math.cos(EARTH_TILT), sET = Math.sin(EARTH_TILT);
 
-      rafId = requestAnimationFrame(draw);
-    };
+        const drawEarth = (alpha) => {
+            if (alpha < 0.01) return;
+            const minWH = Math.min(W, H);
+            const R = minWH * 0.15;
+            const cx = W * 0.5;
+            const cy = H * 0.62;
 
-    // ── Event listeners ──────────────────────────────────────────────
-    const onMouseMove = (e) => {
-      mouseNX = e.clientX / W;
-      mouseNY = e.clientY / H;
-    };
-    const onScroll = () => { pageScrollY = window.scrollY; };
-    const onResize = () => { resize(); };
-    const onVisibility = () => {
-      if (document.hidden) {
-        isRunning = false;
-        if (rafId) cancelAnimationFrame(rafId);
-      } else {
-        isRunning = true;
-        lastTime = performance.now();
-        rafId = requestAnimationFrame(draw);
-      }
-    };
+            const rot = clock * 0.05 + scrollY * 0.0016;         // planet spin
+            const lang = clock * 0.06 + scrollY * 0.0009 + 0.9;  // sub-solar longitude
+            // Light direction in view space (sun to the side, slightly high).
+            let Lx = Math.cos(lang), Ly = -0.32, Lz = Math.sin(lang);
+            const Ll = Math.hypot(Lx, Ly, Lz);
+            Lx /= Ll; Ly /= Ll; Lz /= Ll;
 
-    let themeRafId = null;
-    const themeObserver = new MutationObserver(() => {
-      if (themeRafId) cancelAnimationFrame(themeRafId);
-      themeRafId = requestAnimationFrame(() => {
-        updateStarColor();
-        updateTheme();
-      });
-    });
+            const gx0 = Math.floor((cx - R * 1.16) / MCELL);
+            const gx1 = Math.ceil((cx + R * 1.16) / MCELL);
+            const gy0 = Math.floor((cy - R * 1.16) / MCELL);
+            const gy1 = Math.ceil((cy + R * 1.16) / MCELL);
 
-    resize();
-    buildSupernovaSprites();
-    updateStarColor();
-    updateTheme();
-    // Show the supernova immediately in Professional so the load-time blast
-    // plays from its first frame rather than fading up.
-    smoothSupernovaAlpha = isPersonal ? 0 : 1;
-    rafId = requestAnimationFrame(draw);
+            for (let gy = gy0; gy <= gy1; gy++) {
+                for (let gx = gx0; gx <= gx1; gx++) {
+                    const px = gx * MCELL + MCELL / 2;
+                    const py = gy * MCELL + MCELL / 2;
+                    if (py > H + MCELL) continue;
+                    const nx = (px - cx) / R;
+                    const ny = (py - cy) / R;
+                    const rr2 = nx * nx + ny * ny;
 
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
-    document.addEventListener('visibilitychange', onVisibility);
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
+                    // Atmospheric rim just outside the disc — a thin cyan
+                    // halo, brighter on the sunlit limb.
+                    if (rr2 > 1) {
+                        if (rr2 > 1.30) continue;
+                        const rimLit = clamp(nx * Lx + ny * Ly, -1, 1);
+                        const edge = 1 - (rr2 - 1) / 0.30;
+                        const ra = (0.10 + 0.22 * Math.max(0, rimLit)) * edge;
+                        if (dither(gx, gy, ra)) cell(gx, gy, TT.cyan, alpha * 0.5 * edge);
+                        continue;
+                    }
 
-    return () => {
-      isRunning = false;
-      if (rafId) cancelAnimationFrame(rafId);
-      if (themeRafId) cancelAnimationFrame(themeRafId);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-      document.removeEventListener('visibilitychange', onVisibility);
-      if (rmQuery && rmQuery.removeEventListener) rmQuery.removeEventListener('change', onRmChange);
-      themeObserver.disconnect();
-    };
-  }, []);
+                    const nz = Math.sqrt(1 - rr2);
+                    // View-space normal → undo tilt → lon/lat.
+                    const uy = ny * cET + nz * sET;      // -sin(lat)
+                    const uz = -ny * sET + nz * cET;     // cos(lat)cos(lon)
+                    const ux = nx;                       // cos(lat)sin(lon)
+                    const lat = Math.asin(clamp(-uy, -1, 1));
+                    const lon = Math.atan2(ux, uz) - rot;
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="space-bg-canvas"
-      aria-hidden="true"
-    />
-  );
+                    const lit = nx * Lx + ny * Ly + nz * Lz;   // day/night dot
+                    const isLand = sampleLand(lon, lat);
+                    const isCap = Math.abs(lat) > 1.30;        // ~74°+ ice
+
+                    // Terminator as a dithered band around lit ≈ 0.
+                    const dayMix = clamp((lit + 0.06) / 0.34, 0, 1);
+                    const isDay = dither(gx, gy, dayMix);
+
+                    if (isDay) {
+                        let col = isCap ? TT.white : isLand ? TT.land : TT.ocean;
+                        let a = alpha * (0.72 + 0.28 * clamp(lit, 0, 1));
+                        // specular sea glint near the sub-solar point
+                        if (!isLand && !isCap && lit > 0.82 && cellHash(gx, gy) > 0.6) {
+                            col = TT.white; a = alpha * 0.85;
+                        }
+                        cell(gx, gy, col, a);
+                    } else {
+                        // Night hemisphere — a faint navy disc, with amber
+                        // city glimmer scattered on the dark land.
+                        if (isLand && lit > -0.55 && cellHash(gx, gy) > 0.82) {
+                            cell(gx, gy, TT.amber, alpha * 0.7 * cellTwinkle(gx, gy));
+                        } else if (dither(gx, gy, 0.5)) {
+                            cell(gx, gy, TT.night, alpha * 0.6);
+                        }
+                    }
+                }
+            }
+
+            drawMoon(cx, cy, R, Lx, Ly, Lz, alpha);
+        };
+
+        // A small mosaic Moon on a near-edge-on orbit, phase-lit by the same
+        // sun direction. Painter's order tucks it behind the globe on the
+        // far half of its pass.
+        const drawMoon = (ecx, ecy, R, Lx, Ly, Lz, alpha) => {
+            const a = clock * 0.15 + scrollY * 0.004;
+            const orbitR = R * 1.85;
+            const ox = Math.cos(a) * orbitR;
+            const oz = Math.sin(a) * 0.34;          // orbit tilt → depth
+            if (oz < 0) return;                     // behind the Earth: hidden
+            const mx = ecx + ox;
+            const my = ecy - Math.sin(a) * orbitR * 0.28;
+            const mr = R * 0.26;
+
+            const gx0 = Math.floor((mx - mr) / MCELL);
+            const gx1 = Math.ceil((mx + mr) / MCELL);
+            const gy0 = Math.floor((my - mr) / MCELL);
+            const gy1 = Math.ceil((my + mr) / MCELL);
+            for (let gy = gy0; gy <= gy1; gy++) {
+                for (let gx = gx0; gx <= gx1; gx++) {
+                    const px = gx * MCELL + MCELL / 2;
+                    const py = gy * MCELL + MCELL / 2;
+                    const nx = (px - mx) / mr;
+                    const ny = (py - my) / mr;
+                    const rr2 = nx * nx + ny * ny;
+                    if (rr2 > 1) continue;
+                    const nz = Math.sqrt(1 - rr2);
+                    const lit = nx * Lx + ny * Ly + nz * Lz;
+                    const dayMix = clamp((lit + 0.04) / 0.3, 0, 1);
+                    if (dither(gx, gy, dayMix)) {
+                        cell(gx, gy, TT.moon, alpha * (0.55 + 0.45 * clamp(lit, 0, 1)));
+                    } else if (dither(gx, gy, 0.35)) {
+                        cell(gx, gy, TT.night, alpha * 0.5);
+                    }
+                }
+            }
+        };
+
+        // ── Supernova (CH 1 / NEWS) ───────────────────────────────────
+        // A 3D exploding star, transmitted as mosaic graphics: an expanding
+        // ejecta shell (particles riding fixed directions on a sphere), a
+        // tilted shockwave ring that leans into an ellipse, faint polar
+        // rings (SN 1987A), a hot core and volumetric corona rays. It shares
+        // the Earth's spin + tilt language, so near-side blocks read bright
+        // and large, far-side dim — the whole burst turning as one solid.
+        // Detonates from a point on tune-in (burstT 0→1), re-detonates on
+        // each retune to CH 1.
+        const SN_TILT = -0.28;
+        const cSNT = Math.cos(SN_TILT), sSNT = Math.sin(SN_TILT);
+        let snShell = [], snRing = [], snPolar = [], snRays = [];
+
+        const snColor = (rad) =>
+            rad < 0.26 ? TT.white :
+            rad < 0.40 ? TT.yellow :
+            rad < 0.55 ? TT.amber :
+            rad < 0.68 ? TT.red :
+            rad < 0.82 ? TT.mag :
+            rad < 0.92 ? TT.violet : TT.blue;
+
+        const buildSupernova = () => {
+            snShell = [];
+            const push = (rad, baseA) => {
+                const [ux, uy, uz] = randUnit();
+                snShell.push({
+                    ux, uy, uz, rad, col: snColor(rad), baseA,
+                    big: rad < 0.5 && Math.random() < 0.4,
+                    phase: Math.floor(rand(0, 4)),
+                });
+            };
+            for (let i = 0; i < 140; i++) push(rand(0.10, 0.55), rand(0.60, 0.95)); // dense inner
+            for (let i = 0; i < 110; i++) push(rand(0.50, 0.80), rand(0.40, 0.75)); // mid shell
+            for (let i = 0; i < 80; i++)  push(rand(0.78, 1.00), rand(0.25, 0.55)); // sparse spray
+
+            snRing = [];
+            for (let i = 0; i < 72; i++) {
+                snRing.push({
+                    a: (i / 72) * TAU,
+                    knot: Math.random() < 0.16 ? rand(1.5, 2.3) : 1,   // bright hotspots
+                    phase: Math.floor(rand(0, 4)),
+                });
+            }
+
+            snPolar = [];   // the two fainter SN 1987A rings, off the equator
+            for (const sign of [-1, 1]) {
+                const beads = [];
+                for (let i = 0; i < 44; i++) beads.push({ a: (i / 44) * TAU, phase: Math.floor(rand(0, 4)) });
+                snPolar.push({ sign, beads });
+            }
+
+            snRays = [];
+            for (let i = 0; i < 11; i++) {
+                const [ux, uy, uz] = randUnit();
+                snRays.push({ ux, uy, uz, len: rand(0.55, 1.0), phase: Math.floor(rand(0, 4)) });
+            }
+        };
+
+        // Stepped twinkle keyed to a cell/bead's fixed phase.
+        const twStep = (phase) => {
+            const step = (Math.floor(clock * 1.6) + phase) % 4;
+            return step === 0 ? 0.4 : step === 2 ? 1.35 : 1;
+        };
+
+        const drawSupernova = (alpha, burst) => {
+            if (alpha < 0.01 || snShell.length === 0) return;
+            const minWH = Math.min(W, H);
+            const cx = W * 0.5;
+            const cy = H * 0.62;
+            const maxR = minWH * 0.34;
+
+            // Detonation envelope: throw the shell out from a point with a
+            // little overshoot; a bright flash decays as it flies apart.
+            const expand = burst >= 1 ? 1 : (1 - Math.pow(1 - burst, 2.4)) + Math.sin(burst * Math.PI) * 0.08;
+            const flash = Math.pow(1 - burst, 2.2);
+            const breathe = 0.5 + 0.5 * Math.sin(clock * 0.46);
+
+            // Shared 3D frame — spin about the vertical axis (clock + scroll,
+            // like the Earth) under a fixed tilt. zr > 0 → toward the viewer.
+            const spin = clock * 0.05 + scrollY * 0.001;
+            const cS = Math.cos(spin), sS = Math.sin(spin);
+            const rot3 = (ux, uy, uz) => {
+                const xr = ux * cS + uz * sS;
+                const zr0 = -ux * sS + uz * cS;
+                return { x: xr, y: uy * cSNT - zr0 * sSNT, z: uy * sSNT + zr0 * cSNT };
+            };
+
+            // Project ejecta + rings once; depth (z) sorts them front/back.
+            const parts = snShell.map((sp) => {
+                const p = rot3(sp.ux, sp.uy, sp.uz);
+                const d = sp.rad * maxR * expand;
+                return { sp, sx: cx + p.x * d, sy: cy + p.y * d, depth: p.z };
+            });
+            const ringR = maxR * 0.66 * expand * (0.9 + 0.13 * breathe);
+            const ringPts = snRing.map((bd) => {
+                const p = rot3(Math.cos(bd.a), 0, Math.sin(bd.a));
+                return { bd, sx: cx + p.x * ringR, sy: cy + p.y * ringR, depth: p.z, dim: 1, big: bd.knot > 1 };
+            });
+            const polarR = ringR * 1.5;
+            for (const ring of snPolar) {
+                for (const bd of ring.beads) {
+                    const p = rot3(Math.cos(bd.a), ring.sign * 0.42, Math.sin(bd.a));
+                    ringPts.push({ bd, sx: cx + p.x * polarR, sy: cy + p.y * polarR, depth: p.z, dim: 0.4, big: false });
+                }
+            }
+
+            const drawParticle = (pt) => {
+                if (pt.sy > H + MCELL) return;
+                const sp = pt.sp;
+                const dm = (pt.depth + 1) / 2;                 // 0 far .. 1 near
+                const a = alpha * sp.baseA * (0.22 + 0.78 * dm) * twStep(sp.phase);
+                if (a < 0.02) return;
+                const gx = Math.floor(pt.sx / MCELL), gy = Math.floor(pt.sy / MCELL);
+                cell(gx, gy, sp.col, clamp(a, 0, 0.9));
+                if (sp.big && dm > 0.55) cell(gx + 1, gy, sp.col, clamp(a * 0.8, 0, 0.9));
+            };
+            const drawBead = (rp) => {
+                if (rp.sy > H + MCELL) return;
+                const dm = (rp.depth + 1) / 2;
+                const a = alpha * (0.2 + 0.6 * dm) * rp.dim * rp.bd.knot * twStep(rp.bd.phase);
+                if (a < 0.02) return;
+                const gx = Math.floor(rp.sx / MCELL), gy = Math.floor(rp.sy / MCELL);
+                cell(gx, gy, rp.bd.knot > 1.3 ? TT.white : TT.amber, clamp(a, 0, 0.95));
+                if (rp.big) cell(gx, gy + 1, TT.amber, clamp(a * 0.7, 0, 0.9));
+            };
+
+            // ── Back hemisphere (behind the core) ──
+            for (const pt of parts) if (pt.depth < 0) drawParticle(pt);
+            for (const rp of ringPts) if (rp.depth < 0) drawBead(rp);
+
+            // ── Volumetric corona rays — 3D directions, foreshortened + dim
+            // on the far side, drawn as dithered mosaic streaks.
+            for (const ray of snRays) {
+                const p = rot3(ray.ux, ray.uy, ray.uz);
+                const dm = (p.z + 1) / 2;
+                const len = maxR * ray.len * (0.6 + 0.5 * breathe) * expand;
+                const inner = maxR * 0.14 * expand;
+                const a0 = alpha * (0.06 + 0.30 * dm) * twStep(ray.phase);
+                if (a0 < 0.02 || len <= inner) continue;
+                const steps = Math.max(2, Math.floor((len - inner) / MCELL));
+                for (let s = 1; s <= steps; s++) {
+                    const f = s / steps;
+                    const rr = inner + (len - inner) * f;
+                    const sx = cx + p.x * rr, sy = cy + p.y * rr;
+                    if (sy > H + MCELL) continue;
+                    const gx = Math.floor(sx / MCELL), gy = Math.floor(sy / MCELL);
+                    if (dither(gx, gy, 0.5)) cell(gx, gy, f < 0.4 ? TT.yellow : f < 0.7 ? TT.amber : TT.red, a0 * (1 - f * 0.85));
+                }
+            }
+
+            // ── Hot core — a glowing sphere disc, brightest at centre ──
+            const coreR = maxR * 0.15 + minWH * 0.1 * flash;
+            const gx0 = Math.floor((cx - coreR) / MCELL), gx1 = Math.ceil((cx + coreR) / MCELL);
+            const gy0 = Math.floor((cy - coreR) / MCELL), gy1 = Math.ceil((cy + coreR) / MCELL);
+            for (let gy = gy0; gy <= gy1; gy++) {
+                for (let gx = gx0; gx <= gx1; gx++) {
+                    const px = gx * MCELL + MCELL / 2, py = gy * MCELL + MCELL / 2;
+                    if (py > H + MCELL) continue;
+                    const nx = (px - cx) / coreR, ny = (py - cy) / coreR;
+                    const rr2 = nx * nx + ny * ny;
+                    if (rr2 > 1) continue;
+                    if (rr2 > 0.7 && !dither(gx, gy, 1 - (rr2 - 0.7) / 0.3)) continue;  // stipple the rim
+                    const col = rr2 < 0.34 ? TT.white : rr2 < 0.66 ? TT.yellow : TT.amber;
+                    cell(gx, gy, col, clamp(alpha * (0.92 - 0.35 * rr2), 0, 0.95));
+                }
+            }
+
+            // ── Expanding shockwave — a tilted ring racing outward on blast
+            if (burst < 0.999) {
+                const shR = burst * maxR * 1.15;
+                const sa = Math.pow(1 - burst, 1.6) * 0.6 * alpha;
+                if (sa > 0.02) {
+                    for (let i = 0; i < 96; i++) {
+                        const ang = (i / 96) * TAU;
+                        const p = rot3(Math.cos(ang), 0, Math.sin(ang));
+                        const sx = cx + p.x * shR, sy = cy + p.y * shR;
+                        if (sy > H + MCELL) continue;
+                        const gx = Math.floor(sx / MCELL), gy = Math.floor(sy / MCELL);
+                        if (dither(gx, gy, 0.7)) cell(gx, gy, TT.white, sa * (0.4 + 0.6 * (p.z + 1) / 2));
+                    }
+                }
+            }
+
+            // ── Front hemisphere (in front of the core) ──
+            for (const rp of ringPts) if (rp.depth >= 0) drawBead(rp);
+            for (const pt of parts) if (pt.depth >= 0) drawParticle(pt);
+        };
+
+        const drawBand = () => {
+            if (bandY < 0) return;
+            const bandH = 26;
+            const top = bandY * (H + bandH * 2) - bandH;
+            for (let i = 0; i < 90; i++) {
+                const w = rand(6, 60);
+                const x = rand(-10, W);
+                const y = top + rand(0, bandH);
+                ctx.fillStyle = `rgba(${colors.ink}, ${rand(0.03, 0.14)})`;
+                ctx.fillRect(x, y, w, 2);
+            }
+        };
+
+        const drawStatic = () => {
+            if (staticT <= 0) return;
+            const cols = Math.ceil(W / (CELL * 2));
+            const rows = Math.ceil(H / (CELL * 2));
+            const coverage = staticT * 0.5;
+            const palette = [colors.ink, colors.ink, colors.lab, colors.hl, colors.bar];
+            for (let i = 0, n = cols * rows * coverage; i < n; i++) {
+                const c = palette[(Math.random() * palette.length) | 0];
+                ctx.fillStyle = `rgba(${c}, ${rand(0.1, 0.7) * staticT})`;
+                ctx.fillRect(
+                    ((Math.random() * cols) | 0) * CELL * 2,
+                    ((Math.random() * rows) | 0) * CELL * 2,
+                    CELL * 2 - 1, CELL * 2 - 1
+                );
+            }
+        };
+
+        const draw = (dt) => {
+            // Reduced motion: snap to settled targets so the single, static
+            // frame shows the remnant + a fully-lit scene, no in-flight blast.
+            if (reduce) {
+                snAlpha = isPersonal ? 0 : 0.5;
+                earthAlpha = isPersonal ? 0.55 : 0;
+                burstT = 1;
+            }
+
+            ctx.clearRect(0, 0, W, H);
+            drawStars();
+
+            // Service illustrations (both early-return when faded out, so the
+            // crossfade dissolves one into the other).
+            drawEarth(earthAlpha);
+            drawSupernova(snAlpha, burstT);
+
+            if (!reduce) {
+                if (bandY >= 0) {
+                    bandY += dt / 1.3;
+                    if (bandY > 1) { bandY = -1; nextBandAt = clock + rand(6, 14); }
+                } else if (clock > nextBandAt) {
+                    bandY = 0;
+                }
+                drawBand();
+
+                if (staticT > 0) staticT = Math.max(0, staticT - dt / 0.7);
+                drawStatic();
+            }
+        };
+
+        const tick = (now) => {
+            const dt = Math.min((now - last) / 1000, 0.1);
+            last = now;
+            clock += dt;
+            scrollY = window.scrollY;
+
+            // Ease the illustration crossfade + advance the detonation.
+            snAlpha = lerp(snAlpha, isPersonal ? 0 : 0.5, 0.09);
+            earthAlpha = lerp(earthAlpha, isPersonal ? 0.55 : 0, 0.09);
+            if (!isPersonal) burstT = Math.min(1, burstT + dt / 2.6);
+
+            draw(dt);
+            rafId = requestAnimationFrame(tick);
+        };
+
+        // Retune: re-read service colours, swap the illustration, re-detonate
+        // the nova, and blast static over the cut.
+        const mo = new MutationObserver(() => {
+            colors = readColors();
+            isPersonal = document.documentElement.getAttribute('data-theme') === 'personal';
+            if (!isPersonal) burstT = 0;
+            if (!reduce) staticT = 1;
+            if (reduce) draw(0);
+        });
+        mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        const onMotionChange = (e) => {
+            reduce = e.matches;
+            if (reduce) {
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = null;
+                staticT = 0;
+                bandY = -1;
+                draw(0);
+            } else if (!rafId) {
+                last = performance.now();
+                rafId = requestAnimationFrame(tick);
+            }
+        };
+        if (reduceQuery.addEventListener) reduceQuery.addEventListener('change', onMotionChange);
+
+        const onScroll = () => { if (reduce) { scrollY = window.scrollY; draw(0); } };
+
+        window.addEventListener('resize', resize, { passive: true });
+        window.addEventListener('scroll', onScroll, { passive: true });
+        buildLandMask();
+        buildSupernova();
+        resize();
+        if (!reduce) rafId = requestAnimationFrame(tick);
+
+        return () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            mo.disconnect();
+            if (reduceQuery.removeEventListener) reduceQuery.removeEventListener('change', onMotionChange);
+            window.removeEventListener('resize', resize);
+            window.removeEventListener('scroll', onScroll);
+        };
+    }, []);
+
+    return <canvas ref={canvasRef} className="space-bg-canvas" aria-hidden="true" />;
 };
 
 export default SpaceBackground;

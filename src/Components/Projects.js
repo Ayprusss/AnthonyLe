@@ -56,7 +56,7 @@ const Projects = () => {
             >
                 <SectionHeader
                     title="Projects."
-                    meta={`${projects.length} details · ${projects.filter(p => p.live).length} as built`}
+                    meta={`${projects.length} programmes · ${projects.filter(p => p.live).length} on air`}
                 />
             </motion.div>
 
@@ -74,8 +74,8 @@ const Projects = () => {
                             <span className="detail-bubble" aria-hidden="true">
                                 {DETAIL_LETTERS[idx]}
                             </span>
-                            <span className="detail-caption">DETAIL {DETAIL_LETTERS[idx]}</span>
-                            {project.live && <span className="detail-asbuilt">AS BUILT</span>}
+                            <span className="detail-caption">PROG. {DETAIL_LETTERS[idx]}</span>
+                            {project.live && <span className="detail-asbuilt">ON AIR</span>}
                             <span className="detail-top-fill" />
                             <div className="detail-links">
                                 {project.github && (

@@ -111,8 +111,8 @@ const Hobbies = () => {
             >
                 <SectionHeader
                     title="Hobbies."
-                    meta={`appendix figures · ${total} sheets`}
-                    subtitle="What I get up to when I'm away from the keyboard — flip through the figure sheets."
+                    meta={`${total} programmes · after hours`}
+                    subtitle="What I get up to when I'm away from the keyboard — flip through the channels."
                 />
             </motion.div>
 
@@ -166,7 +166,7 @@ const Hobbies = () => {
                             }}
                         >
                             <div className="fig-sheet-band">
-                                <span className="fig-no">FIG. H-{pad(index + 1)}</span>
+                                <span className="fig-no">CH 7{pad(index + 1)}</span>
                                 <span className="fig-of">/ {pad(total)}</span>
                                 <span className="fig-band-fill" />
                                 <span className="fig-tag">{hobby.tag}</span>

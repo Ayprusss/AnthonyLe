@@ -14,9 +14,9 @@ import Hobbies from '../../Components/Hobbies';
 import Contact from '../../Components/Contact';
 import SpaceBackground from '../../Components/SpaceBackground';
 
-// Section sets per print. Hero (cover sheet) and Contact (transmittal)
-// bookend both sets; slots stay position-aligned so sheet numbers 01–06
-// never shift between prints.
+// Page sets per channel. Hero (page 100 index) and Contact (page 600)
+// bookend both services; slots stay position-aligned so page numbers
+// 100–600 never shift between channels.
 const SECTIONS = {
     professional: [
         { id: 'skills',       label: 'skills',       Component: Skills },
@@ -41,16 +41,26 @@ const Home = () => {
         }
     });
 
-    const crossHRef = useRef(null);
-    const crossVRef = useRef(null);
-    const bubbleRef = useRef(null);
+    // Brief hold-roll glitch while the receiver retunes between channels.
+    const [tuning, setTuning] = useState(false);
+    const firstRender = useRef(true);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         try { localStorage.setItem('site-theme', theme); } catch (_) {}
     }, [theme]);
 
-    // Re-observe sections whenever the print swaps the rendered set.
+    useEffect(() => {
+        if (firstRender.current) {
+            firstRender.current = false;
+            return;
+        }
+        setTuning(true);
+        const id = setTimeout(() => setTuning(false), 650);
+        return () => clearTimeout(id);
+    }, [theme]);
+
+    // Re-observe sections whenever the channel swaps the rendered set.
     useEffect(() => {
         document.documentElement.setAttribute('data-section', 'hero');
         const observer = new IntersectionObserver((entries) => {
@@ -64,87 +74,18 @@ const Home = () => {
         return () => observer.disconnect();
     }, [theme]);
 
-    // Drafting crosshair: hairlines track instantly, the detail bubble lags.
-    useEffect(() => {
-        const h = crossHRef.current;
-        const v = crossVRef.current;
-        const bubble = bubbleRef.current;
-        if (!h || !v || !bubble) return;
-
-        let mouseX = 0, mouseY = 0;
-        let bubX = 0, bubY = 0;
-        let rafId = null;
-
-        const onMove = (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            h.style.transform = `translateY(${mouseY}px)`;
-            v.style.transform = `translateX(${mouseX}px)`;
-        };
-
-        const lerp = (a, b, t) => a + (b - a) * t;
-
-        const tick = () => {
-            bubX = lerp(bubX, mouseX, 0.2);
-            bubY = lerp(bubY, mouseY, 0.2);
-            bubble.style.transform = `translate(${bubX}px, ${bubY}px)`;
-            rafId = requestAnimationFrame(tick);
-        };
-
-        document.addEventListener('mousemove', onMove);
-        rafId = requestAnimationFrame(tick);
-
-        const onEnter = () => bubble.classList.add('hover');
-        const onLeave = () => bubble.classList.remove('hover');
-
-        const attach = () => {
-            document.querySelectorAll('a, button').forEach(el => {
-                el.removeEventListener('mouseenter', onEnter);
-                el.removeEventListener('mouseleave', onLeave);
-                el.addEventListener('mouseenter', onEnter);
-                el.addEventListener('mouseleave', onLeave);
-            });
-        };
-
-        attach();
-        const mo = new MutationObserver(attach);
-        mo.observe(document.body, { childList: true, subtree: true });
-
-        return () => {
-            document.removeEventListener('mousemove', onMove);
-            cancelAnimationFrame(rafId);
-            mo.disconnect();
-        };
-    }, []);
-
     return (
         <MotionConfig reducedMotion="user">
-        <div className="home-container">
-            {/* Drafting crosshair cursor */}
-            <div className="crosshair-h" ref={crossHRef} aria-hidden="true" />
-            <div className="crosshair-v" ref={crossVRef} aria-hidden="true" />
-            <div className="cursor-bubble" ref={bubbleRef} aria-hidden="true">
-                <div className="cursor-bubble-inner" />
-            </div>
-
+        <div className={`home-container${tuning ? ' is-tuning' : ''}`}>
             {/* Background stack */}
             <div className="base-bg" aria-hidden="true" />
             <SpaceBackground />
 
-            {/* Paper-tooth filter */}
-            <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
-                <filter id="grainFilter">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-                    <feColorMatrix type="saturate" values="0" />
-                </filter>
-            </svg>
+            {/* CRT glass: scanlines, aperture grille, vignette */}
             <div className="grain-overlay" aria-hidden="true" />
 
-            {/* Fixed drawing-sheet frame */}
-            <div className="sheet-frame" aria-hidden="true">
-                <span className="sheet-frame-tick top" />
-                <span className="sheet-frame-tick bottom" />
-            </div>
+            {/* Receiver bezel — rounded corner shadows over everything */}
+            <div className="crt-bezel" aria-hidden="true" />
 
             <Navbar
                 theme={theme}
