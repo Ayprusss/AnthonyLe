@@ -13,6 +13,21 @@ const projects = [
         github: 'https://github.com/Ayprusss/Gladius',
     },
     {
+        title: 'dejavu',
+        description:
+            'A full webstore project mocking "Vuja De" — a complete e-commerce experience with a dedicated backend and frontend, featuring product browsing, and a modern storefront UI.',
+        tech: ['JavaScript', 'CSS', 'HTML', 'Express', 'Supabase', 'Vite.js', 'Stripe'],
+        github: 'https://github.com/Ayprusss/dejavu',
+    },
+    {
+        title: '"PPPTAILORINGCOURIER"',
+        description:
+            'A UI-focused webstore mock built for SEG 3125, featuring a tailoring courier service interface with an integrated chatbot, responsive design, and a polished user experience.',
+        tech: ['JavaScript', 'CSS', 'HTML', 'React'],
+        github: 'https://github.com/Ayprusss/PPPTAILORINGCOURIER',
+        live: 'https://ppptailoringcourier.vercel.app/',
+    },
+    {
         title: 'Crux',
         description: 'A full-stack web application that serves as a comprehensive climbing map platform, allowing users to discover, share, and manage climbing locations worldwide.',
         tech: ['Next.js', 'Tailwind CSS', 'MapLibre GL', 'Supabase', 'PostGIS', 'TypeScript', 'HTML'],
