@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { MotionConfig } from 'framer-motion';
 import './Home.css';
 import '../../Components/GrainOverlay.css';
+import BootScene from '../../Components/BootScene';
 import Navbar from '../../Components/Navbar';
 import Hero from '../../Components/Hero';
 import Skills from '../../Components/Skills';
@@ -32,6 +33,17 @@ const SECTIONS = {
     ],
 };
 
+// Play the sign-on once per session, and never for reduced-motion viewers.
+// The matchMedia gate also keeps the scene out of jsdom (no matchMedia),
+// so the section tests render the service directly.
+const shouldSignOn = () => {
+    try {
+        if (sessionStorage.getItem('ch741-signed-on')) return false;
+    } catch (_) {}
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
+
 const Home = () => {
     const [theme, setTheme] = useState(() => {
         try {
@@ -44,6 +56,25 @@ const Home = () => {
     // Brief hold-roll glitch while the receiver retunes between channels.
     const [tuning, setTuning] = useState(false);
     const firstRender = useRef(true);
+
+    // Receiver sign-on overlay before the service appears.
+    const [booting, setBooting] = useState(shouldSignOn);
+
+    const handleSignOnDone = useCallback(() => {
+        try { sessionStorage.setItem('ch741-signed-on', '1'); } catch (_) {}
+        setBooting(false);
+        setTuning(true);   // roll the service in as it locks
+        window.setTimeout(() => setTuning(false), 650);
+    }, []);
+
+    // Freeze the page behind the sign-on so nothing scrolls under it.
+    useEffect(() => {
+        if (!booting) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        window.scrollTo(0, 0);
+        return () => { document.body.style.overflow = prev; };
+    }, [booting]);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
@@ -86,6 +117,8 @@ const Home = () => {
 
             {/* Receiver bezel — rounded corner shadows over everything */}
             <div className="crt-bezel" aria-hidden="true" />
+
+            {booting && <BootScene onComplete={handleSignOnDone} />}
 
             <Navbar
                 theme={theme}
