@@ -1,0 +1,301 @@
+/* ══════════════════════════════════════════════════════════════════
+   CH·741 SIGN·ON — receiver warm-up + decoder self-test, on the tube.
+   Same phosphor, fonts and palette as the service it hands off to.
+   ══════════════════════════════════════════════════════════════════ */
+
+.boot-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 60;                       /* above bezel (40) and grain (10) */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.4rem;
+    background: var(--screen);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    overflow: hidden;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Scanlines + aperture-grille tint — same glass as the rest of the set. */
+.boot-scene::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.28) 0px,
+            rgba(0, 0, 0, 0.28) 1px,
+            transparent 1px,
+            transparent 3px);
+    mix-blend-mode: multiply;
+    z-index: 3;
+}
+
+/* Vignette — the curve of the tube. */
+.boot-scene::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.7) 100%);
+    z-index: 2;
+}
+
+/* ── CRT power-on: a bright line snaps open and blooms to full raster ── */
+.boot-flash {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 60%;
+    transform: translateY(-50%);
+    background:
+        radial-gradient(60% 100% at 50% 50%,
+            var(--ink-strong) 0%,
+            rgba(var(--ink-rgb), 0.6) 40%,
+            transparent 78%);
+    animation: boot-power 0.6s ease-out forwards;
+    z-index: 4;
+}
+
+@keyframes boot-power {
+    0%   { transform: translateY(-50%) scaleY(0.006); opacity: 0; filter: brightness(2.4); }
+    10%  { transform: translateY(-50%) scaleY(0.01);  opacity: 1; }
+    45%  { transform: translateY(-50%) scaleY(1);     opacity: 0.92; }
+    70%  { opacity: 0.4; }
+    100% { transform: translateY(-50%) scaleY(1);     opacity: 0; }
+}
+
+/* ── Terminal column ── */
+.boot-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: boot-inner-in 0.28s steps(3, end) both;
+}
+
+@keyframes boot-inner-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.boot-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.boot-brand {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 12vw, 5.2rem);
+    line-height: 0.85;
+    color: var(--hl);
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 22px rgba(var(--hl-rgb), 0.4);
+}
+
+.boot-sub {
+    font-size: 0.66rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+}
+
+.boot-rule {
+    height: 2px;
+    background: var(--bar);
+    transition: background 0.5s ease;
+}
+
+/* ── Self-test log ── */
+.boot-log {
+    display: flex;
+    flex-direction: column;
+    gap: 0.42rem;
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    min-height: 12.5rem;             /* reserve height so the block doesn't jump */
+}
+
+.boot-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+    white-space: nowrap;
+    animation: boot-line-in 0.12s steps(2, end) both;
+}
+
+@keyframes boot-line-in {
+    from { opacity: 0; transform: translateX(-4px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.boot-row-k {
+    color: var(--ink);
+    text-transform: uppercase;
+}
+
+.boot-row-k::before {
+    content: '> ';
+    color: var(--lab);
+}
+
+.boot-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--ink-faint);
+    transform: translateY(-0.3em);
+    min-width: 1.2rem;
+}
+
+.boot-row-v {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+.boot-row-v.v-ok  { color: var(--grn); }
+.boot-row-v.v-key { color: var(--lab); }
+
+/* ── Page-acquire line: the teletext header counter rolling to 100 ── */
+.boot-acquire {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--lab);
+}
+
+.boot-count {
+    color: var(--hl);
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+}
+
+.boot-cursor {
+    width: 0.55rem;
+    height: 1rem;
+    background: var(--hl);
+    animation: dot-pulse 0.9s steps(1, end) infinite;
+}
+
+/* ── Signal lock ── */
+.boot-lock {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.18s steps(2, end);
+}
+.boot-lock.is-on { opacity: 1; }
+
+.boot-lock-tag {
+    background: var(--grn);
+    color: var(--screen);
+    padding: 0.22rem 0.55rem;
+    font-weight: 600;
+}
+.boot-lock-svc { color: var(--ink-dim); }
+
+/* ── EBU colour-bar strip — flashes bright on lock ── */
+.boot-bars {
+    display: flex;
+    height: 0.5rem;
+    opacity: 0.14;
+    transition: opacity 0.15s steps(2, end), height 0.15s steps(2, end);
+}
+.boot-bars.is-on { opacity: 1; height: 0.85rem; }
+
+.boot-bar { flex: 1; }
+.bar-white  { background: rgb(var(--ink-rgb)); }
+.bar-yellow { background: var(--hl); }
+.bar-cyan   { background: var(--lab); }
+.bar-grn    { background: var(--grn); }
+.bar-mag    { background: var(--mag); }
+.bar-red    { background: var(--red); }
+.bar-bar    { background: var(--bar); }
+
+/* ── Skip hint ── */
+.boot-hint {
+    position: absolute;
+    bottom: 1.6rem;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    text-align: center;
+    font-size: 0.6rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    animation: dot-pulse 1.4s steps(1, end) infinite;
+}
+
+/* ── Static hand-off ── */
+.boot-static {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0;
+    background:
+        repeating-linear-gradient(0deg,
+            rgba(var(--ink-rgb), 0.5) 0px,
+            rgba(var(--ink-rgb), 0.5) 1px,
+            transparent 1px, transparent 2px),
+        repeating-linear-gradient(90deg,
+            rgba(var(--ink-rgb), 0.4) 0px,
+            rgba(var(--ink-rgb), 0.4) 1px,
+            transparent 1px, transparent 3px);
+    background-size: 3px 3px, 4px 4px;
+}
+
+.boot-scene.phase-exit { animation: boot-exit 0.48s steps(6, end) forwards; }
+.boot-scene.phase-exit .boot-static { animation: boot-snow 0.48s steps(4, end) forwards; }
+
+@keyframes boot-exit {
+    0%   { opacity: 1; }
+    72%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes boot-snow {
+    0%   { opacity: 0; background-position: 0 0, 0 0; }
+    30%  { opacity: 0.85; background-position: 2px -7px, -5px 3px; }
+    60%  { opacity: 0.7;  background-position: -3px 5px, 4px -6px; }
+    100% { opacity: 0;    background-position: 1px 9px, -2px 4px; }
+}
+
+@media (max-width: 560px) {
+    .boot-log { font-size: 0.68rem; min-height: 11rem; }
+    .boot-sub { flex-basis: 100%; }
+}
+
+/* Reduced motion — belt & braces; Home also bypasses the scene entirely. */
+@media (prefers-reduced-motion: reduce) {
+    .boot-scene,
+    .boot-flash,
+    .boot-inner,
+    .boot-row,
+    .boot-cursor,
+    .boot-hint,
+    .boot-scene.phase-exit,
+    .boot-scene.phase-exit .boot-static {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
