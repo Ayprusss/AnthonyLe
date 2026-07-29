@@ -72,15 +72,53 @@
             rgba(200, 255, 212, 0.85) 34%,
             rgba(53, 255, 91, 0.5) 62%,
             transparent 100%);
-    animation: boot-power 0.48s ease-out forwards;
+    animation: boot-power 0.62s ease-out forwards;
 }
 
+/* The set doesn't come up in one go: the gun strikes faintly, drops back
+   for a beat, then blooms open into the full raster. */
 @keyframes boot-power {
-    0%   { opacity: 0;   transform: scaleY(0.012); filter: brightness(2.6); }
-    8%   { opacity: 1;   transform: scaleY(0.02); }
-    38%  { opacity: 1;   transform: scaleY(1); }
-    70%  { opacity: 0.55; }
-    100% { opacity: 0;   transform: scaleY(1); }
+    0%   { opacity: 0;    transform: scaleY(0.012); filter: brightness(2.6); }
+    7%   { opacity: 0.5;  transform: scaleY(0.014); }
+    16%  { opacity: 0.08; transform: scaleY(0.012); }
+    28%  { opacity: 1;    transform: scaleY(0.03); }
+    56%  { opacity: 1;    transform: scaleY(1); }
+    80%  { opacity: 0.5; }
+    100% { opacity: 0;    transform: scaleY(1); }
+}
+
+/* ── Dead tube: no signal, no raster flicker, just the dot burning off ── */
+.boot-scene.phase-dark {
+    background: #000;
+    animation: none;
+}
+
+/* Nothing on the glass can be lit while the set is off. */
+.boot-scene.phase-dark::before,
+.boot-scene.phase-dark::after,
+.boot-scene.phase-dark .boot-hint {
+    opacity: 0;
+}
+
+.boot-afterglow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 5;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px 0 0 -2.5px;
+    border-radius: 50%;
+    background: var(--fg-hot);
+    box-shadow: 0 0 10px 3px var(--glow);
+    animation: boot-afterglow 0.85s ease-out forwards;
+}
+
+@keyframes boot-afterglow {
+    0%   { opacity: 0.95; transform: scale(1); }
+    30%  { opacity: 0.4;  transform: scale(0.7); }
+    65%  { opacity: 0.12; transform: scale(0.4); }
+    100% { opacity: 0;    transform: scale(0.2); }
 }
 
 /* ── CRT power-off: the picture collapses to a bright line, then a dot ── */
@@ -251,6 +289,7 @@
 @media (prefers-reduced-motion: reduce) {
     .boot-scene,
     .boot-flash,
+    .boot-afterglow,
     .boot-line,
     .boot-cursor,
     .boot-hint,
