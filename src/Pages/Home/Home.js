@@ -91,8 +91,10 @@ const Home = () => {
         return () => clearTimeout(id);
     }, [theme]);
 
-    // Re-observe sections whenever the channel swaps the rendered set.
+    // Re-observe sections whenever the channel swaps the rendered set, or
+    // once the sign-on completes and the service mounts.
     useEffect(() => {
+        if (booting) return;
         document.documentElement.setAttribute('data-section', 'hero');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
@@ -103,7 +105,7 @@ const Home = () => {
 
         document.querySelectorAll('main > div[id]').forEach(s => observer.observe(s));
         return () => observer.disconnect();
-    }, [theme]);
+    }, [theme, booting]);
 
     return (
         <MotionConfig reducedMotion="user">
@@ -120,19 +122,25 @@ const Home = () => {
 
             {booting && <BootScene onComplete={handleSignOnDone} />}
 
-            <Navbar
-                theme={theme}
-                links={SECTIONS[theme]}
-                onToggleTheme={() => setTheme(t => t === 'professional' ? 'personal' : 'professional')}
-            />
+            {/* The service — navbar and pages — mounts only once the tube
+                finishes signing on, so nothing shows over the cold boot. */}
+            {!booting && (
+                <>
+                    <Navbar
+                        theme={theme}
+                        links={SECTIONS[theme]}
+                        onToggleTheme={() => setTheme(t => t === 'professional' ? 'personal' : 'professional')}
+                    />
 
-            <main>
-                <div id="hero"><Hero sections={SECTIONS[theme]} /></div>
-                {SECTIONS[theme].map(({ id, Component }) => (
-                    <div id={id} key={id}><Component /></div>
-                ))}
-                <div id="contact"><Contact /></div>
-            </main>
+                    <main>
+                        <div id="hero"><Hero sections={SECTIONS[theme]} /></div>
+                        {SECTIONS[theme].map(({ id, Component }) => (
+                            <div id={id} key={id}><Component /></div>
+                        ))}
+                        <div id="contact"><Contact /></div>
+                    </main>
+                </>
+            )}
         </div>
         </MotionConfig>
     );
