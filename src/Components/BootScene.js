@@ -5,9 +5,11 @@ import './BootScene.css';
 // Linux-style power cycle on a CRT. Two modes:
 //   · cold   — first sign-on: power-on flash → kernel log → service.
 //   · reboot — channel switch: shutdown log → CRT power-off collapse
-//              (theme swaps here, in the dark) → power-on into the other
-//              service. Its own green-on-black device, independent of the
-//              channel the site is tuned to. Any key/click skips.
+//              (theme swaps here, in the dark) → a dead beat while the
+//              phosphor dot burns off and the tube sits cold → power-on
+//              into the other service. Its own green-on-black device,
+//              independent of the channel the site is tuned to.
+//              Any key/click skips.
 
 // Boot log (power-on). `tag` is the leading bracket/label, `body` the message.
 const LINES = [
@@ -48,9 +50,10 @@ const SHUTDOWN_LINES = [
 ];
 
 const SHUT_MS     = 74;    // per shutdown line
-const SHUT_HOLD   = 220;   // pause on "Powering off." before the collapse
+const SHUT_HOLD   = 420;   // pause on "Powering off." before the collapse
 const POWEROFF_MS = 600;   // CRT collapse to a dot
-const WARMUP_MS   = 480;   // full-screen power-on flash
+const DARK_MS     = 1000;  // tube dead: dot afterglow burns off, then black
+const WARMUP_MS   = 620;   // power-on flash — strike, beat, then full bloom
 const LINE_MS     = 58;    // per boot-log line
 const PROG_FROM   = 40;    // loading bar starts partway
 const PROG_MS     = 20;    // per loading-bar step
@@ -113,9 +116,18 @@ const BootScene = ({ mode = 'cold', onSwap, onComplete }) => {
     useEffect(() => {
         if (phase !== 'poweroff') return;
         doSwap();
-        const id = setTimeout(() => setPhase('warmup'), POWEROFF_MS);
+        const id = setTimeout(() => setPhase('dark'), POWEROFF_MS);
         return () => clearTimeout(id);
     }, [phase, doSwap]);
+
+    // Dead tube — the collapsed dot bleeds off and nothing lights for a
+    // beat before the set strikes again. Without this the power-off and
+    // power-on flashes run together and read as one blink.
+    useEffect(() => {
+        if (phase !== 'dark') return;
+        const id = setTimeout(() => setPhase('warmup'), DARK_MS);
+        return () => clearTimeout(id);
+    }, [phase]);
 
     // Power-on flash → begin the boot log.
     useEffect(() => {
@@ -184,6 +196,9 @@ const BootScene = ({ mode = 'cold', onSwap, onComplete }) => {
 
             {/* CRT power-off: picture collapses to a line, then a dot */}
             {phase === 'poweroff' && <div className="boot-collapse" aria-hidden="true" />}
+
+            {/* Dead tube: the last of the phosphor dot fading in the centre */}
+            {phase === 'dark' && <div className="boot-afterglow" aria-hidden="true" />}
 
             {phase === 'shutdown' && (
                 <div className="boot-inner" aria-hidden="true">
