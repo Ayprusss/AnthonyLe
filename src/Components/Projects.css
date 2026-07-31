@@ -1,11 +1,11 @@
-/* ── Programme grid ── */
+/* ── Record grid ── */
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.4rem;
 }
 
-/* the fifth programme spans the full row */
+/* the fifth record spans the full row */
 .detail-panel:last-child:nth-child(odd) {
     grid-column: 1 / -1;
 }
@@ -13,16 +13,20 @@
 .detail-panel {
     display: flex;
     flex-direction: column;
-    background: rgba(var(--ink-rgb), 0.035);
+    /* Grid items default to min-width:auto, so a long unbroken title
+       would push the panel past the column. */
+    min-width: 0;
+    background: rgba(var(--phos-rgb), 0.035);
+    box-shadow: 0 0 0 1px var(--phos-faint);
     transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .detail-panel:hover {
-    background: rgba(var(--ink-rgb), 0.06);
-    box-shadow: 0 0 0 1px rgba(var(--lab-rgb), 0.4);
+    background: rgba(var(--phos-rgb), 0.07);
+    box-shadow: 0 0 0 1px var(--phos);
 }
 
-/* ── Programme title bar — inverse video ── */
+/* ── Record title strip — inverse video ── */
 .detail-top {
     display: flex;
     align-items: center;
@@ -46,22 +50,26 @@
     transition: background 0.5s ease;
 }
 
+/* The title strip is inverse video, so everything riding it is
+   screen-coloured — white would be a second ink the tube can't make. */
 .detail-caption {
-    font-family: var(--font-display);
-    font-size: 0.95rem;
+    font-family: var(--font-term);
+    font-size: var(--t2);
     line-height: 1;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 0.14em;
+    color: var(--scr);
+    opacity: 0.75;
 }
 
+/* A deployed project is the one thing on this page the terminal flags,
+   so it gets the alert phosphor. */
 .detail-asbuilt {
-    font-family: var(--font-mono);
-    font-size: 0.52rem;
-    font-weight: 600;
+    font-family: var(--font-term);
+    font-size: var(--t1);
     letter-spacing: 0.2em;
-    color: #050508;
-    background: var(--grn);
-    padding: 0.24rem 0.5rem;
+    color: var(--scr);
+    background: var(--alert);
+    padding: 3px 7px;
     animation: dot-pulse 2s steps(1) infinite;
 }
 
@@ -75,14 +83,16 @@
 
 .detail-links a {
     display: inline-flex;
-    color: rgba(255, 255, 255, 0.8);
-    transition: color 0.15s ease;
+    color: var(--scr);
+    opacity: 0.8;
+    transition: opacity 0.12s steps(2, end);
 }
 
-.detail-links a:hover { color: var(--hl); }
+.detail-links a:hover { opacity: 1; }
 
-/* ── Programme body ── */
+/* ── Record body ── */
 .detail-title {
+    overflow-wrap: anywhere;
     font-family: var(--font-display);
     font-weight: 400;
     font-size: 2.1rem;
