@@ -58,7 +58,7 @@ const Contact = () => {
             >
                 <SectionHeader
                     title="Contact."
-                    meta="viewer response · reply requested"
+                    meta="message relay · reply requested"
                     subtitle="I'm currently open to new opportunities. Send a message and I will get back to you ASAP."
                 />
 
@@ -78,7 +78,7 @@ const Contact = () => {
                 </div>
 
                 <form ref={formRef} onSubmit={sendEmail} className="contact-form">
-                    <p className="contact-form-caption">VIEWER RESPONSE FORM</p>
+                    <p className="contact-form-caption">MESSAGE RELAY</p>
                     <div className="form-group">
                         <label htmlFor="contact-email" className="form-label">From</label>
                         <input id="contact-email" type="email" name="user_email" placeholder="Your Email" required className="form-input" />
@@ -107,19 +107,19 @@ const Contact = () => {
                 </div>
             </motion.div>
 
-            {/* Closedown — the service signs off here */}
+            {/* Sign-off — the terminal closes the session here */}
             <footer className="footer">
                 <div className="footer-cell">
-                    <span className="footer-label">Broadcast by</span>
+                    <span className="footer-label">Terminal user</span>
                     <span className="footer-value">ANTHONY LE · © {new Date().getFullYear()}</span>
                 </div>
                 <div className="footer-cell">
-                    <span className="footer-label">Studio</span>
+                    <span className="footer-label">Station</span>
                     <span className="footer-value">45.4215° N · 75.6972° W — OTTAWA, CA</span>
                 </div>
                 <div className="footer-cell footer-cell-sht">
-                    <span className="footer-label">Page</span>
-                    <span className="footer-value">600 / 600 · END OF TRANSMISSION</span>
+                    <span className="footer-label">Session</span>
+                    <span className="footer-value">EOF · SESSION TERMINATED</span>
                 </div>
                 <button
                     type="button"
