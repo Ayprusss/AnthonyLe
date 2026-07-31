@@ -1,11 +1,13 @@
 /* ══════════════════════════════════════════════════════════════════
-   CH·741 COLD BOOT — monochrome green phosphor CRT, Linux-style power-on.
-   A self-contained device: green-on-black, its own palette, independent
-   of whichever channel the site is tuned to.
+   SEEGSON COLD BOOT — the tube the terminal runs on, powering up.
+   Always green, whichever profile the session is about to load: the set
+   doesn't know which user is signing in until the core hands over.
    ══════════════════════════════════════════════════════════════════ */
 
 .boot-scene {
-    /* Phosphor palette — local to the boot tube, not the site theme. */
+    /* Phosphor palette — the tube's own, not the site profile's. These
+       are the values --phos / --phos-hot carry in SEEGSON STANDARD, so a
+       cold boot hands off to an identical screen. */
     --scr:    #030f04;                 /* CRT green-black */
     --fg:     #35ff5b;                 /* P1 phosphor green */
     --fg-dim: rgba(53, 255, 91, 0.5);  /* kernel / secondary text */
@@ -21,7 +23,7 @@
     background:
         radial-gradient(120% 120% at 50% 42%, #06210c 0%, var(--scr) 70%);
     color: var(--fg);
-    font-family: var(--font-mono);
+    font-family: var(--font-term);
     overflow: hidden;
     cursor: pointer;
     outline: none;
@@ -179,6 +181,12 @@
 /* Firmware banner — brightest. */
 .k-bios .boot-body { color: var(--fg-hot); }
 
+/* Core section heading. */
+.k-hdr .boot-body {
+    color: var(--fg-hot);
+    letter-spacing: 0.24em;
+}
+
 /* Kernel ring buffer — dim timestamps, mid-bright message. */
 .k-kmsg { color: var(--fg-dim); }
 .k-kmsg .boot-tag  { color: var(--fg-dim); }
@@ -193,38 +201,102 @@
 .k-svc .boot-body   { color: var(--fg-dim); }
 .k-login .boot-body { color: var(--fg-hot); }
 
-/* ── Loading bar: the service coming up ── */
-.boot-load {
+/* ── Operator plate ──────────────────────────────────────────────────
+   The corporate identification card the terminal prints before it hands
+   the session over: the wordmark boxed in a hairline rule, the operator
+   under it, the station line ruled beneath. Modelled on the SEEGSON
+   CORPORATION plate the Sevastopol sets show on power-up. */
+.boot-plate-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.boot-plate {
+    display: flex;
+    flex-direction: column;
+    width: min(660px, 86vw);
+    filter: drop-shadow(0 0 18px rgba(53, 255, 91, 0.35));
+}
+
+.boot-plate-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 0.7rem;
-    flex-wrap: wrap;
-    margin-top: 1.1rem;
-    font-size: clamp(0.72rem, 1.4vw, 0.9rem);
-    text-shadow: 0 0 6px var(--glow), 0 0 14px rgba(53, 255, 91, 0.3);
+    border: 1px solid var(--fg);
+    padding: 1.6rem 1.4rem 1.3rem;
+    justify-content: center;
 }
 
-.boot-load-lbl {
-    color: var(--fg-hot);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.boot-bar {
+/* The wordmark. Horizontal slices are carved out of the glyphs with a
+   mask — the plate is a lit stencil, not a printed logo, and the tube's
+   own raster is too fine to read as one.
+   Nostromo is a condensed face, so it needs a hard horizontal stretch
+   to reach the extended proportions of a corporate plate — the stems
+   stay heavy while the counters open up. scaleX doesn't touch layout,
+   so the font-size is kept well under the box width for the overhang. */
+.boot-mark {
+    position: relative;
+    display: block;
+    font-family: var(--font-mark);
+    font-size: clamp(1.7rem, 5vw, 3.3rem);
+    font-weight: 400;
+    line-height: 1.05;
     letter-spacing: 0.06em;
-    white-space: pre;
+    text-transform: uppercase;
     color: var(--fg);
+    transform: scaleX(1.25);
+    -webkit-mask-image: repeating-linear-gradient(
+        to bottom,
+        #000 0, #000 5px, transparent 5px, transparent 8px);
+    mask-image: repeating-linear-gradient(
+        to bottom,
+        #000 0, #000 5px, transparent 5px, transparent 8px);
 }
 
-.boot-pct { color: var(--fg-hot); }
+/* Holds the row open at its finished width; never drawn. */
+.boot-mark-ghost { visibility: hidden; }
 
-.boot-cursor {
-    width: 0.62rem;
-    height: 1.05em;
-    background: var(--fg);
-    box-shadow: 0 0 8px var(--glow);
-    animation: boot-blink 0.9s steps(1, end) infinite;
+.boot-mark-live {
+    position: absolute;
+    inset: 0;
+    text-align: left;
+    white-space: pre;
 }
+
+.boot-plate-name {
+    font-size: clamp(0.62rem, 1.6vw, 0.82rem);
+    letter-spacing: 0.7em;
+    text-indent: 0.7em;      /* balance the trailing letter-space */
+    text-transform: uppercase;
+    color: var(--fg-hot);
+    opacity: 0;
+    transition: opacity 0.28s steps(3, end);
+}
+
+.boot-plate-name.is-in { opacity: 1; }
+
+/* The station line resolves under the box, ruled, as on the plate. */
+.boot-plate-rule {
+    margin-top: -1px;
+    border: 1px solid var(--fg);
+    border-top: none;
+    padding: 0.4rem 0.7rem;
+    font-size: clamp(0.6rem, 1.5vw, 0.78rem);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--fg);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.28s steps(3, end);
+}
+
+.boot-plate-rule.is-in { opacity: 1; }
 
 @keyframes boot-blink {
     0%, 49%  { opacity: 1; }
@@ -291,7 +363,6 @@
     .boot-flash,
     .boot-afterglow,
     .boot-line,
-    .boot-cursor,
     .boot-hint,
     .boot-scene.phase-exit,
     .boot-scene.phase-exit .boot-static {
