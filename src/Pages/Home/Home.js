@@ -4,6 +4,7 @@ import './Home.css';
 import '../../Components/GrainOverlay.css';
 import BootScene from '../../Components/BootScene';
 import Navbar from '../../Components/Navbar';
+import KeyLegend from '../../Components/KeyLegend';
 import Hero from '../../Components/Hero';
 import Skills from '../../Components/Skills';
 import Projects from '../../Components/Projects';
@@ -13,7 +14,7 @@ import About from '../../Components/About';
 import Volunteering from '../../Components/Volunteering';
 import Hobbies from '../../Components/Hobbies';
 import Contact from '../../Components/Contact';
-import SpaceBackground from '../../Components/SpaceBackground';
+import Schematic from '../../Components/Schematic';
 
 // Page sets per channel. Hero (page 100 index) and Contact (page 600)
 // bookend both services; slots stay position-aligned so page numbers
@@ -142,7 +143,7 @@ const Home = () => {
         <div className={`home-container${tuning ? ' is-tuning' : ''}`}>
             {/* Background stack */}
             <div className="base-bg" aria-hidden="true" />
-            <SpaceBackground />
+            <Schematic />
 
             {/* CRT glass: scanlines, aperture grille, vignette */}
             <div className="grain-overlay" aria-hidden="true" />
@@ -175,6 +176,11 @@ const Home = () => {
                         ))}
                         <div id="contact"><Contact /></div>
                     </main>
+
+                    <KeyLegend
+                        sections={SECTIONS[theme]}
+                        onToggleTheme={handleToggle}
+                    />
                 </>
             )}
         </div>

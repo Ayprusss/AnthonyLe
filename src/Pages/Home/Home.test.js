@@ -15,7 +15,7 @@ jest.mock('../../Components/About', () => () => <div data-testid="About" />);
 jest.mock('../../Components/Volunteering', () => () => <div data-testid="Volunteering" />);
 jest.mock('../../Components/Hobbies', () => () => <div data-testid="Hobbies" />);
 jest.mock('../../Components/Contact', () => () => <div data-testid="Contact" />);
-jest.mock('../../Components/SpaceBackground', () => () => <canvas data-testid="SpaceBackground" />);
+jest.mock('../../Components/Schematic', () => () => <canvas data-testid="Schematic" />);
 
 describe('Home Component', () => {
   let originalIntersectionObserver;

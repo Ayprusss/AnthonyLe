@@ -10,23 +10,23 @@
     inset: 0;
     z-index: -3;
     background:
-        radial-gradient(115% 85% at 50% 38%, var(--screen-high) 0%, var(--screen) 72%);
+        radial-gradient(115% 85% at 50% 38%, var(--scr-high) 0%, var(--scr) 72%);
     transition: background 0.5s ease;
 }
 
-/* ── Receiver bezel: soft rounded-corner shadow of the tube glass ── */
+/* ── Tube glass: soft rounded-corner shadow at the edge of the picture ── */
 .crt-bezel {
     position: fixed;
     inset: 0;
     z-index: 40;
     pointer-events: none;
-    border-radius: 18px;
+    border-radius: 14px;
     box-shadow:
         inset 0 0 90px rgba(0, 0, 0, 0.55),
         inset 0 0 14px rgba(0, 0, 0, 0.7);
 }
 
-/* ── Channel retune: brief vertical-hold roll on the picture ── */
+/* ── Profile switch: the vertical hold slips for a beat ── */
 @keyframes channel-roll {
     0%   { transform: translateY(0);      opacity: 1; }
     18%  { transform: translateY(-14px);  opacity: 0.55; }
@@ -43,16 +43,18 @@
 main {
     display: flex;
     flex-direction: column;
-    gap: 9rem;
-    padding-bottom: 4rem;
+    gap: 112px;
+    /* Clear of the fixed key legend along the bottom edge. */
+    padding-bottom: 76px;
 }
 
 main > div[id] {
     width: 100%;
     max-width: 1180px;
     margin: 0 auto;
-    padding: 0 4rem;
-    scroll-margin-top: 6rem;
+    padding: 0 40px;
+    /* Clear of the fixed status bar when a folder is jumped to. */
+    scroll-margin-top: 54px;
 }
 
 main > div#hero {
@@ -61,8 +63,8 @@ main > div#hero {
 }
 
 @media (max-width: 768px) {
-    main { gap: 6.5rem; }
-    main > div[id] { padding: 0 1.4rem; }
+    main { gap: 84px; }
+    main > div[id] { padding: 0 20px; }
     main > div#hero { padding: 0; }
-    .crt-bezel { border-radius: 10px; }
+    .crt-bezel { border-radius: 8px; }
 }
