@@ -1,4 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* ══════════════════════════════════════════════════════════════════
+   SEVASTOLINK — shared terminal chrome
+   Everything here is the frame the terminal draws around content:
+   inverse-video bars, hairline listings, key-style buttons. No radii,
+   no gradients on UI surfaces, 1px borders only.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Faces ──────────────────────────────────────────────────────────
+   Jixellation is the in-game terminal face (Jon McKellan, Creative
+   Assembly), self-hosted from src/fonts so webpack fingerprints it.
+   `block` rather than `swap`: a local 41K file loads instantly, and a
+   swap would reflow the whole interface off a fallback metric. */
+@font-face {
+    font-family: 'Jixellation';
+    src: url('./fonts/jixellation.ttf') format('truetype');
+    /* The family ships one weight. Claiming the whole range maps every
+       requested weight onto it, so the browser never synthesises a bold —
+       faux-bold smears a pixel face into mud. */
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: block;
+}
+
+/* Isolation — the game's own typeface. It sets everything a person
+   wrote, so the site reads in the film's voice rather than a Helvetica
+   stand-in. Caveat: its U+00B7 (·) is mapped to a wrong outline and
+   renders as "û", so separator dots must stay out of Isolation text. */
+@font-face {
+    font-family: 'Isolation';
+    src: url('./fonts/isolation.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Nostromo Cond — the ship's signage face, effectively caps-only (its
+   lowercase glyphs are capitals). Wordmark and operator ident only. */
+@font-face {
+    font-family: 'Nostromo Cond';
+    src: url('./fonts/nostromo.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: block;
+}
 
 /* ── Reset ── */
 *, *::before, *::after {
@@ -13,29 +56,53 @@ html, body, #root {
 }
 
 body {
-    background-color: var(--screen);
-    color: var(--ink);
-    font-family: var(--font-mono);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--scr);
+    color: var(--phos);
+    font-family: var(--font-hv);
+    /* Pixel type must land on whole pixels or Jixellation smears. Prose
+       opts back into antialiasing below. */
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    text-rendering: geometricPrecision;
     transition: background-color 0.5s ease, color 0.5s ease;
     overflow-x: hidden;
 }
 
+/* Anything you actually read is Helvetica, and Helvetica wants smoothing. */
+p,
+input,
+textarea,
+.section-subtitle,
+.prose {
+    font-family: var(--font-hv);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 /* ── Text selection — inverse video ── */
 ::selection {
-    background-color: var(--hl);
-    color: var(--screen);
+    background-color: var(--phos);
+    color: var(--scr);
     text-shadow: none;
 }
 ::-moz-selection {
-    background-color: var(--hl);
-    color: var(--screen);
+    background-color: var(--phos);
+    color: var(--scr);
     text-shadow: none;
 }
 
-h1, h2, h3, h4, h5, h6 { font-weight: 600; }
-p  { line-height: 1.75; color: var(--ink-dim); }
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-term);
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+p {
+    line-height: 1.7;
+    font-size: 15px;
+    color: var(--phos-dim);
+}
+
 a  { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 
@@ -47,37 +114,39 @@ ul { list-style: none; }
     position: relative;
 }
 
-/* Headlines — VT323 with a faint phosphor bloom */
+/* ── Section title — the folder name, big, in hot phosphor ──
+   Fixed px steps, not clamp(): a pixel face has to land on the grid. */
 .section-title {
-    font-family: var(--font-display);
+    font-family: var(--font-term);
     font-weight: 400;
-    font-size: clamp(3.6rem, 8vw, 7rem);
-    letter-spacing: 0.02em;
+    font-size: var(--t6);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--hl);
-    text-shadow: 0 0 18px rgba(var(--hl-rgb), 0.35);
-    line-height: 0.9;
-    margin: 1.6rem 0 2.4rem;
+    color: var(--phos-hot);
+    text-shadow: 0 0 14px var(--glow);
+    line-height: 1;
+    margin: 22px 0 16px;
     transition: color 0.5s ease, text-shadow 0.5s ease;
 }
 
 .section-subtitle {
-    font-family: var(--font-prose);
-    font-size: 0.92rem;
-    color: var(--ink-dim);
-    max-width: 580px;
-    margin: -1rem 0 2.8rem;
-    line-height: 1.75;
+    font-size: 15px;
+    color: var(--phos-dim);
+    max-width: 60ch;
+    margin: 0 0 32px;
+    line-height: 1.7;
 }
 
-/* ── Page header bar: P n00 · CH·741 · readout — white on service colour ── */
+/* ── Page bar: the folder header, inverse video ──────────────────────
+   Solid phosphor block, screen-coloured text, terminated by a filled
+   cell — the header strip on every Seegson terminal page. */
 .page-bar {
     display: flex;
     align-items: stretch;
-    background: var(--bar);
-    color: var(--ink-strong);
-    font-family: var(--font-display);
-    font-size: 1.05rem;
+    background: var(--phos);
+    color: var(--scr);
+    font-family: var(--font-term);
+    font-size: var(--t3);
     line-height: 1;
     user-select: none;
     transition: background 0.5s ease;
@@ -86,134 +155,149 @@ ul { list-style: none; }
 .page-bar > * {
     display: flex;
     align-items: center;
-    padding: 0.45rem 0.8rem;
+    padding: 6px 10px;
     white-space: nowrap;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 
-.page-bar-no {
-    color: var(--hl);
-    text-shadow: none;
-}
-
+/* Folder ref — the same counter that orders the sections, so the bar
+   and the reading order can never disagree. */
 .page-bar-no::before {
-    content: 'P' counter(section-counter) '00';
+    content: '0' counter(section-counter);
 }
 
-.page-bar-ch { color: rgba(255, 255, 255, 0.85); }
+.page-bar-no {
+    background: var(--scr);
+    color: var(--phos);
+    margin: 3px 0 3px 3px;
+}
+
+/* Path — where the folder sits, so the bar carries information rather
+   than just holding the colour. */
+.page-bar-path {
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.page-bar-path i { font-style: normal; opacity: 0.45; }
+
+/* On a narrow screen the bar keeps the folder ref and the readout; the
+   path prefix is the first thing that can go. */
+@media (max-width: 700px) {
+    .page-bar-path { display: none; }
+}
 
 .page-bar-fill { flex: 1; padding: 0; }
 
 .page-bar-meta {
-    color: rgba(255, 255, 255, 0.85);
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
+    font-size: var(--t1);
+    letter-spacing: 0.18em;
+    opacity: 0.85;
 }
 
-/* ── Listings (skills, broadcast log, community service) ── */
+/* The terminating block — every bar in the game ends in one. */
+.page-bar-end {
+    padding: 0;
+    width: 18px;
+    margin: 3px 3px 3px 0;
+    background: var(--scr);
+}
+
+/* ── Listings (skills, service record, community log) ── */
 .rule-table {
-    border-top: 2px solid var(--bar);
+    border-top: 1px solid var(--phos-hair);
     transition: border-color 0.5s ease;
 }
 
 .rule-table-head {
     display: grid;
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
+    font-family: var(--font-term);
+    font-size: var(--t1);
+    font-weight: 400;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: var(--lab);
-    border-bottom: 1px solid var(--ink-faint);
+    color: var(--phos-dim);
+    border-bottom: 1px solid var(--phos-faint);
 }
 
-.rule-table-head > span { padding: 0.7rem 0.9rem; }
+.rule-table-head > span { padding: 8px 10px; }
 
-/* ── Fastext keys — solid colour blocks, hard pixel shadow ── */
+/* ── Keys — the interface's buttons ─────────────────────────────────
+   Primary is inverse video (a lit key); secondary is an unlit outline.
+   Hover flips the state rather than shifting hue — one gun, no colours
+   to trade. */
 .btn-primary,
 .btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.55rem;
-    font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 0.72rem;
-    letter-spacing: 0.14em;
+    gap: 8px;
+    font-family: var(--font-term);
+    font-weight: 400;
+    font-size: var(--t2);
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    padding: 0.8rem 1.6rem;
+    padding: 10px 20px;
     border-radius: 0;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    cursor: pointer;
+    transition: background 0.12s steps(2, end), color 0.12s steps(2, end),
+                border-color 0.12s steps(2, end);
 }
 
 .btn-primary {
-    background: var(--hl);
-    color: var(--screen);
-    border: none;
-    box-shadow: 4px 4px 0 rgba(var(--hl-rgb), 0.28);
+    background: var(--phos);
+    color: var(--scr);
+    border: 1px solid var(--phos);
 }
 
 .btn-primary:hover {
-    background: var(--ink-strong);
-    color: var(--screen);
-    box-shadow: 2px 2px 0 rgba(var(--ink-rgb), 0.35);
-    transform: translate(2px, 2px);
+    background: var(--phos-hot);
+    border-color: var(--phos-hot);
+    color: var(--scr);
 }
 
-.btn-primary:disabled { opacity: 0.4; }
+.btn-primary:disabled { opacity: 0.4; cursor: default; }
 
 .btn-secondary {
     background: transparent;
-    color: var(--lab);
-    border: 2px solid rgba(var(--lab-rgb), 0.6);
+    color: var(--phos);
+    border: 1px solid var(--phos-hair);
 }
 
 .btn-secondary:hover {
-    border-color: var(--lab);
-    background: rgba(var(--lab-rgb), 0.12);
+    background: var(--phos);
+    border-color: var(--phos);
+    color: var(--scr);
 }
 
-/* ── Page-number corner tag — the receiver reports the page it's on ── */
+/* ── Section ordering counter — feeds the folder refs ── */
 main { counter-reset: section-counter; }
 main > div { counter-increment: section-counter; }
 
-.section-container::before {
-    content: 'P' counter(section-counter) '00';
-    position: absolute;
-    top: -3.4rem;
-    right: 0;
-    font-family: var(--font-display);
-    font-size: 1rem;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    color: var(--ink-strong);
-    background: var(--bar);
-    padding: 0.4rem 0.7rem;
-    pointer-events: none;
-    user-select: none;
-    z-index: 0;
-    transition: background 0.5s ease;
-}
-
-/* ── Keyboard focus — headline-colour ring ── */
+/* ── Keyboard focus — a lit outline, never a glow ── */
 :focus-visible {
-    outline: 2px solid var(--hl);
-    outline-offset: 3px;
+    outline: 1px solid var(--phos-hot);
+    outline-offset: 2px;
     border-radius: 0;
 }
 
-/* ── Shared teletext blink (status dots, cursors) ── */
+/* ── Shared blink (status dots, cursors) — stepped, never eased ── */
 @keyframes dot-pulse {
-    0%, 49%  { opacity: 1; }
-    50%, 100% { opacity: 0.25; }
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0.2; }
 }
 
 /* ── Ticker crawl ── */
 @keyframes ticker-crawl {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
+}
+
+@media (max-width: 768px) {
+    .section-title { font-size: var(--t5); }
 }
 
 /* ── Reduced motion ── */
