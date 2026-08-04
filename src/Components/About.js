@@ -28,7 +28,7 @@ const About = () => {
             >
                 <SectionHeader
                     title="About."
-                    meta="viewer profile · 2 notes"
+                    meta="operator profile · 2 notes"
                     subtitle="Computer Science Student at the University of Ottawa."
                 />
             </motion.div>

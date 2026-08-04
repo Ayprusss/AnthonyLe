@@ -49,7 +49,7 @@ const Resume = () => {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
             >
-                <SectionHeader title="Resume." meta="hard copy · pdf on request" />
+                <SectionHeader title="Resume." meta="hard copy · pdf on file" />
             </motion.div>
 
             <motion.div

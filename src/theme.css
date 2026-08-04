@@ -1,93 +1,141 @@
 /* ══════════════════════════════════════════════════════════════════
-   CH·741 — a teletext service broadcast on a CRT
-   Two channels, one receiver. The tune knob changes the service,
-   not the television:
-     · CH 1 / NEWS     = blue header bars, yellow headlines, cyan labels
-     · CH 2 / LEISURE  = magenta header bars, green headlines, yellow labels
-   Saturated colour is structural (bars, keys, labels) — never decorative.
+   SEVASTOLINK — a Seegson personal terminal
+   One tube, one electron gun, two user profiles. The profile switch
+   changes which phosphor the set was built with, not the machine:
+     · SEEGSON STANDARD (professional) — P1 green, the shipboard default
+     · SEVASTOLINK      (personal)     — amber, the APOLLO-era screens
+   There is no decorative colour. Emphasis is INVERSE VIDEO — a solid
+   phosphor block with screen-coloured text — the way a real single-gun
+   display does it. --alert is the only non-phosphor hue on the site.
    ══════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* CH 1 — NEWS (default / Professional) */
-    --screen:      #07070e;          /* CRT black, blue cast */
-    --screen-rgb:  7, 7, 14;
-    --screen-high: #0d0d20;          /* phosphor lift at centre */
-    --bar:         #1a1ad0;          /* teletext header blue */
-    --bar-rgb:     26, 26, 208;
-    --ink:         #eceef8;
-    --ink-rgb:     236, 238, 248;
-    --ink-strong:  #ffffff;
-    --ink-dim:     rgba(236, 238, 248, 0.62);
-    --ink-faint:   rgba(236, 238, 248, 0.12);
-    --hl:          #ffd21f;          /* headline yellow */
-    --hl-rgb:      255, 210, 31;
-    --lab:         #38e1e6;          /* label cyan */
-    --lab-rgb:     56, 225, 230;
-    --grn:         #3bf07d;
-    --grn-rgb:     59, 240, 125;
-    --red:         #ff3352;          /* alert / fastext red */
-    --red-rgb:     255, 51, 82;
-    --mag:         #ff54d7;
-    --mag-rgb:     255, 84, 215;
+    /* ── SEEGSON STANDARD — green phosphor (default / Professional) ──
+       --phos and --phos-hot are lifted verbatim from BootScene's --fg /
+       --fg-hot, so the boot sequence hands off to the same tube. */
+    --scr:         #030c06;                    /* screen, green-black */
+    --scr-rgb:     3, 12, 6;
+    --scr-high:    #06210c;                    /* phosphor lift at centre */
+    --phos:        #35ff5b;                    /* P1 phosphor */
+    --phos-rgb:    53, 255, 91;
+    --phos-hot:    #c8ffd4;                    /* brights, inverse-video bg */
+    --phos-hot-rgb: 200, 255, 212;
+    --phos-dim:    rgba(53, 255, 91, 0.55);    /* secondary text */
+    --phos-faint:  rgba(53, 255, 91, 0.16);    /* fills, row bands */
+    --phos-hair:   rgba(53, 255, 91, 0.28);    /* 1px rules */
+    --glow:        rgba(53, 255, 91, 0.5);
+    --alert:       #ff6a2a;                    /* warnings ONLY */
+    --alert-rgb:   255, 106, 42;
 
-    --font-display: 'VT323', 'Courier New', monospace;
-    --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
-    --font-prose:   'IBM Plex Mono', 'Courier New', monospace;
+    /* ── Type ──────────────────────────────────────────────────────
+       Three faces, three jobs, no overlap:
+         · Jixellation — what the TERMINAL draws. Chrome, tables, the
+           boot log. The only monospaced one, so column alignment lives
+           here and nowhere else.
+         · Isolation   — what a PERSON wrote. Running prose only. A
+           pixel face is crisp in a status bar and mush in a paragraph,
+           so the two never trade jobs.
+         · Nostromo    — what is STAMPED ON THE HARDWARE. The operator
+           ident in the status bar, nothing else. Caps only.
+       Isolation carries two jobs because it has two weights of presence:
+       set small it is a text face, set huge it is a display face, and
+       the boot plate needs the heaviest thing available. Nostromo is
+       lighter-stemmed, which is wrong for a plate and right for a 34px
+       bar. Isolation's middle dot is broken (renders "û") — keep `·`
+       separators in --font-term text. */
+    --font-term:   'Jixellation', 'Courier New', monospace;
+    --font-hv:     'Isolation', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-mark:   'Isolation', 'Arial Black', 'Helvetica Neue', Helvetica, sans-serif;
+    --font-ident:  'Nostromo Cond', 'Arial Narrow', 'Helvetica Neue', Helvetica, sans-serif;
 
-    /* Aliases kept so anything unconverted still renders legibly */
-    --paper:       var(--screen);
-    --paper-rgb:   7, 7, 14;
-    --paper-high:  var(--screen-high);
-    --bg:          var(--screen);
-    --bg-rgb:      7, 7, 14;
-    --surface:     var(--screen-high);
-    --text:        var(--ink);
-    --text-rgb:    236, 238, 248;
-    --text-dim:    var(--ink-dim);
-    --border:      rgba(236, 238, 248, 0.2);
-    --accent:      var(--hl);
-    --accent-rgb:  255, 210, 31;
-    --font-body:   var(--font-mono);
-    --bg-color:    var(--screen);
-    --text-main:   var(--ink);
-    --text-muted:  var(--ink-dim);
-    --border-color: var(--border);
+    /* Pixel type ladder — whole pixels only. A pixel font at 13.7px is
+       a smear, so sizes never come from clamp(). */
+    --t1: 11px;   /* micro labels, column heads */
+    --t2: 13px;   /* body labels, nav, table cells */
+    --t3: 16px;   /* bars, lead-ins */
+    --t4: 22px;   /* sub-heads */
+    --t5: 32px;   /* section titles, small screens */
+    --t6: 48px;   /* section titles */
+    --t7: 72px;   /* hero name */
+
+    /* ── Aliases ───────────────────────────────────────────────────
+       The teletext token names survive so every section stylesheet
+       keeps working — they now all resolve onto the phosphor ramp,
+       which is what turns the whole site monochrome in one place. */
+    --screen:      var(--scr);
+    --screen-rgb:  3, 12, 6;
+    --screen-high: var(--scr-high);
+    --bar:         var(--phos);          /* was the coloured header bar */
+    --bar-rgb:     53, 255, 91;
+    --ink:         var(--phos);
+    --ink-rgb:     53, 255, 91;
+    --ink-strong:  var(--phos-hot);
+    --ink-dim:     var(--phos-dim);
+    --ink-faint:   var(--phos-faint);
+    --hl:          var(--phos-hot);      /* was headline yellow */
+    --hl-rgb:      200, 255, 212;
+    --lab:         var(--phos);          /* was label cyan */
+    --lab-rgb:     53, 255, 91;
+    --grn:         var(--phos);
+    --grn-rgb:     53, 255, 91;
+    --red:         var(--alert);
+    --red-rgb:     255, 106, 42;
+    --mag:         var(--phos);
+    --mag-rgb:     53, 255, 91;
+
+    --font-display: var(--font-term);
+    --font-mono:    var(--font-term);
+    --font-prose:   var(--font-hv);
+    --font-body:    var(--font-hv);
+
+    --paper:       var(--scr);
+    --paper-rgb:   3, 12, 6;
+    --paper-high:  var(--scr-high);
+    --bg:          var(--scr);
+    --bg-rgb:      3, 12, 6;
+    --bg-color:    var(--scr);
+    --surface:     var(--scr-high);
+    --text:        var(--phos);
+    --text-rgb:    53, 255, 91;
+    --text-main:   var(--phos);
+    --text-dim:    var(--phos-dim);
+    --text-muted:  var(--phos-dim);
+    --border:      var(--phos-hair);
+    --border-color: var(--phos-hair);
+    --accent:      var(--phos-hot);
+    --accent-rgb:  200, 255, 212;
     --svg-filter:  invert(1);
-    --ripple-rgb:  236, 238, 248;
+    --ripple-rgb:  53, 255, 91;
 }
 
-/* CH 2 — LEISURE (Personal): magenta bars, green headlines, yellow labels */
+/* ── SEVASTOLINK — amber phosphor (Personal) ───────────────────────
+   Same tube, same layout, different gun. Only the ramp moves. */
 [data-theme="personal"] {
-    --screen:      #0c0710;          /* CRT black, violet cast */
-    --screen-rgb:  12, 7, 16;
-    --screen-high: #180d20;
-    --bar:         #b3128f;
-    --bar-rgb:     179, 18, 143;
-    --ink:         #f4eef6;
-    --ink-rgb:     244, 238, 246;
-    --ink-strong:  #ffffff;
-    --ink-dim:     rgba(244, 238, 246, 0.62);
-    --ink-faint:   rgba(244, 238, 246, 0.12);
-    --hl:          #3bf07d;          /* headline green */
-    --hl-rgb:      59, 240, 125;
-    --lab:         #ffd21f;          /* label yellow */
-    --lab-rgb:     255, 210, 31;
-    --grn:         #3bf07d;
-    --grn-rgb:     59, 240, 125;
-    --red:         #ff3352;
-    --red-rgb:     255, 51, 82;
-    --mag:         #ff54d7;
-    --mag-rgb:     255, 84, 215;
+    --scr:         #100a02;
+    --scr-rgb:     16, 10, 2;
+    --scr-high:    #241503;
+    --phos:        #ffb32e;
+    --phos-rgb:    255, 179, 46;
+    --phos-hot:    #ffe9b8;
+    --phos-hot-rgb: 255, 233, 184;
+    --phos-dim:    rgba(255, 179, 46, 0.55);
+    --phos-faint:  rgba(255, 179, 46, 0.16);
+    --phos-hair:   rgba(255, 179, 46, 0.28);
+    --glow:        rgba(255, 179, 46, 0.5);
+    --alert:       #ff4d3d;
+    --alert-rgb:   255, 77, 61;
 
-    --paper:       var(--screen);
-    --paper-rgb:   12, 7, 16;
-    --bg:          var(--screen);
-    --bg-rgb:      12, 7, 16;
-    --surface:     var(--screen-high);
-    --text:        var(--ink);
-    --text-rgb:    244, 238, 246;
-    --text-dim:    var(--ink-dim);
-    --border:      rgba(244, 238, 246, 0.2);
-    --accent:      var(--hl);
-    --accent-rgb:  59, 240, 125;
+    --screen-rgb:  16, 10, 2;
+    --bar-rgb:     255, 179, 46;
+    --ink-rgb:     255, 179, 46;
+    --hl-rgb:      255, 233, 184;
+    --lab-rgb:     255, 179, 46;
+    --grn-rgb:     255, 179, 46;
+    --red-rgb:     255, 77, 61;
+    --mag-rgb:     255, 179, 46;
+    --paper-rgb:   16, 10, 2;
+    --bg-rgb:      16, 10, 2;
+    --text-rgb:    255, 179, 46;
+    --accent-rgb:  255, 233, 184;
+    --ripple-rgb:  255, 179, 46;
 }
