@@ -3,22 +3,6 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Experience from './Experience';
 
-// Mock framer-motion to bypass animation requirements during tests
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: require('react').forwardRef(({ children, ...props }, ref) => {
-      // Exclude framer-motion specific props to prevent React warnings
-      const { initial, whileInView, viewport, transition, delay, ...validProps } = props;
-      return <div ref={ref} {...validProps}>{children}</div>;
-    }),
-  },
-}));
-
-// Mock TextScramble so it just renders the text instead of scrambling
-jest.mock('./ui/TextScramble', () => ({
-  TextScramble: ({ text, as: Tag = 'span', className }) => <Tag className={className}>{text}</Tag>,
-}));
-
 describe('Experience Component', () => {
   test('renders the Experience heading properly', () => {
     render(<Experience />);
