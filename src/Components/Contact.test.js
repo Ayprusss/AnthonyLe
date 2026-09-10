@@ -5,25 +5,9 @@ import Contact from './Contact';
 import emailjs from '@emailjs/browser';
 import '@testing-library/jest-dom';
 
-// Mock framer-motion to bypass animation requirements during tests
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: require('react').forwardRef(({ children, ...props }, ref) => {
-      // Exclude framer-motion specific props to prevent React warnings
-      const { initial, whileInView, viewport, transition, ...validProps } = props;
-      return <div ref={ref} {...validProps}>{children}</div>;
-    }),
-  },
-}));
-
 // Mock @emailjs/browser
 jest.mock('@emailjs/browser', () => ({
   sendForm: jest.fn(),
-}));
-
-// Mock TextScramble so it just renders the text instead of scrambling
-jest.mock('./ui/TextScramble', () => ({
-  TextScramble: ({ text, as: Tag = 'span', className }) => <Tag className={className}>{text}</Tag>,
 }));
 
 describe('Contact Component', () => {
