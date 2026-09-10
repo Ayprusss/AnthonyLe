@@ -3,33 +3,6 @@ import { render, screen } from '@testing-library/react';
 import Resume from './Resume';
 import '@testing-library/jest-dom';
 
-// Mock framer-motion to bypass animation requirements during tests
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: require('react').forwardRef(({ children, ...props }, ref) => {
-      const { initial, whileInView, viewport, transition, ...validProps } = props;
-      return <div ref={ref} {...validProps}>{children}</div>;
-    }),
-  },
-}));
-
-// Mock react-pdf
-jest.mock('react-pdf', () => ({
-  pdfjs: {
-    GlobalWorkerOptions: {
-      workerSrc: '',
-    },
-    version: '1.2.3',
-  },
-  Document: ({ children }) => <div>{children}</div>,
-  Page: () => <div>Page</div>,
-}));
-
-// Mock TextScramble
-jest.mock('./ui/TextScramble', () => ({
-  TextScramble: ({ text }) => <h2>{text}</h2>,
-}));
-
 describe('Resume Component Security Fix', () => {
   test('all links have rel="noopener noreferrer"', () => {
     render(<Resume />);

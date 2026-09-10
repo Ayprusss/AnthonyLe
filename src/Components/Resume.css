@@ -1,85 +1,22 @@
-.resume-content {
-    display: flex;
-    justify-content: flex-start;
+/* Résumé — what is in the file, then the file. */
+
+.resume-contents {
+    margin-top: var(--s6);
+    display: grid;
 }
 
-/* Hard-copy frame */
-.resume-card {
-    position: relative;
-    background: rgba(var(--ink-rgb), 0.035);
-    box-shadow: 0 0 0 1px var(--ink-faint);
-    padding: 2.2rem;
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.8rem;
-    transition: box-shadow 0.2s ease;
-}
-
-.resume-card:hover { box-shadow: 0 0 0 1px rgba(var(--lab-rgb), 0.45); }
-
-.resume-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.resume-icon { color: var(--hl); flex-shrink: 0; margin-top: 0.2rem; }
-
-.resume-title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1.9rem;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--ink-strong);
-    margin-bottom: 0.4rem;
-}
-
-.resume-subtitle {
-    font-family: var(--font-mono);
-    font-size: 0.58rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    color: var(--lab);
+/* A rule above each line, none below the last: the list is a set of
+   discrete items, which is the same thing the record rule says
+   everywhere else on the page. */
+.resume-item {
+    padding: var(--s4) 0;
+    border-top: 1px solid var(--rule);
+    color: var(--ink);
 }
 
 .resume-actions {
+    margin-top: var(--s6);
     display: flex;
-    gap: 1rem;
     flex-wrap: wrap;
-}
-
-/* ── The received page ── */
-.pdf-viewer-container {
-    display: flex;
-    justify-content: center;
-    background: rgba(var(--ink-rgb), 0.03);
-    box-shadow: 0 0 0 1px var(--ink-faint);
-    padding: 1.2rem;
-    overflow-x: auto;
-}
-
-.pdf-document { display: flex; justify-content: center; }
-
-.pdf-page canvas {
-    max-width: 100%;
-    height: auto !important;
-}
-
-.pdf-loading {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    letter-spacing: 0.1em;
-    color: var(--hl);
-    padding: 4rem 1rem;
-    animation: dot-pulse 1.2s steps(1) infinite;
-}
-
-@media (max-width: 768px) {
-    .resume-card { padding: 1.2rem; }
-    .resume-actions .btn-primary,
-    .resume-actions .btn-secondary { flex: 1; }
+    gap: var(--s3);
 }

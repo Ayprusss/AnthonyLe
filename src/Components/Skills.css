@@ -1,84 +1,23 @@
-/* ── Skills listings ── */
-.bom-head {
-    grid-template-columns: 190px 1fr 64px;
-}
+/* Skills — a title and a run of names per group. */
 
-.bom-row {
-    display: grid;
-    grid-template-columns: 190px 1fr 64px;
-    border-bottom: 1px solid var(--ink-faint);
-    transition: background 0.15s ease;
-}
-
-.bom-row:hover { background: rgba(var(--lab-rgb), 0.06); }
-
-.bom-assy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-    padding: 1.3rem 0.9rem;
-}
-
-.bom-assy-no {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    line-height: 1;
-    color: var(--hl);
-}
-
-.bom-assy-title {
-    font-family: var(--font-mono);
+.skill-title {
+    font-size: var(--fs-small);
     font-weight: 600;
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--lab);
+    color: var(--mute);
+    margin-bottom: var(--s3);
 }
 
-.bom-items {
+.skill-list {
     display: flex;
     flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 0.4rem 0;
-    padding: 1.3rem 0.9rem;
+    gap: var(--s2) var(--s4);
+    font-size: var(--fs-body);
+    color: var(--ink-max);
 }
 
-.bom-item {
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    color: var(--ink);
-    white-space: nowrap;
-}
+/* The long tail is set at the weight of secondary text, so revealing it
+   adds information without flattening the ranking it was hidden to
+   preserve. */
+.skill-item.is-tail { color: var(--mute); }
 
-/* separator dot between items */
-.bom-item:not(:last-child)::after {
-    content: '·';
-    color: rgba(var(--hl-rgb), 0.7);
-    margin: 0 0.55rem;
-}
-
-.bom-qty {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 1.3rem 0;
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    line-height: 1;
-    color: var(--ink-dim);
-}
-
-@media (max-width: 768px) {
-    .bom-head { display: none; }
-
-    .bom-row {
-        grid-template-columns: 1fr 48px;
-        grid-template-areas:
-            "assy qty"
-            "items items";
-    }
-
-    .bom-assy  { grid-area: assy; padding-bottom: 0.4rem; }
-    .bom-qty   { grid-area: qty; padding-bottom: 0; }
-    .bom-items { grid-area: items; padding-top: 0.5rem; }
-}
+.skills-toggle { margin-top: var(--s6); }
