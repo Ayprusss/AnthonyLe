@@ -1,141 +1,94 @@
-/* ══════════════════════════════════════════════════════════════════
-   SEVASTOLINK — a Seegson personal terminal
-   One tube, one electron gun, two user profiles. The profile switch
-   changes which phosphor the set was built with, not the machine:
-     · SEEGSON STANDARD (professional) — P1 green, the shipboard default
-     · SEVASTOLINK      (personal)     — amber, the APOLLO-era screens
-   There is no decorative colour. Emphasis is INVERSE VIDEO — a solid
-   phosphor block with screen-coloured text — the way a real single-gun
-   display does it. --alert is the only non-phosphor hue on the site.
-   ══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   Tokens.
+
+   The site is one page in two sessions, and the sessions are literal
+   inversions of each other: professional is black type on white,
+   personal is white type on black. Nothing else changes — same layout,
+   same type, same rhythm — so the toggle reads as the light going off
+   rather than as a different website.
+
+   There is no accent hue anywhere. Six neutral steps per session carry
+   the entire design; hierarchy comes from weight, size and space.
+   ═══════════════════════════════════════════════════════════════════ */
 
 :root {
-    /* ── SEEGSON STANDARD — green phosphor (default / Professional) ──
-       --phos and --phos-hot are lifted verbatim from BootScene's --fg /
-       --fg-hot, so the boot sequence hands off to the same tube. */
-    --scr:         #030c06;                    /* screen, green-black */
-    --scr-rgb:     3, 12, 6;
-    --scr-high:    #06210c;                    /* phosphor lift at centre */
-    --phos:        #35ff5b;                    /* P1 phosphor */
-    --phos-rgb:    53, 255, 91;
-    --phos-hot:    #c8ffd4;                    /* brights, inverse-video bg */
-    --phos-hot-rgb: 200, 255, 212;
-    --phos-dim:    rgba(53, 255, 91, 0.55);    /* secondary text */
-    --phos-faint:  rgba(53, 255, 91, 0.16);    /* fills, row bands */
-    --phos-hair:   rgba(53, 255, 91, 0.28);    /* 1px rules */
-    --glow:        rgba(53, 255, 91, 0.5);
-    --alert:       #ff6a2a;                    /* warnings ONLY */
-    --alert-rgb:   255, 106, 42;
+    /* ── Professional: daylight ─────────────────────────────────────
+       True white and true black, not a softened charcoal. The brief is
+       black and white, so the palette says so literally. */
+    --ground:   #ffffff;   /* page */
+    --ink:      #000000;   /* body copy */
+    --ink-max:  #000000;   /* headings — the brightest step */
+    --mute:     #6e6e6e;   /* secondary text; 5.2:1 on white */
+    --rule:     #d6d6d6;   /* hairlines between records */
+    --fill:     #f1f1f1;   /* quiet bands, hovers, code */
 
-    /* ── Type ──────────────────────────────────────────────────────
-       Three faces, three jobs, no overlap:
-         · Jixellation — what the TERMINAL draws. Chrome, tables, the
-           boot log. The only monospaced one, so column alignment lives
-           here and nowhere else.
-         · Isolation   — what a PERSON wrote. Running prose only. A
-           pixel face is crisp in a status bar and mush in a paragraph,
-           so the two never trade jobs.
-         · Nostromo    — what is STAMPED ON THE HARDWARE. The operator
-           ident in the status bar, nothing else. Caps only.
-       Isolation carries two jobs because it has two weights of presence:
-       set small it is a text face, set huge it is a display face, and
-       the boot plate needs the heaviest thing available. Nostromo is
-       lighter-stemmed, which is wrong for a plate and right for a 34px
-       bar. Isolation's middle dot is broken (renders "û") — keep `·`
-       separators in --font-term text. */
-    --font-term:   'Jixellation', 'Courier New', monospace;
-    --font-hv:     'Isolation', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --font-mark:   'Isolation', 'Arial Black', 'Helvetica Neue', Helvetica, sans-serif;
-    --font-ident:  'Nostromo Cond', 'Arial Narrow', 'Helvetica Neue', Helvetica, sans-serif;
+    /* rgba() bases for the few translucent surfaces (mobile sheet
+       backdrop, the boot inversion wipe). */
+    --ground-rgb: 255, 255, 255;
+    --ink-rgb:    0, 0, 0;
 
-    /* Pixel type ladder — whole pixels only. A pixel font at 13.7px is
-       a smear, so sizes never come from clamp(). */
-    --t1: 11px;   /* micro labels, column heads */
-    --t2: 13px;   /* body labels, nav, table cells */
-    --t3: 16px;   /* bars, lead-ins */
-    --t4: 22px;   /* sub-heads */
-    --t5: 32px;   /* section titles, small screens */
-    --t6: 48px;   /* section titles */
-    --t7: 72px;   /* hero name */
+    /* ── Type ───────────────────────────────────────────────────────
+       One family. Archivo is a grotesque drawn for headlines and for
+       small text at speed, which is exactly the two jobs on this page,
+       and its width axis gives a display cut and a text cut without a
+       second typeface to fight with.
 
-    /* ── Aliases ───────────────────────────────────────────────────
-       The teletext token names survive so every section stylesheet
-       keeps working — they now all resolve onto the phosphor ramp,
-       which is what turns the whole site monochrome in one place. */
-    --screen:      var(--scr);
-    --screen-rgb:  3, 12, 6;
-    --screen-high: var(--scr-high);
-    --bar:         var(--phos);          /* was the coloured header bar */
-    --bar-rgb:     53, 255, 91;
-    --ink:         var(--phos);
-    --ink-rgb:     53, 255, 91;
-    --ink-strong:  var(--phos-hot);
-    --ink-dim:     var(--phos-dim);
-    --ink-faint:   var(--phos-faint);
-    --hl:          var(--phos-hot);      /* was headline yellow */
-    --hl-rgb:      200, 255, 212;
-    --lab:         var(--phos);          /* was label cyan */
-    --lab-rgb:     53, 255, 91;
-    --grn:         var(--phos);
-    --grn-rgb:     53, 255, 91;
-    --red:         var(--alert);
-    --red-rgb:     255, 106, 42;
-    --mag:         var(--phos);
-    --mag-rgb:     53, 255, 91;
+       Plex Mono appears in one place only: the boot log, which is
+       genuinely monospaced content. It is never a label face. */
+    --font:      'Archivo Variable', 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 
-    --font-display: var(--font-term);
-    --font-mono:    var(--font-term);
-    --font-prose:   var(--font-hv);
-    --font-body:    var(--font-hv);
+    /* Width axis, applied through font-stretch. */
+    --wide:   112%;   /* the name, set huge */
+    --normal: 100%;
 
-    --paper:       var(--scr);
-    --paper-rgb:   3, 12, 6;
-    --paper-high:  var(--scr-high);
-    --bg:          var(--scr);
-    --bg-rgb:      3, 12, 6;
-    --bg-color:    var(--scr);
-    --surface:     var(--scr-high);
-    --text:        var(--phos);
-    --text-rgb:    53, 255, 91;
-    --text-main:   var(--phos);
-    --text-dim:    var(--phos-dim);
-    --text-muted:  var(--phos-dim);
-    --border:      var(--phos-hair);
-    --border-color: var(--phos-hair);
-    --accent:      var(--phos-hot);
-    --accent-rgb:  200, 255, 212;
-    --svg-filter:  invert(1);
-    --ripple-rgb:  53, 255, 91;
+    /* ── Scale ──────────────────────────────────────────────────────
+       1.25 modular, off a 17px body. Only the display size flexes;
+       everything else is fixed so the vertical rhythm holds. */
+    --fs-micro: 0.78rem;    /* 12.5px — dates, counts, captions */
+    --fs-small: 0.875rem;   /* 14px   — rail, meta, buttons */
+    --fs-body:  1.0625rem;  /* 17px   — running prose */
+    --fs-lead:  1.3125rem;  /* 21px   — section lead-ins, h3 */
+    --fs-h2:    2.125rem;   /* 34px   — section titles */
+    --fs-h1:    clamp(3.5rem, 10vw, 8.25rem);
+
+    --lh-tight: 1.15;
+    --lh-body:  1.6;
+
+    /* ── Space ──────────────────────────────────────────────────────
+       A 4px base. Sections are separated by --s9, records by --s5. */
+    --s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;
+    --s5: 24px;  --s6: 32px;  --s7: 48px;  --s8: 72px;
+    --s9: 112px;
+
+    /* ── Frame ──────────────────────────────────────────────────────
+       The measure is the spine of the page: one column, ragged right,
+       never wider than a comfortable line. */
+    --measure:  66ch;
+    --bar-h:    56px;   /* top bar */
+    --rail-w:   200px;  /* index rail */
+    --gutter:   40px;
+
+    /* ── Motion ─────────────────────────────────────────────────────
+       Three moments on the whole site: the boot, the session
+       inversion, and state feedback. Nothing animates on scroll. */
+    --t-swap:   320ms;
+    --t-state:  140ms;
+    --ease:     cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* ── SEVASTOLINK — amber phosphor (Personal) ───────────────────────
-   Same tube, same layout, different gun. Only the ramp moves. */
+/* ── Personal: after hours ──────────────────────────────────────────
+   The same six roles, inverted. Body copy sits at #ededed rather than
+   pure white — white body text on true black halates, and holding #fff
+   back means the brightest step still belongs to the headings. */
 [data-theme="personal"] {
-    --scr:         #100a02;
-    --scr-rgb:     16, 10, 2;
-    --scr-high:    #241503;
-    --phos:        #ffb32e;
-    --phos-rgb:    255, 179, 46;
-    --phos-hot:    #ffe9b8;
-    --phos-hot-rgb: 255, 233, 184;
-    --phos-dim:    rgba(255, 179, 46, 0.55);
-    --phos-faint:  rgba(255, 179, 46, 0.16);
-    --phos-hair:   rgba(255, 179, 46, 0.28);
-    --glow:        rgba(255, 179, 46, 0.5);
-    --alert:       #ff4d3d;
-    --alert-rgb:   255, 77, 61;
+    --ground:   #000000;
+    --ink:      #ededed;
+    --ink-max:  #ffffff;
+    --mute:     #9b9b9b;   /* 7.0:1 on black */
+    --rule:     #2e2e2e;
+    --fill:     #141414;
 
-    --screen-rgb:  16, 10, 2;
-    --bar-rgb:     255, 179, 46;
-    --ink-rgb:     255, 179, 46;
-    --hl-rgb:      255, 233, 184;
-    --lab-rgb:     255, 179, 46;
-    --grn-rgb:     255, 179, 46;
-    --red-rgb:     255, 77, 61;
-    --mag-rgb:     255, 179, 46;
-    --paper-rgb:   16, 10, 2;
-    --bg-rgb:      16, 10, 2;
-    --text-rgb:    255, 179, 46;
-    --accent-rgb:  255, 233, 184;
-    --ripple-rgb:  255, 179, 46;
+    --ground-rgb: 0, 0, 0;
+    --ink-rgb:    237, 237, 237;
 }
