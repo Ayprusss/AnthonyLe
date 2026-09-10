@@ -1,372 +1,90 @@
-/* ══════════════════════════════════════════════════════════════════
-   SEEGSON COLD BOOT — the tube the terminal runs on, powering up.
-   Always green, whichever profile the session is about to load: the set
-   doesn't know which user is signing in until the core hands over.
-   ══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   The boot console.
 
-.boot-scene {
-    /* Phosphor palette — the tube's own, not the site profile's. These
-       are the values --phos / --phos-hot carry in SEEGSON STANDARD, so a
-       cold boot hands off to an identical screen. */
-    --scr:    #030f04;                 /* CRT green-black */
-    --fg:     #35ff5b;                 /* P1 phosphor green */
-    --fg-dim: rgba(53, 255, 91, 0.5);  /* kernel / secondary text */
-    --fg-hot: #c8ffd4;                 /* hot white-green (flash, brights) */
-    --glow:   rgba(53, 255, 91, 0.55);
+   Always black, whichever session is loading — a machine does not know
+   which account it is about to open. This is the one place on the site
+   that sets a colour of its own rather than reading the session tokens,
+   and the one place monospace appears.
+   ═══════════════════════════════════════════════════════════════════ */
 
+.boot {
     position: fixed;
     inset: 0;
-    z-index: 60;                       /* above bezel (40) and grain (10) */
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    background:
-        radial-gradient(120% 120% at 50% 42%, #06210c 0%, var(--scr) 70%);
-    color: var(--fg);
-    font-family: var(--font-term);
+    z-index: 1000;
+    background: #000000;
+    color: #9b9b9b;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    padding: clamp(20px, 6vh, 64px) clamp(20px, 5vw, 72px);
     overflow: hidden;
     cursor: pointer;
-    outline: none;
-    animation: boot-flicker 4.5s steps(60) infinite;
+    border: 0;
 }
 
-/* Scanlines — the raster of the tube. */
-.boot-scene::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 3;
-    background: repeating-linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.32) 0px,
-        rgba(0, 0, 0, 0.32) 1px,
-        transparent 1px,
-        transparent 3px);
-    mix-blend-mode: multiply;
-}
-
-/* Curvature — vignette pulling the edges into the tube's corners. */
-.boot-scene::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 2;
-    background: radial-gradient(125% 100% at 50% 48%, transparent 52%, rgba(0, 0, 0, 0.78) 100%);
-}
-
-@keyframes boot-flicker {
-    0%, 96%, 100% { opacity: 1; }
-    97%           { opacity: 0.86; }
-    98%           { opacity: 1; }
-    99%           { opacity: 0.92; }
-}
-
-/* ── CRT power-on: a full-screen flash that blooms over everything ── */
-.boot-flash {
-    position: absolute;
-    inset: 0;                          /* full screen — encapsulates the tube */
-    z-index: 5;
-    background:
-        radial-gradient(140% 140% at 50% 50%,
-            var(--fg-hot) 0%,
-            rgba(200, 255, 212, 0.85) 34%,
-            rgba(53, 255, 91, 0.5) 62%,
-            transparent 100%);
-    animation: boot-power 0.62s ease-out forwards;
-}
-
-/* The set doesn't come up in one go: the gun strikes faintly, drops back
-   for a beat, then blooms open into the full raster. */
-@keyframes boot-power {
-    0%   { opacity: 0;    transform: scaleY(0.012); filter: brightness(2.6); }
-    7%   { opacity: 0.5;  transform: scaleY(0.014); }
-    16%  { opacity: 0.08; transform: scaleY(0.012); }
-    28%  { opacity: 1;    transform: scaleY(0.03); }
-    56%  { opacity: 1;    transform: scaleY(1); }
-    80%  { opacity: 0.5; }
-    100% { opacity: 0;    transform: scaleY(1); }
-}
-
-/* ── Dead tube: no signal, no raster flicker, just the dot burning off ── */
-.boot-scene.phase-dark {
-    background: #000;
-    animation: none;
-}
-
-/* Nothing on the glass can be lit while the set is off. */
-.boot-scene.phase-dark::before,
-.boot-scene.phase-dark::after,
-.boot-scene.phase-dark .boot-hint {
+/* On the personal session there is nothing to invert into — the page
+   underneath is already black — so the text simply goes out. */
+.boot.is-exiting .boot-log,
+.boot.is-exiting .boot-hint {
     opacity: 0;
+    transition: opacity 240ms var(--ease);
 }
 
-.boot-afterglow {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: 5;
-    width: 5px;
-    height: 5px;
-    margin: -2.5px 0 0 -2.5px;
-    border-radius: 50%;
-    background: var(--fg-hot);
-    box-shadow: 0 0 10px 3px var(--glow);
-    animation: boot-afterglow 0.85s ease-out forwards;
+.boot-log { white-space: pre; }
+
+.boot-line { display: flex; gap: 0.75em; }
+
+.boot-gap { height: 1.7em; }
+
+.boot-head { color: #ffffff; }
+
+/* The status tag is the only thing on the line that is scanned, so it
+   is the only thing set at full brightness. */
+.boot-ok {
+    color: #ffffff;
+    flex: none;
 }
 
-@keyframes boot-afterglow {
-    0%   { opacity: 0.95; transform: scale(1); }
-    30%  { opacity: 0.4;  transform: scale(0.7); }
-    65%  { opacity: 0.12; transform: scale(0.4); }
-    100% { opacity: 0;    transform: scale(0.2); }
+.boot-prompt { color: #ffffff; margin-top: 0.85em; }
+
+.boot-cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1em;
+    margin-left: 0.12em;
+    background: #ffffff;
+    vertical-align: text-bottom;
+    /* A terminal cursor blinks; it never eases. */
+    animation: boot-blink 1s steps(1, end) infinite;
 }
-
-/* ── CRT power-off: the picture collapses to a bright line, then a dot ── */
-.boot-collapse {
-    position: absolute;
-    inset: 0;                          /* full screen — the whole raster */
-    z-index: 5;
-    transform-origin: 50% 50%;
-    background:
-        linear-gradient(to bottom,
-            transparent 0%,
-            rgba(53, 255, 91, 0.25) 44%,
-            var(--fg-hot) 50%,
-            rgba(53, 255, 91, 0.25) 56%,
-            transparent 100%);
-    animation: boot-poweroff 0.6s cubic-bezier(0.6, 0, 0.85, 0.2) forwards;
-}
-
-@keyframes boot-poweroff {
-    0%   { transform: scaleY(1)     scaleX(1);    opacity: 1; filter: brightness(1.3); }
-    46%  { transform: scaleY(0.006) scaleX(1);    opacity: 1; filter: brightness(2.4); }
-    72%  { transform: scaleY(0.006) scaleX(0.03); opacity: 1; filter: brightness(2.6); }
-    100% { transform: scaleY(0.006) scaleX(0.03); opacity: 0; filter: brightness(3); }
-}
-
-/* ── The console fills the tube from the top-left ── */
-.boot-inner {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 940px;
-    padding: clamp(1.4rem, 5vh, 3rem) clamp(1.4rem, 5vw, 3.6rem);
-    display: flex;
-    flex-direction: column;
-    gap: 0.18rem;
-    font-size: clamp(0.7rem, 1.35vw, 0.86rem);
-    line-height: 1.55;
-    letter-spacing: 0.02em;
-    text-shadow: 0 0 5px var(--glow), 0 0 12px rgba(53, 255, 91, 0.25);
-}
-
-.boot-line {
-    display: flex;
-    gap: 0.6rem;
-    white-space: pre;
-    animation: boot-line-in 0.06s steps(1, end) both;
-}
-.boot-line.k-gap { min-height: 0.7em; }
-
-@keyframes boot-line-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
-
-.boot-tag { flex: none; }
-.boot-body { white-space: pre-wrap; }
-
-/* Firmware banner — brightest. */
-.k-bios .boot-body { color: var(--fg-hot); }
-
-/* Core section heading. */
-.k-hdr .boot-body {
-    color: var(--fg-hot);
-    letter-spacing: 0.24em;
-}
-
-/* Kernel ring buffer — dim timestamps, mid-bright message. */
-.k-kmsg { color: var(--fg-dim); }
-.k-kmsg .boot-tag  { color: var(--fg-dim); }
-.k-kmsg .boot-body { color: var(--fg); }
-
-/* systemd unit starts — the bracket glows, message reads normal. */
-.k-ok .boot-tag {
-    color: var(--fg-hot);
-    text-shadow: 0 0 8px var(--glow);
-}
-
-.k-svc .boot-body   { color: var(--fg-dim); }
-.k-login .boot-body { color: var(--fg-hot); }
-
-/* ── Operator plate ──────────────────────────────────────────────────
-   The corporate identification card the terminal prints before it hands
-   the session over: the wordmark boxed in a hairline rule, the operator
-   under it, the station line ruled beneath. Modelled on the SEEGSON
-   CORPORATION plate the Sevastopol sets show on power-up. */
-.boot-plate-wrap {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-}
-
-.boot-plate {
-    display: flex;
-    flex-direction: column;
-    width: min(660px, 86vw);
-    filter: drop-shadow(0 0 18px rgba(53, 255, 91, 0.35));
-}
-
-.boot-plate-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.7rem;
-    border: 1px solid var(--fg);
-    padding: 1.6rem 1.4rem 1.3rem;
-    justify-content: center;
-}
-
-/* The wordmark. Horizontal slices are carved out of the glyphs with a
-   mask — the plate is a lit stencil, not a printed logo, and the tube's
-   own raster is too fine to read as one.
-   Nostromo is a condensed face, so it needs a hard horizontal stretch
-   to reach the extended proportions of a corporate plate — the stems
-   stay heavy while the counters open up. scaleX doesn't touch layout,
-   so the font-size is kept well under the box width for the overhang. */
-.boot-mark {
-    position: relative;
-    display: block;
-    font-family: var(--font-mark);
-    font-size: clamp(1.7rem, 5vw, 3.3rem);
-    font-weight: 400;
-    line-height: 1.05;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--fg);
-    transform: scaleX(1.25);
-    -webkit-mask-image: repeating-linear-gradient(
-        to bottom,
-        #000 0, #000 5px, transparent 5px, transparent 8px);
-    mask-image: repeating-linear-gradient(
-        to bottom,
-        #000 0, #000 5px, transparent 5px, transparent 8px);
-}
-
-/* Holds the row open at its finished width; never drawn. */
-.boot-mark-ghost { visibility: hidden; }
-
-.boot-mark-live {
-    position: absolute;
-    inset: 0;
-    text-align: left;
-    white-space: pre;
-}
-
-.boot-plate-name {
-    font-size: clamp(0.62rem, 1.6vw, 0.82rem);
-    letter-spacing: 0.7em;
-    text-indent: 0.7em;      /* balance the trailing letter-space */
-    text-transform: uppercase;
-    color: var(--fg-hot);
-    opacity: 0;
-    transition: opacity 0.28s steps(3, end);
-}
-
-.boot-plate-name.is-in { opacity: 1; }
-
-/* The station line resolves under the box, ruled, as on the plate. */
-.boot-plate-rule {
-    margin-top: -1px;
-    border: 1px solid var(--fg);
-    border-top: none;
-    padding: 0.4rem 0.7rem;
-    font-size: clamp(0.6rem, 1.5vw, 0.78rem);
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--fg);
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.28s steps(3, end);
-}
-
-.boot-plate-rule.is-in { opacity: 1; }
 
 @keyframes boot-blink {
-    0%, 49%  { opacity: 1; }
-    50%, 100% { opacity: 0; }
+    0%, 50%   { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
 }
 
-/* ── Skip hint ── */
 .boot-hint {
     position: absolute;
-    bottom: 1.5rem;
-    right: 1.8rem;
-    z-index: 1;
-    font-size: 0.58rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--fg-dim);
-    text-shadow: 0 0 6px var(--glow);
-    animation: boot-blink 1.5s steps(1, end) infinite;
+    right: clamp(20px, 5vw, 72px);
+    bottom: clamp(20px, 6vh, 64px);
+    font-size: 11px;
+    color: #4a4a4a;
 }
 
-/* ── Static hand-off — green snow bridging into the service ── */
-.boot-static {
+/* ── The hand-off ───────────────────────────────────────────────────
+   Identical to the session wipe in Home.css, because it is the same
+   move: one hard edge of the incoming ground colour crossing the page.
+   Seeing it at the end of the boot is what teaches the toggle. */
+
+.boot-invert {
     position: absolute;
     inset: 0;
-    z-index: 6;
-    pointer-events: none;
-    opacity: 0;
-    background:
-        repeating-linear-gradient(0deg,
-            rgba(53, 255, 91, 0.55) 0px,
-            rgba(53, 255, 91, 0.55) 1px,
-            transparent 1px, transparent 2px),
-        repeating-linear-gradient(90deg,
-            rgba(200, 255, 212, 0.4) 0px,
-            rgba(200, 255, 212, 0.4) 1px,
-            transparent 1px, transparent 3px);
-    background-size: 3px 3px, 4px 4px;
+    background: #ffffff;
+    transform-origin: left center;
+    animation: wipe-across 300ms var(--ease) forwards;
 }
 
-.boot-scene.phase-exit { animation: boot-exit 0.46s steps(6, end) forwards; }
-.boot-scene.phase-exit .boot-static { animation: boot-snow 0.46s steps(4, end) forwards; }
-
-@keyframes boot-exit {
-    0%   { opacity: 1; }
-    68%  { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-@keyframes boot-snow {
-    0%   { opacity: 0;    background-position: 0 0, 0 0; }
-    28%  { opacity: 0.9;  background-position: 2px -7px, -5px 3px; }
-    58%  { opacity: 0.7;  background-position: -3px 5px, 4px -6px; }
-    100% { opacity: 0;    background-position: 1px 9px, -2px 4px; }
-}
-
-@media (max-width: 620px) {
-    .boot-inner { font-size: 0.66rem; }
-    .boot-hint { right: 1.1rem; letter-spacing: 0.2em; }
-}
-
-/* Reduced motion — belt & braces; Home also bypasses the scene entirely. */
-@media (prefers-reduced-motion: reduce) {
-    .boot-scene,
-    .boot-flash,
-    .boot-afterglow,
-    .boot-line,
-    .boot-hint,
-    .boot-scene.phase-exit,
-    .boot-scene.phase-exit .boot-static {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-    }
+@media (max-width: 640px) {
+    .boot { font-size: 11.5px; }
+    .boot-hint { left: 20px; right: auto; }
 }
