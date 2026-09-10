@@ -1,171 +1,43 @@
-.about-content {
+/* About — prose, a portrait, and the short answers. */
+
+.about-prose {
+    margin-top: var(--s6);
+    max-width: 58ch;
+}
+
+.about-detail {
+    margin-top: var(--s8);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--rule);
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 4rem;
+    grid-template-columns: 200px 1fr;
+    gap: var(--s7);
     align-items: start;
 }
 
-/* ── Profile notes ── */
-.about-notes-caption {
-    display: inline-block;
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    color: var(--screen);
-    background: var(--lab);
-    padding: 0.28rem 0.6rem 0.18rem;
-    margin-bottom: 1.6rem;
-    transition: background 0.5s ease;
+.about-portrait {
+    margin: 0;
 }
 
-.about-notes-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.6rem;
-    list-style: none;
-}
-
-.about-note {
-    display: flex;
-    gap: 1.1rem;
-    align-items: baseline;
-}
-
-.about-note-no {
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    line-height: 1;
-    color: var(--hl);
-    flex-shrink: 0;
-}
-
-.about-note-text {
-    font-family: var(--font-prose);
-    font-size: 0.92rem;
-    line-height: 1.85;
-    color: var(--ink);
-}
-
-/* ── Still frame ── */
-.about-rail {
-    display: flex;
-    flex-direction: column;
-    gap: 2.2rem;
-}
-
-.about-portrait { margin: 0; }
-
-.about-portrait-frame {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    background: rgba(var(--ink-rgb), 0.04);
-    box-shadow: 0 0 0 1px var(--ink-faint);
-    overflow: hidden;
-}
-
-.about-portrait-img {
-    position: relative;
-    z-index: 1;
+.about-portrait img {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
-    filter: saturate(0.85) contrast(1.05);
-}
-
-/* NO SIGNAL — colour bars while the still is missing */
-.about-portrait-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 1.2rem;
-    background: linear-gradient(
-        90deg,
-        rgba(var(--ink-rgb), 0.5)  0 12.5%,
-        rgba(var(--hl-rgb), 0.45)  12.5% 25%,
-        rgba(var(--lab-rgb), 0.45) 25% 37.5%,
-        rgba(var(--grn-rgb), 0.4)  37.5% 50%,
-        rgba(var(--mag-rgb), 0.4)  50% 62.5%,
-        rgba(var(--red-rgb), 0.45) 62.5% 75%,
-        rgba(var(--bar-rgb), 0.55) 75% 87.5%,
-        rgba(var(--ink-rgb), 0.14) 87.5% 100%
-    );
-}
-
-.about-portrait-ph-label {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    letter-spacing: 0.1em;
-    color: var(--ink-strong);
-    background: rgba(var(--screen-rgb), 0.85);
-    padding: 0.3rem 0.7rem;
-    animation: dot-pulse 1.6s steps(1) infinite;
-}
-
-.about-portrait-caption {
-    display: flex;
-    align-items: baseline;
-    gap: 0.8rem;
-    margin-top: 0.7rem;
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
-    color: var(--ink-dim);
-}
-
-.about-portrait-tag {
-    font-family: var(--font-display);
-    font-size: 0.95rem;
-    color: var(--hl);
-}
-
-/* ── Quick facts ── */
-.about-facts-caption {
-    display: inline-block;
-    font-family: var(--font-display);
-    font-size: 1rem;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    color: #fff;
-    background: var(--bar);
-    padding: 0.28rem 0.6rem 0.18rem;
-    margin-bottom: 1rem;
-    transition: background 0.5s ease;
+    /* The one image on the site sits in the same monochrome as
+       everything around it; a colour photograph here would be the only
+       hue on the page and would read as an accident. */
+    filter: grayscale(1) contrast(1.05);
 }
 
 .about-facts {
-    display: flex;
-    flex-direction: column;
+    align-content: start;
 }
 
-.about-fact {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.8rem 0;
-    border-bottom: 1px solid var(--ink-faint);
-}
+@media (max-width: 640px) {
+    .about-detail {
+        grid-template-columns: 1fr;
+        gap: var(--s6);
+    }
 
-.about-fact-label {
-    font-family: var(--font-mono);
-    font-size: 0.56rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--lab);
-}
-
-.about-fact-value {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    color: var(--ink);
-}
-
-@media (max-width: 900px) {
-    .about-content { grid-template-columns: 1fr; gap: 2.8rem; }
-    .about-rail { flex-direction: column-reverse; }
-    .about-portrait-frame { max-width: 360px; }
+    .about-portrait { max-width: 180px; }
 }

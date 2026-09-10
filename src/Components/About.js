@@ -1,104 +1,54 @@
-import { motion } from 'framer-motion';
-import { SectionHeader } from './ui/SectionHeader';
-
+import React, { useState } from 'react';
+import { Section } from './ui/Section';
 import './About.css';
 
-// TODO: replace placeholder copy with real bio + facts (user-supplied).
 const paragraphs = [
-    "I am a fourth-year Computer Science student at the University of Ottawa. After finishing my Software Developer Internship at Magnet Forensics, I am now currently on summer break exploring more about the world of Computer Science and relaxing at home.",
-    "I am based in Ottawa, Ontario, and hope to explore the world in the future. After hours, I enjoy Rock climbing, Gaming, Music (Particularly Underground Rap), Hiking, Exercising and Fashion.",
+    "I'm a fourth-year Computer Science student about to finish my last year at the University of Ottawa.",
+    "I am hoping to exit Ottawa and enter Toronto for full-time positions. I am currently looking for Summer 2027 Internships or Full-time roles.",
 ];
 
 const facts = [
-    { label: "Based in", value: "Ottawa, Canada" },
-    { label: "Currently", value: "Stuck on top of Mt. Fuji" },
-    { label: "Studying", value: "Computer Science" },
-    { label: "Off the clock", value: "Climbing, Fashion, Gaming, Exercising, Hiking, Music" },
+    { label: "Based in",      value: "Ottawa, Canada" },
+    { label: "Studying",      value: "Computer science, University of Ottawa" },
+    { label: "Currently",     value: "Completing last year of Computer Science degree" },
+    { label: "Off the clock", value: "Climbing, hiking, the gym, fashion, gaming, music" },
 ];
 
-// General-notes sheet: numbered notes, a figure, and a spec table.
 const About = () => {
+    // The portrait is a real file in public/, but if it ever goes
+    // missing the figure removes itself rather than leaving a broken
+    // frame and a caption describing nothing.
+    const [hasPortrait, setHasPortrait] = useState(true);
+
     return (
-        <section className="section-container">
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6 }}
-            >
-                <SectionHeader
-                    title="About."
-                    meta="operator profile · 2 notes"
-                    subtitle="Computer Science Student at the University of Ottawa."
-                />
-            </motion.div>
+        <>
+            <Section title="About." />
 
-            <div className="about-content">
-                <motion.div
-                    className="about-notes"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                    <p className="about-notes-caption">IN HIS OWN WORDS:</p>
-                    <ol className="about-notes-list">
-                        {paragraphs.map((text, idx) => (
-                            <li className="about-note" key={idx}>
-                                <span className="about-note-no">{idx + 1}.</span>
-                                <p className="about-note-text">{text}</p>
-                            </li>
-                        ))}
-                    </ol>
-                </motion.div>
-
-                <div className="about-rail">
-                    {/* TODO: drop a real portrait at public/about-portrait.jpg (4:5 crop).
-                        Until then the hatched NO-PHOTO region prints. */}
-                    <motion.figure
-                        className="about-portrait"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: 0.15 }}
-                    >
-                        <div className="about-portrait-frame">
-                            <img
-                                src="/about-portrait.jpg"
-                                alt="Anthony Le"
-                                className="about-portrait-img"
-                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                            />
-                            <div className="about-portrait-placeholder" aria-hidden="true">
-                                <span className="about-portrait-ph-label">NO SIGNAL</span>
-                            </div>
-                        </div>
-                        <figcaption className="about-portrait-caption">
-                            <span className="about-portrait-tag">STILL A-1</span>
-                            <span>Anthony Le — Ottawa</span>
-                        </figcaption>
-                    </motion.figure>
-
-                    <motion.div
-                        className="about-facts-wrap"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                    >
-                        <p className="about-facts-caption">QUICK FACTS</p>
-                        <dl className="about-facts">
-                            {facts.map((fact, idx) => (
-                                <div className="about-fact" key={idx}>
-                                    <dt className="about-fact-label">{fact.label}</dt>
-                                    <dd className="about-fact-value">{fact.value}</dd>
-                                </div>
-                            ))}
-                        </dl>
-                    </motion.div>
-                </div>
+            <div className="prose about-prose">
+                {paragraphs.map((text) => <p key={text.slice(0, 24)}>{text}</p>)}
             </div>
-        </section>
+
+            <div className="about-detail">
+                {hasPortrait && (
+                    <figure className="about-portrait">
+                        <img
+                            src="/about-portrait.jpg"
+                            alt="Anthony Le"
+                            onError={() => setHasPortrait(false)}
+                        />
+                    </figure>
+                )}
+
+                <dl className="pairs about-facts">
+                    {facts.map(({ label, value }) => (
+                        <div key={label}>
+                            <dt className="pair-label">{label}</dt>
+                            <dd className="pair-value">{value}</dd>
+                        </div>
+                    ))}
+                </dl>
+            </div>
+        </>
     );
 };
 
