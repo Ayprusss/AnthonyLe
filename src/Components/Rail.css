@@ -1,0 +1,238 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Top bar, index rail, shortcut panel.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: var(--bar-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s5);
+    padding: 0 var(--gutter);
+    background: var(--ground);
+    border-bottom: 1px solid var(--rule);
+}
+
+.bar-name {
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--ink-max);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.bar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+}
+
+/* ── Session control ────────────────────────────────────────────────
+   Two cells sharing one outline. The selected cell is filled with ink,
+   which is the same inversion the page itself performs when you press
+   it — the control is a small preview of what it does. */
+
+.seg {
+    display: flex;
+    border: 1px solid var(--ink);
+}
+
+.seg-btn {
+    padding: 6px 12px;
+    font: inherit;
+    font-size: var(--fs-micro);
+    font-weight: 500;
+    line-height: 1.2;
+    background: transparent;
+    color: var(--ink);
+    border: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--t-state) var(--ease),
+                color var(--t-state) var(--ease);
+}
+
+.seg-btn + .seg-btn { border-left: 1px solid var(--ink); }
+
+.seg-btn[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--ground);
+    cursor: default;
+}
+
+.seg-btn[aria-pressed="false"]:hover { background: var(--fill); }
+
+.bar-help {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    font: inherit;
+    font-size: var(--fs-small);
+    background: transparent;
+    color: var(--mute);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: color var(--t-state) var(--ease),
+                border-color var(--t-state) var(--ease);
+}
+
+.bar-help:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ── Index rail ─────────────────────────────────────────────────────
+   Fixed rather than sticky so it never scrolls out from under the
+   reader on a long section. */
+
+.rail {
+    position: fixed;
+    top: var(--bar-h);
+    left: 0;
+    width: var(--rail-w);
+    padding: var(--s8) 0 var(--s7) var(--gutter);
+    z-index: 90;
+}
+
+.rail-list { display: grid; gap: 2px; }
+
+.rail-link {
+    display: block;
+    padding: 5px 0 5px var(--s3);
+    font-size: var(--fs-small);
+    color: var(--mute);
+    text-decoration: none;
+    /* The marker lives on the link at all times and is simply
+       transparent when it is not the current one, so nothing shifts
+       sideways as you scroll. */
+    border-left: 2px solid transparent;
+    transition: color var(--t-state) var(--ease),
+                border-color var(--t-state) var(--ease);
+}
+
+.rail-link:hover { color: var(--ink); }
+
+.rail-link[aria-current="true"] {
+    color: var(--ink-max);
+    font-weight: 600;
+    border-left-color: var(--ink-max);
+}
+
+.rail-rule {
+    margin: var(--s5) var(--s5) var(--s5) var(--s3);
+}
+
+.rail-links {
+    display: grid;
+    gap: var(--s2);
+    padding-left: var(--s3);
+    font-size: var(--fs-small);
+}
+
+.rail-links a { color: var(--mute); }
+.rail-links a:hover { color: var(--ink); }
+
+/* ── Narrow: the rail lies down under the bar ───────────────────────
+   Same list, same order, same current-item marker moved to the
+   underside. No hamburger: six short words fit on one line and a menu
+   that has to be opened is a menu that gets ignored. */
+
+@media (max-width: 1039px) {
+    .rail {
+        top: var(--bar-h);
+        left: 0;
+        right: 0;
+        width: auto;
+        height: 44px;
+        padding: 0;
+        display: flex;
+        align-items: stretch;
+        background: var(--ground);
+        border-bottom: 1px solid var(--rule);
+    }
+
+    .rail-list {
+        display: flex;
+        gap: 0;
+        align-items: stretch;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 0 var(--gutter);
+    }
+
+    .rail-list::-webkit-scrollbar { display: none; }
+
+    .rail-link {
+        display: flex;
+        align-items: center;
+        padding: 0 var(--s3);
+        white-space: nowrap;
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+    }
+
+    .rail-link[aria-current="true"] {
+        border-left: 0;
+        border-bottom-color: var(--ink-max);
+    }
+
+    /* The external links are already in the footer; repeating them in
+       a strip this tight would only crowd the index. */
+    .rail-rule,
+    .rail-links { display: none; }
+}
+
+@media (max-width: 640px) {
+    .bar { padding: 0 var(--s5); gap: var(--s3); }
+    .rail-list { padding: 0 var(--s5); }
+    .bar-name { font-size: var(--fs-micro); }
+    .bar-help { display: none; }
+}
+
+/* ── Shortcut panel ─────────────────────────────────────────────────
+   Shown on request and never otherwise. */
+
+.help-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: var(--s5);
+    background: rgba(var(--ground-rgb), 0.86);
+}
+
+.help {
+    width: min(340px, 100%);
+    padding: var(--s6);
+    background: var(--ground);
+    border: 1px solid var(--ink);
+}
+
+.help-title {
+    font-size: var(--fs-lead);
+    font-weight: 600;
+    color: var(--ink-max);
+}
+
+.help-list {
+    margin: var(--s5) 0 var(--s6);
+    display: grid;
+    gap: var(--s3);
+}
+
+.help-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: var(--s4);
+    align-items: baseline;
+    font-size: var(--fs-small);
+}
+
+.help-keys {
+    font-family: var(--font-mono);
+    color: var(--ink-max);
+}
+
+.help-action { color: var(--mute); margin: 0; }
