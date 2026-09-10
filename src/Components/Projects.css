@@ -1,154 +1,18 @@
-/* ── Record grid ── */
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.4rem;
+/* Projects — the only thing here that is not shared record chrome is
+   the technology run underneath each entry. */
+
+.proj-tech {
+    margin-top: var(--s4);
 }
 
-/* the fifth record spans the full row */
-.detail-panel:last-child:nth-child(odd) {
-    grid-column: 1 / -1;
+/* Each technology carries a hairline underneath rather than sitting in
+   a pill. It marks where one name ends and the next begins without
+   building eight little boxes to do it. */
+.proj-tech span {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1px;
 }
 
-.detail-panel {
-    display: flex;
-    flex-direction: column;
-    /* Grid items default to min-width:auto, so a long unbroken title
-       would push the panel past the column. */
-    min-width: 0;
-    background: rgba(var(--phos-rgb), 0.035);
-    box-shadow: 0 0 0 1px var(--phos-faint);
-    transition: background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.detail-panel:hover {
-    background: rgba(var(--phos-rgb), 0.07);
-    box-shadow: 0 0 0 1px var(--phos);
-}
-
-/* ── Record title strip — inverse video ── */
-.detail-top {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    background: var(--bar);
-    padding: 0.45rem 0.8rem;
-    transition: background 0.5s ease;
-}
-
-.detail-bubble {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    line-height: 1;
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--screen);
-    background: var(--hl);
-    transition: background 0.5s ease;
-}
-
-/* The title strip is inverse video, so everything riding it is
-   screen-coloured — white would be a second ink the tube can't make. */
-.detail-caption {
-    font-family: var(--font-term);
-    font-size: var(--t2);
-    line-height: 1;
-    letter-spacing: 0.14em;
-    color: var(--scr);
-    opacity: 0.75;
-}
-
-/* A deployed project is the one thing on this page the terminal flags,
-   so it gets the alert phosphor. */
-.detail-asbuilt {
-    font-family: var(--font-term);
-    font-size: var(--t1);
-    letter-spacing: 0.2em;
-    color: var(--scr);
-    background: var(--alert);
-    padding: 3px 7px;
-    animation: dot-pulse 2s steps(1) infinite;
-}
-
-.detail-top-fill { flex: 1; }
-
-.detail-links {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-}
-
-.detail-links a {
-    display: inline-flex;
-    color: var(--scr);
-    opacity: 0.8;
-    transition: opacity 0.12s steps(2, end);
-}
-
-.detail-links a:hover { opacity: 1; }
-
-/* ── Record body ── */
-.detail-title {
-    overflow-wrap: anywhere;
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 2.1rem;
-    line-height: 1;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--ink-strong);
-    padding: 1.2rem 1.2rem 0.5rem;
-}
-
-.detail-description {
-    font-family: var(--font-prose);
-    font-size: 0.82rem;
-    line-height: 1.75;
-    color: var(--ink-dim);
-    padding: 0 1.2rem 1.2rem;
-    flex: 1;
-}
-
-/* ── Credits strip ── */
-.detail-matl {
-    display: flex;
-    align-items: baseline;
-    gap: 0.9rem;
-    padding: 0.8rem 1.2rem;
-    border-top: 1px solid var(--ink-faint);
-}
-
-.detail-matl-label {
-    font-family: var(--font-mono);
-    font-size: 0.52rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    color: var(--lab);
-    flex-shrink: 0;
-}
-
-.detail-matl-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem 0;
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    color: var(--ink-dim);
-}
-
-.detail-matl-list > span { white-space: nowrap; }
-
-.detail-matl-list > span:not(:last-child)::after {
-    content: '·';
-    color: rgba(var(--hl-rgb), 0.7);
-    margin: 0 0.45rem;
-}
-
-@media (max-width: 860px) {
-    .detail-grid { grid-template-columns: 1fr; }
-    .detail-panel:last-child:nth-child(odd) { grid-column: auto; }
-    .detail-title { font-size: 1.8rem; }
+.proj-links {
+    margin-top: var(--s4);
 }
