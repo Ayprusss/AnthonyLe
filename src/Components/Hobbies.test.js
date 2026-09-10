@@ -1,25 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Hobbies from './Hobbies';
-
-jest.mock('framer-motion', () => {
-  const React = require('react');
-  const strip = (Tag) => React.forwardRef(({ children, ...props }, ref) => {
-    const {
-      initial, animate, exit, whileInView, whileHover, whileTap, viewport,
-      transition, delay, variants, custom, drag, dragConstraints, dragElastic,
-      dragMomentum, dragSnapToOrigin, onDragStart, onDragEnd, ...valid
-    } = props;
-    return <Tag ref={ref} {...valid}>{children}</Tag>;
-  });
-  const motion = new Proxy({}, { get: (_, tag) => strip(tag) });
-  return { motion, AnimatePresence: ({ children }) => <>{children}</> };
-});
-
-jest.mock('./ui/TextScramble', () => ({
-  TextScramble: ({ text, as: Tag = 'span', className }) => <Tag className={className}>{text}</Tag>,
-}));
 
 describe('Hobbies Component', () => {
   test('renders the Hobbies heading', () => {
@@ -27,26 +9,36 @@ describe('Hobbies Component', () => {
     expect(screen.getByRole('heading', { name: /hobbies\./i, level: 2 })).toBeInTheDocument();
   });
 
-  test('shows the first hobby as the active card', () => {
+  // The carousel is gone: every hobby is on the page at once, so there
+  // is nothing to page through and nothing hidden behind an arrow.
+  test('renders every hobby', () => {
     render(<Hobbies />);
-    expect(screen.getByRole('heading', { name: /Rock Climbing/i, level: 3 })).toBeInTheDocument();
+    const names = [
+      /Rock Climbing/i,
+      /Music/i,
+      /Gaming/i,
+      /Fashion/i,
+      /Exercising/i,
+      /Hiking/i,
+    ];
+    names.forEach((name) => {
+      expect(screen.getByRole('heading', { name, level: 3 })).toBeInTheDocument();
+    });
   });
 
-  test('renders carousel navigation controls', () => {
+  test('leads with rock climbing', () => {
     render(<Hobbies />);
-    expect(screen.getByRole('button', { name: /next hobby/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /previous hobby/i })).toBeInTheDocument();
+    const headings = screen.getAllByRole('heading', { level: 3 });
+    expect(headings[0]).toHaveTextContent(/Rock Climbing/i);
   });
 
-  test('advances to the next hobby when the next arrow is clicked', () => {
+  test('only links out where there is somewhere to go', () => {
     render(<Hobbies />);
-    fireEvent.click(screen.getByRole('button', { name: /next hobby/i }));
-    expect(screen.getByRole('heading', { name: /Hiking/i, level: 3 })).toBeInTheDocument();
-  });
-
-  test('wraps to the last hobby when going previous from the first', () => {
-    render(<Hobbies />);
-    fireEvent.click(screen.getByRole('button', { name: /previous hobby/i }));
-    expect(screen.getByRole('heading', { name: /Gaming/i, level: 3 })).toBeInTheDocument();
+    const links = screen.getAllByRole('link');
+    expect(links.length).toBe(2);
+    links.forEach((link) => {
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    });
   });
 });
