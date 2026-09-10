@@ -1,190 +1,196 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { MotionConfig } from 'framer-motion';
 import './Home.css';
-import '../../Components/GrainOverlay.css';
+
 import BootScene from '../../Components/BootScene';
-import Navbar from '../../Components/Navbar';
-import KeyLegend from '../../Components/KeyLegend';
-import Hero from '../../Components/Hero';
-import Skills from '../../Components/Skills';
-import Projects from '../../Components/Projects';
+import Rail from '../../Components/Rail';
+import Overview from '../../Components/Overview';
+
 import Experience from '../../Components/Experience';
+import Projects from '../../Components/Projects';
+import Skills from '../../Components/Skills';
 import Resume from '../../Components/Resume';
 import About from '../../Components/About';
-import Volunteering from '../../Components/Volunteering';
 import Hobbies from '../../Components/Hobbies';
+import Volunteering from '../../Components/Volunteering';
 import Contact from '../../Components/Contact';
-import Schematic from '../../Components/Schematic';
 
-// Page sets per channel. Hero (page 100 index) and Contact (page 600)
-// bookend both services; slots stay position-aligned so page numbers
-// 100–600 never shift between channels.
+// Two sessions of one page. Overview and Contact bookend both; the four
+// sections between them are what changes, because what a hiring manager
+// wants to know and what someone curious about the person wants to know
+// are not the same four things.
+//
+// Professional leads with Experience — it is the first thing anyone
+// scanning a portfolio looks for, and burying it under a skills dump
+// costs the reader the one thing they came for.
 const SECTIONS = {
     professional: [
-        { id: 'skills',       label: 'skills',       Component: Skills },
-        { id: 'projects',     label: 'projects',     Component: Projects },
-        { id: 'experience',   label: 'experience',   Component: Experience },
-        { id: 'resume',       label: 'resume',       Component: Resume },
+        { id: 'experience',   label: 'Experience',   Component: Experience },
+        { id: 'projects',     label: 'Projects',     Component: Projects },
+        { id: 'skills',       label: 'Skills',       Component: Skills },
+        { id: 'resume',       label: 'Résumé',       Component: Resume },
     ],
     personal: [
-        { id: 'about',        label: 'about',        Component: About },
-        { id: 'volunteering', label: 'volunteering', Component: Volunteering },
-        { id: 'experience',   label: 'experience',   Component: Experience },
-        { id: 'hobbies',      label: 'hobbies',      Component: Hobbies },
+        { id: 'about',        label: 'About',        Component: About },
+        { id: 'hobbies',      label: 'Hobbies',      Component: Hobbies },
+        { id: 'volunteering', label: 'Volunteering', Component: Volunteering },
+        { id: 'experience',   label: 'Experience',   Component: Experience },
     ],
 };
 
-// Whether the receiver can run its CRT boot animations. False for
-// reduced-motion viewers and in jsdom (no matchMedia) — so those swap the
-// channel instantly and the section tests render the service directly.
-const canBootAnimate = () =>
+const GROUND = { professional: '#ffffff', personal: '#000000' };
+
+// Whether this visitor gets the boot and the inversion at all. False for
+// reduced-motion viewers and in jsdom, where there is no matchMedia — so
+// tests render the page directly with no overlay in the way.
+const canAnimate = () =>
     typeof window !== 'undefined' &&
     typeof window.matchMedia === 'function' &&
     !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Play the first sign-on once per session (and only where we can animate).
-const shouldSignOn = () => {
+// The boot runs once per browser session, not once per page load.
+const shouldBoot = () => {
     try {
-        if (sessionStorage.getItem('ch741-signed-on')) return false;
+        if (sessionStorage.getItem('booted')) return false;
     } catch (_) {}
-    return canBootAnimate();
+    return canAnimate();
 };
 
 const Home = () => {
     const [theme, setTheme] = useState(() => {
         try {
             return localStorage.getItem('site-theme') === 'personal' ? 'personal' : 'professional';
-        } catch {
+        } catch (_) {
             return 'professional';
         }
     });
 
-    // Brief hold-roll glitch while the receiver retunes between channels.
-    const [tuning, setTuning] = useState(false);
-    const firstRender = useRef(true);
+    const [booting, setBooting] = useState(shouldBoot);
+    const [activeId, setActiveId] = useState('overview');
 
-    // Boot overlay state: 'cold' first sign-on, 'reboot' channel switch, or
-    // null when the service is live. The channel toggled into on a reboot is
-    // held here until the tube goes dark mid-cycle.
-    const [bootMode, setBootMode] = useState(() => (shouldSignOn() ? 'cold' : null));
-    const pendingTheme = useRef(null);
-    const booting = bootMode !== null;
+    // The session swap is a single wipe of the incoming ground colour
+    // travelling across the page. It is mounted only while it runs: when
+    // it unmounts, the page underneath is already that exact colour, so
+    // there is nothing to animate back out.
+    const [wipe, setWipe] = useState(null);
+    const swapTimer = useRef(null);
 
-    // TUNE — restart the receiver into the other channel. Without animation
-    // (reduced motion / tests) just swap. Ignored mid-cycle.
-    const handleToggle = useCallback(() => {
-        if (bootMode) return;
-        const next = theme === 'professional' ? 'personal' : 'professional';
-        if (!canBootAnimate()) { setTheme(next); return; }
-        pendingTheme.current = next;
-        setBootMode('reboot');
-    }, [bootMode, theme]);
+    const sections = SECTIONS[theme];
+    const navItems = [
+        { id: 'overview', label: 'Overview' },
+        ...sections.map(({ id, label }) => ({ id, label })),
+        { id: 'contact', label: 'Contact' },
+    ];
 
-    // Swap the channel while the tube is dark (power-off / skip).
-    const handleSwap = useCallback(() => {
-        if (pendingTheme.current) {
-            setTheme(pendingTheme.current);
-            pendingTheme.current = null;
-        }
-    }, []);
+    const switchTo = useCallback((next) => {
+        if (next === theme || wipe) return;
+        if (!canAnimate()) { setTheme(next); return; }
+
+        // Cover first, swap underneath, then drop the cover.
+        setWipe(GROUND[next]);
+        swapTimer.current = setTimeout(() => {
+            setTheme(next);
+            setWipe(null);
+        }, 300);
+    }, [theme, wipe]);
+
+    useEffect(() => () => clearTimeout(swapTimer.current), []);
 
     const handleBootDone = useCallback(() => {
-        try { sessionStorage.setItem('ch741-signed-on', '1'); } catch (_) {}
-        setBootMode(null);
-        setTuning(true);   // roll the service in as it locks
-        window.setTimeout(() => setTuning(false), 650);
+        try { sessionStorage.setItem('booted', '1'); } catch (_) {}
+        setBooting(false);
     }, []);
-
-    // Freeze the page behind the boot overlay so nothing scrolls under it.
-    useEffect(() => {
-        if (!booting) return;
-        const prev = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        window.scrollTo(0, 0);
-        return () => { document.body.style.overflow = prev; };
-    }, [booting]);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.style.colorScheme = theme === 'personal' ? 'dark' : 'light';
         try { localStorage.setItem('site-theme', theme); } catch (_) {}
     }, [theme]);
 
+    // Hold the page still behind the boot overlay. The content is mounted
+    // underneath the whole time so the boot's final wipe reveals a page
+    // that is already laid out rather than one that pops in.
     useEffect(() => {
-        if (firstRender.current) {
-            firstRender.current = false;
-            return;
-        }
-        // On a reboot the channel changes mid-cycle behind the overlay; the
-        // reveal roll is fired by handleBootDone instead.
-        if (booting) return;
-        setTuning(true);
-        const id = setTimeout(() => setTuning(false), 650);
-        return () => clearTimeout(id);
-    }, [theme, booting]);
+        if (!booting) return;
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        window.scrollTo(0, 0);
+        return () => { document.body.style.overflow = previous; };
+    }, [booting]);
 
-    // Re-observe sections whenever the channel swaps the rendered set, or
-    // once the sign-on completes and the service mounts.
+    // Which section the reader is in. Measured from scroll position
+    // rather than an IntersectionObserver: a section shorter than the
+    // observer band never reports, and Contact is exactly that short.
     useEffect(() => {
         if (booting) return;
-        document.documentElement.setAttribute('data-section', 'hero');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting)
-                    document.documentElement.setAttribute('data-section', entry.target.id);
-            });
-        }, { rootMargin: '-30% 0px -30% 0px' });
+        let queued = false;
 
-        document.querySelectorAll('main > div[id]').forEach(s => observer.observe(s));
-        return () => observer.disconnect();
-    }, [theme, booting]);
+        const measure = () => {
+            queued = false;
+            const ids = ['overview', ...sections.map((s) => s.id), 'contact'];
+            const line = 96; // just below the top bar
+
+            // At the very bottom the last section may never reach the
+            // line, so the end of the page always means the last entry.
+            const atBottom =
+                window.innerHeight + window.scrollY >= document.body.offsetHeight - 2;
+            if (atBottom) { setActiveId(ids[ids.length - 1]); return; }
+
+            let current = ids[0];
+            for (const id of ids) {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= line) current = id;
+            }
+            setActiveId(current);
+        };
+
+        const onScroll = () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(measure);
+        };
+
+        measure();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
+        };
+    }, [booting, sections]);
 
     return (
-        <MotionConfig reducedMotion="user">
-        <div className={`home-container${tuning ? ' is-tuning' : ''}`}>
-            {/* Background stack */}
-            <div className="base-bg" aria-hidden="true" />
-            <Schematic />
+        <>
+            <a className="skip-link" href="#main">Skip to content</a>
 
-            {/* CRT glass: scanlines, aperture grille, vignette */}
-            <div className="grain-overlay" aria-hidden="true" />
+            <Rail
+                theme={theme}
+                items={navItems}
+                activeId={activeId}
+                onSwitch={switchTo}
+            />
 
-            {/* Receiver bezel — rounded corner shadows over everything */}
-            <div className="crt-bezel" aria-hidden="true" />
+            <main id="main" className="content">
+                <section id="overview" className="section">
+                    <Overview theme={theme} />
+                </section>
 
-            {booting && (
-                <BootScene
-                    mode={bootMode}
-                    onSwap={handleSwap}
-                    onComplete={handleBootDone}
-                />
+                {sections.map(({ id, Component }) => (
+                    <section id={id} className="section" key={`${theme}-${id}`}>
+                        <Component />
+                    </section>
+                ))}
+
+                <section id="contact" className="section">
+                    <Contact />
+                </section>
+            </main>
+
+            {wipe && (
+                <div className="swap-wipe" style={{ background: wipe }} aria-hidden="true" />
             )}
 
-            {/* The service — navbar and pages — mounts only once the tube
-                finishes booting, so nothing shows over the boot/reboot. */}
-            {!booting && (
-                <>
-                    <Navbar
-                        theme={theme}
-                        links={SECTIONS[theme]}
-                        onToggleTheme={handleToggle}
-                    />
-
-                    <main>
-                        <div id="hero"><Hero sections={SECTIONS[theme]} /></div>
-                        {SECTIONS[theme].map(({ id, Component }) => (
-                            <div id={id} key={id}><Component /></div>
-                        ))}
-                        <div id="contact"><Contact /></div>
-                    </main>
-
-                    <KeyLegend
-                        sections={SECTIONS[theme]}
-                        onToggleTheme={handleToggle}
-                    />
-                </>
-            )}
-        </div>
-        </MotionConfig>
+            {booting && <BootScene theme={theme} onComplete={handleBootDone} />}
+        </>
     );
 };
 

@@ -1,70 +1,71 @@
-.home-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    position: relative;
+/* ═══════════════════════════════════════════════════════════════════
+   The frame.
+
+   A slim bar across the top, a sticky index down the left, one column
+   of content beside it. Nothing is fixed to the bottom of the window
+   and nothing floats over the text.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.content {
+    /* The rail is fixed, so the column is inset by its width rather
+       than sharing a grid with it — that keeps the measure identical
+       whether or not the rail is on screen. */
+    margin-left: calc(var(--rail-w) + var(--gutter));
+    padding: calc(var(--bar-h) + var(--s8)) var(--gutter) var(--s9);
+    max-width: calc(var(--measure) + var(--gutter) * 2);
 }
 
-.base-bg {
-    position: fixed;
-    inset: 0;
-    z-index: -3;
-    background:
-        radial-gradient(115% 85% at 50% 38%, var(--scr-high) 0%, var(--scr) 72%);
-    transition: background 0.5s ease;
+/* Sections are separated by space alone. There is no divider between
+   them: the title already says a new one has started. */
+.content > .section + .section {
+    margin-top: var(--s9);
 }
 
-/* ── Tube glass: soft rounded-corner shadow at the edge of the picture ── */
-.crt-bezel {
+/* ── The session wipe ───────────────────────────────────────────────
+   One hard edge of the incoming ground colour crossing the page. It is
+   mounted only while it travels; by the time it is removed the page
+   behind it is already that colour, so there is no wipe back. The boot
+   hands off with the identical move, which is what ties the two
+   together. */
+
+.swap-wipe {
     position: fixed;
     inset: 0;
-    z-index: 40;
+    z-index: 900;
     pointer-events: none;
-    border-radius: 14px;
-    box-shadow:
-        inset 0 0 90px rgba(0, 0, 0, 0.55),
-        inset 0 0 14px rgba(0, 0, 0, 0.7);
+    transform-origin: left center;
+    animation: wipe-across 300ms var(--ease) forwards;
 }
 
-/* ── Profile switch: the vertical hold slips for a beat ── */
-@keyframes channel-roll {
-    0%   { transform: translateY(0);      opacity: 1; }
-    18%  { transform: translateY(-14px);  opacity: 0.55; }
-    36%  { transform: translateY(9px);    opacity: 0.8; }
-    55%  { transform: translateY(-5px);   opacity: 0.5; }
-    74%  { transform: translateY(3px);    opacity: 0.9; }
-    100% { transform: translateY(0);      opacity: 1; }
+@keyframes wipe-across {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
 }
 
-.home-container.is-tuning main {
-    animation: channel-roll 0.6s steps(6, end);
+/* ── Below the rail breakpoint ──────────────────────────────────────
+   The rail turns into a horizontal strip under the bar (see Rail.css),
+   so the column reclaims the full width and gains the strip's height. */
+
+@media (max-width: 1039px) {
+    .content {
+        margin-left: 0;
+        padding-top: calc(var(--bar-h) + 44px + var(--s7));
+        max-width: calc(var(--measure) + var(--gutter) * 2);
+    }
 }
 
-main {
-    display: flex;
-    flex-direction: column;
-    gap: 112px;
-    /* Clear of the fixed key legend along the bottom edge. */
-    padding-bottom: 76px;
+@media (max-width: 640px) {
+    .content {
+        padding-left: var(--s5);
+        padding-right: var(--s5);
+        padding-bottom: var(--s8);
+    }
+
+    .content > .section + .section {
+        margin-top: var(--s8);
+    }
 }
 
-main > div[id] {
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 40px;
-    /* Clear of the fixed status bar when a folder is jumped to. */
-    scroll-margin-top: 54px;
-}
-
-main > div#hero {
-    max-width: none;
-    padding: 0;
-}
-
-@media (max-width: 768px) {
-    main { gap: 84px; }
-    main > div[id] { padding: 0 20px; }
-    main > div#hero { padding: 0; }
-    .crt-bezel { border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) {
+    .swap-wipe { display: none; }
 }
