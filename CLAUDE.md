@@ -20,7 +20,7 @@ npm test -- --watch                          # Interactive watch mode
 
 The site is **one page in two sessions**, and the sessions are literal inversions of each other: professional is black type on white, personal is white type on black. Same layout, same type, same rhythm — only the six colour tokens swap. The toggle reads as the light going off rather than as a different website.
 
-**Everything is flush left, ragged right.** One strong left margin is the spine of the page; the boot console is the only centred thing on the site.
+**Everything is flush left, ragged right.** One strong left margin is the spine of the page; the boot console and the audio ring (round by nature) are the only centred things on the site.
 
 #### Colour — there is no hue
 
@@ -53,11 +53,12 @@ Scale is a 1.25 modular off a 17px body (`--fs-micro` … `--fs-h1`); only `--fs
 - **No cards, no border-radius, no shadows, no gradients.** Hierarchy is weight, size and space.
 - **No `·`-joined meta strings, no all-caps eyebrows, no `→` on buttons.**
 
-#### Motion budget — three moments, total
+#### Motion budget — four moments, total
 
 1. **Boot** (~2.2s, once per browser session, any key or click skips).
 2. **Session switch** (300ms) — the same inversion wipe as the boot hand-off.
 3. **State feedback** — rail cursor, skills disclosure, copy confirmation, focus rings.
+4. **The ambient panel** — the point wave (professional) and the audio ring while the song plays (personal). It lives beside the column, never over it, and answers only to the pointer or the music.
 
 Nothing animates on scroll. There are no `whileInView` reveals; `framer-motion` is not a dependency any more.
 
@@ -71,7 +72,7 @@ Skipped entirely for reduced-motion viewers and in jsdom (`canAnimate()` in `Hom
 
 ### Layout flow
 
-`App.js` → `Home.js` (session state, boot overlay, scroll-position tracking) → renders `Rail`, then `Overview`, a session-dependent section set, and `Contact`.
+`App.js` → `Home.js` (session state, boot overlay, scroll-position tracking) → renders `Rail`, then `Overview`, a session-dependent section set, and `Contact`, then `Ambient` beside the column.
 
 `Home.js` holds `theme` (`'professional'` | `'personal'`, default professional), sets `data-theme` on `document.documentElement`, and persists to `localStorage('site-theme')`. The boot runs once per `sessionStorage('booted')`.
 
@@ -101,7 +102,17 @@ Navigation uses **native `#hash` anchors** with `scroll-behavior: smooth` and `s
 
 Scroll position is measured in a rAF-throttled scroll handler in `Home.js`, **not** an IntersectionObserver: a section shorter than the observer band never reports, and Contact is exactly that short. Bottom-of-page always resolves to the last entry.
 
-Z-index stack: content → `.rail` (90) → `.bar` (100) → `.swap-wipe` (900) → `.help-scrim` (1000) → `.boot` (1000) → `.skip-link` (1200).
+Z-index stack: content → `.ambient` (1) → `.rail` (90) → `.bar` (100) → `.swap-wipe` (900) → `.help-scrim` (1000) → `.boot` (1000) → `.skip-link` (1200).
+
+### The ambient panel
+
+`Ambient.js` fills the empty right-hand side of a desktop window: `PointWave` on the professional session, `AudioRing` on the personal one. Both are hand-written `<canvas>` 2D, with no 3D or audio library, and both are made of dots, so the two sessions still read as one design.
+
+- **Desktop only, gated in script.** `(min-width: 1040px) and (hover: hover)` plus at least 300px of room beside the column (a 1280px window qualifies, 1200px does not). A CSS-hidden panel would still mount its canvas and fetch its audio; this one renders `null` instead. No `matchMedia` (jsdom) also means `null`.
+- **Placement is measured.** The panel is `position: fixed` from the bar to the bottom of the window, starting at `#main`'s right edge. The name overhangs that edge, so its painted extent (a `Range` over `.overview-name`) is passed to `PointWave` as `clearX`/`clearY`, and the sheet thins out of that corner. The ring is round and centred, so it clears the name on its own.
+- **`PointWave`.** A dot grid on a plane under a fixed perspective camera; each dot's screen x and depth scale are computed once per size, so a frame is one height sum per dot. The pointer, read from `window` because the canvas is `pointer-events: none`, feeds a damped wave equation on the same grid at a fixed 60Hz step. Moving drags a wake; resting raises a soft swell. Reduced motion gets one still frame.
+- **`AudioRing`.** The song is played through Web Audio: `MediaElementSource → Analyser → Gain → destination`, built inside the first Play press, because browsers only start audio from a gesture. Volume is applied after the analyser, so the ring shows the music, not the slider. The spectrum is 64 log-spaced bands (32Hz–16kHz), mirrored: bass at twelve o'clock, treble at six. The analyser's dB range (−90 to −15) was calibrated against the actual track, so a sustained 808 isn't pinned at full. `preload="none"`, so the 1.7MB mp3 loads only on Play. Leaving the personal session pauses and closes it. Volume persists to `localStorage('ambient-volume')`.
+- Colours come from the session tokens via `getComputedStyle`, read a frame after mount, because `Home` sets `data-theme` in an effect that runs after its children's.
 
 ### Shared chrome (`src/index.css`)
 
@@ -134,6 +145,7 @@ Contracts the tests rely on:
 - `Projects` renders 6 external links (5 source + 1 live).
 - `Hobbies` renders all six as `h3`, Rock Climbing first, with exactly 2 outbound links. **There is no carousel** — it hid five of six entries behind an arrow.
 - `Home.test.js` mocks `Rail` as two buttons exposing `onSwitch`.
+- `Ambient` and `AudioRing` tests stub `matchMedia`, `clientWidth`, `HTMLCanvasElement.prototype.getContext` (→ `null`) and `HTMLMediaElement.prototype.play/pause` with **plain functions**. CRA's `resetMocks` wipes `jest.fn` implementations before each test. The player keeps the `Play`/`Pause` button labels and the `Volume` slider label that the tests match.
 
 ### Key files
 
@@ -145,3 +157,5 @@ Contracts the tests rely on:
 - `src/Components/BootScene.js` — the Linux console and the inversion hand-off
 - `src/Components/Overview.js` — the nameplate and the per-session introduction
 - `src/Components/ui/Section.js` — the shared section header
+- `src/Components/Ambient.js` — the right-hand panel: desktop gate, measured placement, which visual per session
+- `src/Components/PointWave.js` / `AudioRing.js` — the two canvases; `ui/canvas.js` holds their shared helpers
