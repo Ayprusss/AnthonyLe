@@ -13,6 +13,7 @@ import About from '../../Components/About';
 import Hobbies from '../../Components/Hobbies';
 import Volunteering from '../../Components/Volunteering';
 import Contact from '../../Components/Contact';
+import Ambient from '../../Components/Ambient';
 
 // Two sessions of one page. Overview and Contact bookend both; the four
 // sections between them are what changes, because what a hiring manager
@@ -184,6 +185,8 @@ const Home = () => {
                     <Contact />
                 </section>
             </main>
+
+            <Ambient theme={theme} />
 
             {wipe && (
                 <div className="swap-wipe" style={{ background: wipe }} aria-hidden="true" />
