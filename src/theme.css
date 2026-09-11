@@ -22,6 +22,11 @@
     --rule:     #d6d6d6;   /* hairlines between records */
     --fill:     #f1f1f1;   /* quiet bands, hovers, code */
 
+    /* The single exception to "no hue": the explicit-content mark in the
+       playlist. A warning has to read as one at a glance. White on it is
+       5.0:1. The same in both sessions. */
+    --explicit: #d42a2a;
+
     /* rgba() bases for the few translucent surfaces (mobile sheet
        backdrop, the boot inversion wipe). */
     --ground-rgb: 255, 255, 255;
