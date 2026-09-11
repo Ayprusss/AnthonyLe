@@ -24,7 +24,7 @@ The site is **one page in two sessions**, and the sessions are literal inversion
 
 #### Colour — there is no hue
 
-True `#000` and `#fff`, not a softened charcoal. Six neutral roles per session, defined once in `src/theme.css` and swapped under `[data-theme="personal"]`:
+True `#000` and `#fff`, not a softened charcoal. Six neutral roles per session, defined once in `src/theme.css` and swapped under `[data-theme="personal"]`. The single hue on the site is `--explicit` (`#d42a2a`), used only for the red "E" box that marks explicit songs in the playlist. It's a warning, so it has to read as one.
 
 | Token | Professional | Personal |
 |---|---|---|
@@ -111,7 +111,16 @@ Z-index stack: content → `.ambient` (1) → `.rail` (90) → `.bar` (100) → 
 - **Desktop only, gated in script.** `(min-width: 1040px) and (hover: hover)` plus at least 300px of room beside the column (a 1280px window qualifies, 1200px does not). A CSS-hidden panel would still mount its canvas and fetch its audio; this one renders `null` instead. No `matchMedia` (jsdom) also means `null`.
 - **Placement is measured.** The panel is `position: fixed` from the bar to the bottom of the window, starting at `#main`'s right edge. The name overhangs that edge, so its painted extent (a `Range` over `.overview-name`) is passed to `PointWave` as `clearX`/`clearY`, and the sheet thins out of that corner. The ring is round and centred, so it clears the name on its own.
 - **`PointWave`.** A dot grid on a plane under a fixed perspective camera; each dot's screen x and depth scale are computed once per size, so a frame is one height sum per dot. The pointer, read from `window` because the canvas is `pointer-events: none`, feeds a damped wave equation on the same grid at a fixed 60Hz step. Moving drags a wake; resting raises a soft swell. Reduced motion gets one still frame.
-- **`AudioRing`.** The song is played through Web Audio: `MediaElementSource → Analyser → Gain → destination`, built inside the first Play press, because browsers only start audio from a gesture. Volume is applied after the analyser, so the ring shows the music, not the slider. The spectrum is 64 log-spaced bands (32Hz–16kHz), mirrored: bass at twelve o'clock, treble at six. The analyser's dB range (−90 to −15) was calibrated against the actual track, so a sustained 808 isn't pinned at full. `preload="none"`, so the 1.7MB mp3 loads only on Play. Leaving the personal session pauses and closes it. Volume persists to `localStorage('ambient-volume')`.
+- **`AudioRing`.** The song is played through Web Audio: `MediaElementSource → Analyser → Gain → destination`, built inside the first Play press, because browsers only start audio from a gesture. Volume is applied after the analyser, so the ring shows the music, not the slider. The spectrum is 64 log-spaced bands (32Hz–16kHz), mirrored: bass at twelve o'clock, treble at six. The analyser's dB range (−90 to −15) was calibrated against the actual track, so a sustained 808 isn't pinned at full. `preload="none"`, so a song file loads only on Play. Leaving the personal session pauses and closes it. Volume persists to `localStorage('ambient-volume')`.
+- **The playlist.** `TRACKS` in `AudioRing.js` lists the files in `public/songs/`, with ids 1…n in play order. To add a song, drop the mp3 in `public/songs/` and append an entry with the next id and an `explicit` flag.
+  - **Explicit songs** (`explicit: true`, currently the two Nine Vicious tracks) get the red "E" box in the list, with "Explicit" as screen-reader text. They are never the song a visit opens on.
+  - **Opening song:** every mount (each switch to personal, or a reload) picks a random clean song via `rand()`, never the one `sessionStorage('ambient-last-song')` says was last shown.
+  - **The window:** under the ring, a list three songs tall slides so the current song is always the middle row, wrapping at the ends.
+  - **Previous/Next buttons** in the ring, plus the wheel and arrow keys over the list, change song and keep the play state, so a paused player stays paused.
+  - **Clicking a song** plays it.
+  - **When a song ends,** the next one starts.
+  - **OS media keys** also skip, via the Media Session API.
+  - The list swallows its own arrow keys, so the rail's section navigation doesn't fire while it has focus.
 - Colours come from the session tokens via `getComputedStyle`, read a frame after mount, because `Home` sets `data-theme` in an effect that runs after its children's.
 
 ### Shared chrome (`src/index.css`)
@@ -145,7 +154,7 @@ Contracts the tests rely on:
 - `Projects` renders 6 external links (5 source + 1 live).
 - `Hobbies` renders all six as `h3`, Rock Climbing first, with exactly 2 outbound links. **There is no carousel** — it hid five of six entries behind an arrow.
 - `Home.test.js` mocks `Rail` as two buttons exposing `onSwitch`.
-- `Ambient` and `AudioRing` tests stub `matchMedia`, `clientWidth`, `HTMLCanvasElement.prototype.getContext` (→ `null`) and `HTMLMediaElement.prototype.play/pause` with **plain functions**. CRA's `resetMocks` wipes `jest.fn` implementations before each test. The player keeps the `Play`/`Pause` button labels and the `Volume` slider label that the tests match.
+- `Ambient` and `AudioRing` tests stub `matchMedia`, `clientWidth`, `HTMLCanvasElement.prototype.getContext` (→ `null`) and `HTMLMediaElement.prototype.play/pause` with **plain functions**. CRA's `resetMocks` wipes `jest.fn` implementations before each test. The player keeps the `Play`/`Pause`/`Previous song`/`Next song` button labels, the `Volume` slider label and the `Songs` listbox label that the tests match; `TRACKS` is exported for them.
 
 ### Key files
 
