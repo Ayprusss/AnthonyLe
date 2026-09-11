@@ -1,0 +1,28 @@
+/* ═══════════════════════════════════════════════════════════════════
+   The right-hand panel.
+
+   Fixed beside the column from the bar to the bottom of the window, so
+   it stays put while the text scrolls past it. It sits under the rail,
+   the bar, the session wipe and the boot, so both inversions cover it
+   without knowing it exists.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ambient {
+    position: fixed;
+    top: var(--bar-h);
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    /* The canvases never take the pointer — the wave reads it from the
+       window — so nothing here can block a click or a text selection.
+       Controls opt back in. */
+    pointer-events: none;
+}
+
+.ambient canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
