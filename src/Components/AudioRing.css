@@ -1,8 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════
-   The audio ring — the one thing in the panel that takes the pointer.
+   The audio ring and its playlist — the parts of the panel that take
+   the pointer.
 
-   The controls sit in the hollow of the ring. Within that small block
-   they are still set flush left, like everything else on the page.
+   The controls sit in the round hollow of the ring, so they are centred
+   on it: a flush-left block would put its corners into the dots.
    ═══════════════════════════════════════════════════════════════════ */
 
 .ring {
@@ -13,10 +14,23 @@
 .ring-controls {
     position: absolute;
     left: 50%;
-    top: 50%;
-    width: 120px;
+    top: 40%;
+    width: 126px;
     transform: translate(-50%, -50%);
+    display: grid;
+    justify-items: center;
+    text-align: center;
     pointer-events: auto;
+}
+
+/* Long titles are cut rather than wrapped; the playlist below has room
+   to say them in full. */
+.ring-title,
+.ring-artist {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .ring-title {
@@ -32,32 +46,36 @@
     margin-top: var(--s3);
     display: flex;
     align-items: center;
-    gap: var(--s3);
+    gap: 6px;
 }
 
-.ring-play {
+.ring-play,
+.ring-skip {
     flex: none;
-    width: 36px;
-    height: 36px;
     padding: 0;
     justify-content: center;
 }
 
-.ring-play svg {
+.ring-play { width: 36px; height: 36px; }
+.ring-skip { width: 30px; height: 30px; }
+
+.ring-play svg,
+.ring-skip svg {
     width: 12px;
     height: 12px;
     fill: currentColor;
 }
+
+.ring-skip svg { width: 10px; height: 10px; }
 
 /* ── Volume ─────────────────────────────────────────────────────────
    A hairline and a square: the same baseline the form inputs use, with
    the thumb as the only solid thing on it. */
 
 .ring-volume {
-    flex: 1;
-    min-width: 0;
+    width: 80%;
     height: 20px;
-    margin: 0;
+    margin: var(--s2) 0 0;
     background: transparent;
     cursor: pointer;
     -webkit-appearance: none;
@@ -97,3 +115,106 @@
 .ring-volume:focus-visible::-webkit-slider-runnable-track { background: var(--ink); }
 .ring-volume:hover::-moz-range-track,
 .ring-volume:focus-visible::-moz-range-track { background: var(--ink); }
+
+/* ── Playlist ───────────────────────────────────────────────────────
+   A window three songs tall over the whole list. Every song is laid at
+   its distance from the current one, so changing song moves them all
+   together and the window appears to slide. Songs outside the window
+   are transparent as well as clipped: the one that wraps from one end
+   of the list to the other crosses the window unseen. */
+
+.ring-list {
+    position: absolute;
+    left: 50%;
+    bottom: var(--s6);
+    width: min(300px, calc(100% - 40px));
+    transform: translateX(-50%);
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.ring-song {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    align-items: center;
+    gap: var(--s3);
+    padding: 0 var(--s2);
+    border-top: 1px solid var(--rule);
+    cursor: pointer;
+    transition: transform var(--t-swap) var(--ease),
+                opacity var(--t-swap) var(--ease);
+}
+
+.ring-song[data-in-view="false"] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ring-song-no {
+    font-size: var(--fs-micro);
+    font-variant-numeric: tabular-nums;
+    color: var(--mute);
+}
+
+.ring-song-text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.ring-song-title,
+.ring-song-artist {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Title and explicit mark share a line; the title gives way first. */
+.ring-song-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* The explicit mark — the one place on the site with a hue, because
+   it is a warning and has to read as one before the song is played. */
+.ring-song-e {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    background: var(--explicit);
+    color: #ffffff;
+}
+
+.ring-song-title {
+    font-size: var(--fs-small);
+    color: var(--mute);
+    transition: color var(--t-state) var(--ease);
+}
+
+.ring-song-artist {
+    font-size: var(--fs-micro);
+    color: var(--mute);
+}
+
+.ring-song:hover .ring-song-title { color: var(--ink); }
+
+/* The current song: brightest step and weight, nothing else. */
+.ring-song[aria-selected="true"] { cursor: default; }
+
+.ring-song[aria-selected="true"] .ring-song-title {
+    font-weight: 600;
+    color: var(--ink-max);
+}
+
+.ring-song[aria-selected="true"] .ring-song-no { color: var(--ink-max); }

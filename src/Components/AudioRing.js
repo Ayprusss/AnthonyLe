@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './AudioRing.css';
 import { clamp, fitCanvas, reducedMotion, token } from './ui/canvas';
 
-// The personal side's panel: the song, drawn as it plays.
+// The personal side's panel: the music, drawn as it plays.
 //
 // The ring is the spectrum, bent into a circle and mirrored. Bass sits
 // at twelve o'clock, the bands sweep down both sides through the mids,
@@ -14,13 +14,59 @@ import { clamp, fitCanvas, reducedMotion, token } from './ui/canvas';
 //
 // It answers to the music and nothing else. Browsers will not start
 // audio on their own, so until Play is pressed the ring is still.
+//
+// Under the ring is the playlist, a window three songs tall that slides
+// as the current song changes. Every visit to the personal session opens
+// on a clean song picked at random.
 
-const TRACK = {
-    title: 'Love Crazy',
-    artist: 'Nine Vicious',
-    file: 'Nine Vicious - Love Crazy (prod. ahmad).mp3',
+// The playlist. Files live in public/songs; ids run 1…n and are the
+// play order. `explicit` songs are marked in the list and are never the
+// one a visit opens on — they are a click away, not a surprise.
+export const TRACKS = [
+    { id: 1, title: 'Love Crazy',                artist: 'Nine Vicious', explicit: true,  file: 'Nine Vicious - Love Crazy (prod. ahmad).mp3' },
+    { id: 2, title: "Trevon O'Ryan Echols",      artist: 'Nine Vicious', explicit: true,  file: "Nine Vicious - Trevon O'Ryan Echols.mp3" },
+    { id: 3, title: 'Keep me going (BIRDBRAIN)', artist: 'Slayr',        explicit: false, file: 'Slayr - Keep me going (BIRDBRAIN).mp3' },
+    { id: 4, title: 'Promise',                   artist: 'Slayr',        explicit: false, file: 'Slayr - Promise.mp3' },
+    { id: 5, title: 'My Song',                   artist: 'Labi Siffre',  explicit: false, file: 'Labi Siffre - My Song.mp3' },
+    { id: 6, title: 'Duvet',                     artist: 'boa',          explicit: false, file: 'boa - Duvet.mp3' },
+];
+
+const srcFor = (track) => `${process.env.PUBLIC_URL}/songs/${encodeURIComponent(track.file)}`;
+
+// A whole number from min to max, both included.
+const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
+// The song the ring last showed, kept for the browser session so the
+// next visit — a session switch or a reload — opens on something else.
+const LAST_KEY = 'ambient-last-song';
+
+const readLast = () => {
+    try { return Number(sessionStorage.getItem(LAST_KEY)) || null; } catch (_) { return null; }
 };
-const SRC = `${process.env.PUBLIC_URL}/${encodeURIComponent(TRACK.file)}`;
+const writeLast = (id) => {
+    try { sessionStorage.setItem(LAST_KEY, String(id)); } catch (_) {}
+};
+
+// A clean song, and not the one shown last time.
+const pickTrack = () => {
+    const last = readLast();
+    const clean = TRACKS.filter((t) => !t.explicit);
+    const fresh = clean.filter((t) => t.id !== last);
+    const pool = fresh.length ? fresh : clean.length ? clean : TRACKS;
+    return pool[rand(1, pool.length) - 1].id;
+};
+
+// The playlist window.
+const ROW = 46;           // px per song
+const SHOWN = 3;          // songs visible at once: previous, current, next
+const LIST_GAP = 28;      // between the ring and the window
+
+// Where song i sits relative to the current one, wrapping round the
+// list: -1 above, 0 current, 1 below; anything further is out of view.
+const offsetOf = (i, current, n) => {
+    const d = (((i - current) % n) + n) % n;
+    return d > n / 2 ? d - n : d;
+};
 
 // Spectrum. Bands are log-spaced because hearing is: spaced linearly,
 // everything above 2kHz would take nine tenths of the circle.
@@ -92,6 +138,12 @@ const bandLevel = (freq, band) => {
 const PlayIcon = () => (
     <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 1 11 6l-8.5 5z" /></svg>
 );
+const PrevIcon = () => (
+    <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 1h1.8v10H1.5zM11 1 4 6l7 5z" /></svg>
+);
+const NextIcon = () => (
+    <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M8.7 1h1.8v10H8.7zM1 1l7 5-7 5z" /></svg>
+);
 const PauseIcon = () => (
     <svg viewBox="0 0 12 12" aria-hidden="true">
         <rect x="2" y="1" width="3" height="10" />
@@ -102,13 +154,22 @@ const PauseIcon = () => (
 const AudioRing = () => {
     const canvasRef = useRef(null);
     const audioRef = useRef(null);
+    const listRef = useRef(null);
     const graphRef = useRef(null);
     const wakeRef = useRef(() => {});
     const playingRef = useRef(false);
+    const resumeRef = useRef(false);
 
+    const [trackId, setTrackId] = useState(pickTrack);
     const [playing, setPlaying] = useState(false);
     const [volume, setVolume] = useState(readVolume);
-    const [box, setBox] = useState(null);
+    // Where the controls and the playlist sit, measured with the ring.
+    const [geom, setGeom] = useState(null);
+
+    const index = TRACKS.findIndex((t) => t.id === trackId);
+    const track = TRACKS[index];
+
+    useEffect(() => { writeLast(trackId); }, [trackId]);
 
     // ── Drawing ────────────────────────────────────────────────────────
     useEffect(() => {
@@ -208,18 +269,26 @@ const AudioRing = () => {
                 mute: token('--mute', '#9b9b9b'),
                 font: token('--font', 'sans-serif'),
             };
+            // The ring and the playlist under it are centred as one group.
+            const listH = ROW * SHOWN;
+            const outer = Math.min(w / 2 - 20, (h - listH - LIST_GAP) / 2 - 12, 330);
+            const top = Math.max(12, (h - (outer * 2 + LIST_GAP + listH)) / 2);
             cx = w / 2;
-            cy = h / 2;
-            const outer = Math.min(Math.min(w, h) / 2 - 20, 330);
+            cy = top + outer;
             // Room for the region names only once the ring is big enough
             // that giving it up would not starve the spokes.
             labelled = outer >= 170;
-            r0 = clamp(outer * 0.5, 84, 150);
+            r0 = clamp(outer * 0.5, 92, 150);
             const spoke = Math.max(outer - (labelled ? 36 : 0) - r0, 24);
             pitch = clamp(spoke / 16, 4.5, 8);
             dots = Math.max(3, Math.floor(spoke / pitch));
             dot = clamp(pitch * 0.42, 1.6, 3.2);
-            setBox(Math.round(r0 * 1.3));
+            setGeom({
+                box: Math.round(r0 * 1.36),
+                cy: Math.round(cy),
+                listTop: Math.round(cy + outer + LIST_GAP),
+                listW: Math.round(Math.min(w - 40, 300)),
+            });
             paintLayer(fit.dpr);
         };
 
@@ -366,18 +435,109 @@ const AudioRing = () => {
         return graphRef.current;
     };
 
-    const toggle = () => {
+    const start = () => {
         const audio = audioRef.current;
         if (!audio) return;
-        if (!audio.paused) {
-            audio.pause();
-            return;
-        }
         const graph = ensureGraph();
         if (graph && graph.ctx.state === 'suspended') graph.ctx.resume();
         const started = audio.play();
         if (started && typeof started.catch === 'function') started.catch(() => {});
     };
+
+    const toggle = () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        if (audio.paused) start();
+        else audio.pause();
+    };
+
+    // Changing song swaps the element's source, which stops it; whether
+    // the new one starts is decided here and carried across the render.
+    // Clicking a song in the list plays it. Skipping and scrolling keep
+    // whatever state the player was in, so a paused player can be browsed.
+    const select = (id, play) => {
+        const audio = audioRef.current;
+        resumeRef.current = play ?? (!!audio && !audio.paused);
+        if (id === trackId) {
+            if (resumeRef.current && audio?.paused) start();
+            resumeRef.current = false;
+            return;
+        }
+        setTrackId(id);
+    };
+
+    const cycle = (step) => {
+        select(TRACKS[(index + step + TRACKS.length) % TRACKS.length].id);
+    };
+    // The wheel and media-key handlers are bound once; they reach the
+    // current song through this.
+    const cycleRef = useRef(cycle);
+    cycleRef.current = cycle;
+
+    useEffect(() => {
+        if (!resumeRef.current) return;
+        resumeRef.current = false;
+        start();
+        // start() only reads refs; the song change is the only trigger.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [trackId]);
+
+    // One notch of the wheel over the playlist is one song. Bound natively
+    // because React's wheel listener is passive and cannot stop the page
+    // scrolling underneath.
+    useEffect(() => {
+        const el = listRef.current;
+        if (!el) return undefined;
+        let acc = 0;
+        let last = 0;
+        const onWheel = (e) => {
+            e.preventDefault();
+            const now = performance.now();
+            if (now - last > 300) acc = 0;
+            acc += e.deltaY;
+            if (Math.abs(acc) >= 40 && now - last > 160) {
+                cycleRef.current(Math.sign(acc));
+                acc = 0;
+                last = now;
+            }
+        };
+        el.addEventListener('wheel', onWheel, { passive: false });
+        return () => el.removeEventListener('wheel', onWheel);
+    }, []);
+
+    const onListKey = (e) => {
+        const moves = { ArrowDown: 1, ArrowUp: -1 };
+        if (e.key in moves) cycle(moves[e.key]);
+        else if (e.key === 'Home') select(TRACKS[0].id);
+        else if (e.key === 'End') select(TRACKS[TRACKS.length - 1].id);
+        else if (e.key === 'Enter' || e.key === ' ') select(trackId, true);
+        else return;
+        // The rail binds the arrow keys to section navigation on the
+        // window; inside the playlist they belong to the playlist.
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    // Hardware and OS media keys: name the song and wire up skipping.
+    useEffect(() => {
+        const session = navigator.mediaSession;
+        if (!session || typeof window.MediaMetadata !== 'function') return;
+        session.metadata = new window.MediaMetadata({ title: track.title, artist: track.artist });
+    }, [track]);
+
+    useEffect(() => {
+        const session = navigator.mediaSession;
+        if (!session) return undefined;
+        const bind = (action, fn) => {
+            try { session.setActionHandler(action, fn); } catch (_) {}
+        };
+        bind('previoustrack', () => cycleRef.current(-1));
+        bind('nexttrack', () => cycleRef.current(1));
+        return () => {
+            bind('previoustrack', null);
+            bind('nexttrack', null);
+        };
+    }, []);
 
     useEffect(() => {
         const graph = graphRef.current;
@@ -414,11 +574,22 @@ const AudioRing = () => {
         <aside className="ring" aria-label="Now playing">
             <canvas ref={canvasRef} className="ring-canvas" aria-hidden="true" />
 
-            <div className="ring-controls" style={box ? { width: box } : undefined}>
-                <p className="ring-title">{TRACK.title}</p>
-                <p className="micro ring-artist">{TRACK.artist}</p>
+            <div
+                className="ring-controls"
+                style={geom ? { width: geom.box, top: geom.cy } : undefined}
+            >
+                <p className="ring-title" title={track.title}>{track.title}</p>
+                <p className="micro ring-artist">{track.artist}</p>
 
                 <div className="ring-row">
+                    <button
+                        type="button"
+                        className="btn btn-secondary ring-skip"
+                        aria-label="Previous song"
+                        onClick={() => cycle(-1)}
+                    >
+                        <PrevIcon />
+                    </button>
                     <button
                         type="button"
                         className="btn btn-primary ring-play"
@@ -427,26 +598,90 @@ const AudioRing = () => {
                     >
                         {playing ? <PauseIcon /> : <PlayIcon />}
                     </button>
-                    <input
-                        type="range"
-                        className="ring-volume"
-                        aria-label="Volume"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={volume}
-                        onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    />
+                    <button
+                        type="button"
+                        className="btn btn-secondary ring-skip"
+                        aria-label="Next song"
+                        onClick={() => cycle(1)}
+                    >
+                        <NextIcon />
+                    </button>
                 </div>
+
+                <input
+                    type="range"
+                    className="ring-volume"
+                    aria-label="Volume"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={volume}
+                    onChange={(e) => setVolume(parseFloat(e.target.value))}
+                />
             </div>
 
+            {/* The playlist: a window onto the list that slides so the
+                current song is always the middle row. The songs above and
+                below are real options — click one to play it — and the
+                wheel or the arrow keys walk the list, wrapping at the ends. */}
+            <div
+                ref={listRef}
+                className="ring-list"
+                role="listbox"
+                tabIndex={0}
+                aria-label="Songs"
+                aria-activedescendant={`ring-song-${trackId}`}
+                onKeyDown={onListKey}
+                style={geom
+                    ? { top: geom.listTop, width: geom.listW, height: ROW * SHOWN }
+                    : { height: ROW * SHOWN }}
+            >
+                {TRACKS.map((t, i) => {
+                    const offset = offsetOf(i, index, TRACKS.length);
+                    const inView = Math.abs(offset) <= (SHOWN - 1) / 2;
+                    return (
+                        <div
+                            key={t.id}
+                            id={`ring-song-${t.id}`}
+                            role="option"
+                            aria-selected={t.id === trackId}
+                            className="ring-song"
+                            data-in-view={inView}
+                            style={{
+                                height: ROW,
+                                transform: `translateY(${(offset + (SHOWN - 1) / 2) * ROW}px)`,
+                            }}
+                            onClick={() => select(t.id, true)}
+                        >
+                            <span className="ring-song-no">{t.id}</span>
+                            <span className="ring-song-text">
+                                <span className="ring-song-line">
+                                    <span className="ring-song-title">{t.title}</span>
+                                    {/* The mark is a letter to the eye and
+                                        the word to a screen reader. */}
+                                    {t.explicit && (
+                                        <span className="ring-song-e" title="Explicit">
+                                            <span aria-hidden="true">E</span>
+                                            <span className="sr-only">Explicit</span>
+                                        </span>
+                                    )}
+                                </span>
+                                <span className="ring-song-artist">{t.artist}</span>
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* When a song ends the next one starts; the list wraps, so
+                the ring plays on until it is paused. */}
             <audio
                 ref={audioRef}
-                src={SRC}
+                src={srcFor(track)}
                 preload="none"
-                loop
                 onPlay={onPlay}
                 onPause={onPause}
+                onEnded={() => select(TRACKS[(index + 1) % TRACKS.length].id, true)}
             />
         </aside>
     );
