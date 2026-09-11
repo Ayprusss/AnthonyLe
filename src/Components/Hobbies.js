@@ -23,7 +23,7 @@ const hobbies = [
     },
     {
         name: "Gaming",
-        blurb: "Far too long on a first playthrough of Elden Ring, and far too many hours in League of Legends and Valorant.",
+        blurb: "Played for far too long on my first playthrough of Elden Ring, and far too many hours in League of Legends and Valorant.",
         meta: { label: "Genre", value: "Competitive and RPG" },
         href: "https://steamcommunity.com/id/Ayprusss/",
         linkLabel: "View library",
@@ -32,6 +32,8 @@ const hobbies = [
         name: "Fashion",
         blurb: "Pulled into it during the HYPEBEAST era. My style has moved on since, though some of the outfits along the way were questionable.",
         meta: { label: "Leaning", value: "Archive, Japanese and Korean designers" },
+        href: "https://www.grailed.com/Ayprusss",
+        linkLabel: "View Listings",
     },
     {
         name: "Exercising",
