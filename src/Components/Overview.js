@@ -25,7 +25,7 @@ const COPY = {
     },
     personal: {
         blurb:
-            'I play video games, like hiking and exercising and am struggling to top my first V6.',
+            'I play video games, hike, exercise and am rock climbing my way up to my first V7.',
         availability: '',
         facts: [
             { label: 'Climbing',   value: 'Trying to surpass V6' },
