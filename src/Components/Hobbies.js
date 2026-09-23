@@ -11,7 +11,7 @@ import './Hobbies.css';
 const hobbies = [
     {
         name: "Rock Climbing",
-        blurb: "Currently a V5 climber. I don't want to say I've plateaued, but every session is one step closer to admitting it.",
+        blurb: "I'm finally a V6 climber!! I'm looking to get some more V6 climbs under my belt before I move to V7. I'm on the come up.",
         meta: { label: "Discipline", value: "Bouldering" },
     },
     {
